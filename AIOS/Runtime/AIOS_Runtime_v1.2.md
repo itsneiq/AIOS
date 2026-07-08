@@ -4,7 +4,7 @@
 
 **Version:** 1.2
 
-**Status:** DRAFT
+**Status:** REVIEW REQUIRED
 
 **Document Type:** Official Derived Specification
 
@@ -32,7 +32,7 @@ Nothing in this specification supersedes, replaces, extends, or redefines AIOS C
 |--------|-------|
 | Product | AIOS Runtime |
 | Version | 1.2 |
-| Status | DRAFT |
+| Status | REVIEW REQUIRED |
 | Type | Official Derived Specification |
 | Authority | AIOS Core v4.3 |
 | Language | English |
@@ -43,11 +43,11 @@ Nothing in this specification supersedes, replaces, extends, or redefines AIOS C
 
 | Field | Value |
 |--------|-------|
-| Document ID | AIOS-RUNTIME-DRAFT-1.2 |
+| Document ID | AIOS-RUNTIME-1.2 |
 | Current Version | 1.2 |
 | Derived From | AIOS Core v4.3 |
-| Classification | Draft |
-| Stability | DRAFT |
+| Classification | Review |
+| Stability | REVIEW REQUIRED |
 
 ---
 
@@ -57,7 +57,7 @@ Nothing in this specification supersedes, replaces, extends, or redefines AIOS C
 |----------|--------|-------------|
 | 1.0 | Archived | Initial Runtime Specification |
 | 1.1 | Current | Official Derived Specification |
-| 1.2 | Draft | Adds Model Resolution, CASE Initialization, Reference Analysis orchestration, Knowledge Extraction orchestration, Master Asset Registry runtime behavior, Asset Validation, Asset Lock, and Creative Planning runtime behavior for AIOS Production Operating System support. |
+| 1.2 | Review Required | Adds Model Resolution, CASE Initialization, Reference Analysis orchestration, Knowledge Extraction orchestration, Master Asset Registry runtime behavior, Asset Validation, Asset Lock, and Creative Planning runtime behavior for AIOS Production Operating System support. |
 
 ---
 
