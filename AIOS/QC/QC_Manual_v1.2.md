@@ -1,6 +1,6 @@
-# AIOS QC Manual v1.1 SSOT
+# AIOS QC Manual v1.2
 
-Version 1.1
+Version 1.2
 
 Single Source of Truth (SSOT)
 
@@ -12,7 +12,7 @@ Single Source of Truth (SSOT)
 
 **Document Name**
 
-AIOS QC Manual v1.1 SSOT
+AIOS QC Manual v1.2
 
 **Document Type**
 
@@ -48,14 +48,14 @@ It does not redefine system architecture, runtime behavior, production workflow,
 
 This document applies to all official AIOS documents, including but not limited to:
 
-- AIOS Core
-- AIOS Runtime
-- AIOS Production
-- AIOS Repository
-- AIOS Prompt Standards
-- AIOS Templates
+- AIOS Core v4.3 SSOT
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS RRepository v1.2
+- AIOS Prompt Standards v1.3
+- AIOS Templates v1.2
 - AIOS Export Specification
-- AIOS Knowledge Package
+- AIOS Export Specification v1.2
 
 ---
 
@@ -1045,13 +1045,13 @@ These metrics provide guidance for reviewers and support continuous quality impr
 
 This document references the following AIOS Single Source of Truth (SSOT) documents:
 
-- AIOS Core
-- AIOS Runtime
-- AIOS Production
-- AIOS Repository
-- AIOS Prompt Standards
-- AIOS Templates
-- AIOS Export Specification
+- AIOS Core v4.3 SSOT
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Repository v1.2
+- AIOS Prompt Standards v1.3
+- AIOS Templates v1.2
+- AIOS Export Specification v1.2
 
 These documents remain the authoritative source for their respective domains.
 
@@ -1063,7 +1063,7 @@ AIOS QC Manual SHALL only define Quality Control standards and SHALL NOT redefin
 
 End of Specification
 
-AIOS QC Manual v1.1 SSOT
+AIOS QC Manual v1.2
 
 Single Source of Truth
 
