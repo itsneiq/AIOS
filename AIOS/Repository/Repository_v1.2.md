@@ -1,4 +1,4 @@
-# AIOS Repository v1.1
+# AIOS Repository v1.2
 
 Single Source of Truth (Derived Specification)
 
