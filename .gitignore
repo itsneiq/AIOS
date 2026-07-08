@@ -1,0 +1,36 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Archives / working packages
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+
+# Build / export outputs
+/dist/
+/build/
+/exports/
+
+# Environment files
+.env
+.env.*
+
+# Local notes
+.local/
+notes.local.md
