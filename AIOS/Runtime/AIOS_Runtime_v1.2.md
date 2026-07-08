@@ -1,4 +1,4 @@
-# AIOS Runtime v1.2 Draft
+# AIOS Runtime v1.2
 
 ## Single Source of Truth (SSOT)
 
