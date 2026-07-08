@@ -2,7 +2,7 @@
 
 Single Source of Truth (Derived Specification)
 
-Version: 1.1
+Version: 1.2
 
 Status: RELEASE
 
@@ -15,8 +15,8 @@ Classification: DERIVED SPECIFICATION
 This specification derives its authority from the following Canonical Specifications:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 SSOT
-- AIOS Production v4.3 SSOT
+- AIOS Runtime v1.2
+- AIOS Production v4.4
 
 These Canonical Specifications remain the authoritative definition of AIOS.
 
@@ -60,8 +60,8 @@ This specification SHALL NOT define Runtime behavior, Production workflow, gover
 This specification SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 SSOT
-- AIOS Production v4.3 SSOT
+- AIOS Runtime v1.2
+- AIOS Production v4.4
 
 Where conflicts exist, the Canonical Specification SHALL prevail.
 
@@ -1063,8 +1063,8 @@ Repository SHALL NOT redefine those concepts.
 The following specifications are normative:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 SSOT
-- AIOS Production v4.3 SSOT
+- AIOS Runtime v1.2
+- AIOS Production v4.4
 
 ---
 
@@ -1072,10 +1072,10 @@ The following specifications are normative:
 
 The following specifications are related supporting documents:
 
-- AIOS Prompt Standards v1.2 SSOT
-- AIOS Templates v1.1 SSOT
-- AIOS QC Manual v1.1 SSOT
-- AIOS Export Specification v1.1 SSOT
+- AIOS Prompt Standards v1.3
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These documents SHALL NOT override the Canonical Specifications.
 
@@ -1115,25 +1115,25 @@ AIOS/
 │   └── AIOS_Core_v4.3_SSOT.md
 │
 ├── Runtime/
-│   └── AIOS_Runtime_v1.1_SSOT.md
+│   └── AIOS_Runtime_v1.2.md
 │
 ├── Production/
-│   └── AIOS_Production_v4.3_SSOT.md
+│   └── AIOS_Production_v4.4.md
 │
 ├── Repository/
-│   └── AIOS_Repository_v1.1_SSOT.md
+│   └── AIOS_Repository_v1.2.md
 │
 ├── Prompt_Standards/
-│   └── AIOS_Prompt_Standards_v1.2_SSOT.md
+│   └── AIOS_Prompt_Standards_v1.3.md
 │
 ├── Templates/
-│   └── AIOS_Templates_v1.1_SSOT.md
+│   └── AIOS_Templates_v1.2.md
 │
 ├── QC/
-│   └── AIOS_QC_Manual_v1.1_SSOT.md
+│   └── AIOS_QC_Manual_v1.2.md
 │
 ├── Export/
-│   └── AIOS_Export_Specification_v1.1_SSOT.md
+│   └── AIOS_Export_Specification_v1.2.md
 │
 ├── Knowledge/
 │
@@ -1211,11 +1211,11 @@ The following examples comply with the Repository Naming Convention.
 ```
 AIOS_Core_v4.3_SSOT.md
 
-AIOS_Runtime_v1.1_SSOT.md
+AIOS_Runtime_v1.2.md.md
 
-AIOS_Production_v4.3_SSOT.md
+AIOS_Production_v4.4.md
 
-AIOS_Repository_v1.1_SSOT.md
+AIOS_Repository_v1.2.md
 ```
 
 ---
@@ -1223,13 +1223,13 @@ AIOS_Repository_v1.1_SSOT.md
 ## Supporting Specifications
 
 ```
-AIOS_Prompt_Standards_v1.2_SSOT.md
+AIOS_Prompt_Standards_v1.3.md
 
-AIOS_Templates_v1.1_SSOT.md
+AIOS_Templates_v1.2.md
 
-AIOS_QC_Manual_v1.1_SSOT.md
+AIOS_QC_Manual_v1.2.md
 
-AIOS_Export_Specification_v1.1_SSOT.md
+AIOS_Export_Specification_v1.2.md
 ```
 
 ---
