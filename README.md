@@ -8,7 +8,7 @@ AIOS is a specification-first ecosystem for structuring AI production workflows,
 
 Release target: `AIOS v1.0.0`
 
-Current state: Release preparation and SSOT synchronization.
+Current state: Release preparation and Sprint C1 release closure preparation.
 
 ## Single Source of Truth
 
@@ -23,9 +23,11 @@ Authority order:
 3. AIOS Production
 4. Domain specifications
 5. Templates and implementation artifacts
+6. Release and packaging documents
 
 ## Repository Structure
 
+- `AIOS/Baseline/` — AIOS release baseline and coordination map
 - `AIOS/Core/` — AIOS Core SSOT
 - `AIOS/Runtime/` — Runtime specification
 - `AIOS/Production/` — Production specification
@@ -42,11 +44,15 @@ Authority order:
 
 Current release preparation files:
 
+- `AIOS/Baseline/AIOS_Baseline_v1.0.md`
 - `AIOS/Release/SSOT_Audit_Report.md`
+- `AIOS/Release/SSOT_Synchronization_Report.md`
 - `AIOS/Release/Compatibility_Report.md`
 - `AIOS/Release/Release_Manifest.md`
 - `AIOS/Release/Release_Notes_v1.0.0.md`
 - `AIOS/Release/AIOS_v1.0_Release_Checklist.md`
+- `AIOS/Release/Sprint_C1_Release_Closure_Report.md`
+- `AIOS/Release/Knowledge_GPT_Package_List.md`
 
 ## Repository Guides
 
@@ -67,7 +73,10 @@ AIOS v1.0.0 requires:
 - compatibility verification;
 - revision history synchronization;
 - release manifest completion;
-- Knowledge GPT package preparation.
+- Knowledge GPT package preparation and approval;
+- final release lock.
+
+Sprint C1 has prepared the release closure layer, but final release lock remains blocked until all unresolved gates are cleared.
 
 ## License
 
