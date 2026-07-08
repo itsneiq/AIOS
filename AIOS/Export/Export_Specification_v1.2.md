@@ -1,8 +1,8 @@
-# AIOS Export Specification v1.1 SSOT
+# AIOS Export Specification v1.2
 
 **Status:** Single Source of Truth (SSOT)
 
-**Version:** 1.1
+**Version:** 1.2
 
 **Classification:** Derived Specification
 
@@ -47,12 +47,12 @@ Its objective is to ensure every exported AIOS package is deterministic, reprodu
 This specification derives its authority from:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.1 SSOT
-- AIOS Production v4.3 SSOT
-- AIOS Repository v1.1 SSOT
-- AIOS Prompt Standards v1.2 SSOT
-- AIOS Templates v1.1 SSOT
-- AIOS QC Manual v1.1 SSOT
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Repository v1.2
+- AIOS Prompt Standards v1.3
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
 
 Whenever conflicts occur, the authoritative order SHALL follow AIOS Core.
 
@@ -143,9 +143,9 @@ Recommended naming:
 ```
 AIOS_Core_v4.3_SSOT.md
 
-AIOS_Runtime_v1.1_SSOT.md
+AIOS_Runtime_v1.2.md
 
-AIOS_Production_v4.3_SSOT.md
+AIOS_Production_v4.4.md
 ```
 
 General convention:
@@ -237,11 +237,11 @@ Example:
 ```
 Core v4.3
 
-Runtime v1.1
+Runtime v1.2
 
-Production v4.3
+Production v4.4
 
-Repository v1.1
+Repository v1.2
 ```
 
 Mixed incompatible versions SHALL NOT be packaged together.
@@ -253,15 +253,15 @@ Mixed incompatible versions SHALL NOT be packaged together.
 Example:
 
 ```
-Release_v1.1/
+Release_v1.2/
 
 AIOS_Core_v4.3_SSOT.pdf
 
-AIOS_Runtime_v1.1_SSOT.pdf
+AIOS_Runtime_v1.2.pdf
 
-AIOS_Production_v4.3_SSOT.pdf
+AIOS_Production_v4.4.pdf
 
-AIOS_Repository_v1.1_SSOT.pdf
+AIOS_Repository_v1.2.pdf
 
 README.md
 ```
@@ -290,7 +290,7 @@ Release MAY proceed only after all checklist items are complete.
 
 # Final Lock Statement
 
-AIOS Export Specification v1.1 SSOT defines the official export behavior for AIOS documentation and production artifacts.
+AIOS Export Specification v1.2 defines the official export behavior for AIOS documentation and production artifacts.
 
 It SHALL NOT redefine AIOS Core, Runtime, or Production.
 
