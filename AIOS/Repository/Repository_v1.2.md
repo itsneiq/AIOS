@@ -1211,7 +1211,7 @@ The following examples comply with the Repository Naming Convention.
 ```
 AIOS_Core_v4.3_SSOT.md
 
-AIOS_Runtime_v1.2.md.md
+AIOS_Runtime_v1.2.md
 
 AIOS_Production_v4.4.md
 
