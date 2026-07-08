@@ -559,7 +559,7 @@ Compatibility SHALL be maintained through implementation behavior rather than ar
 
 ## 3.10 Conformance Statement
 
-A Runtime implementation MAY claim conformance with AIOS Runtime v1.1 only after satisfying all mandatory requirements defined by:
+A Runtime implementation MAY claim conformance with AIOS Runtime v1.2 only after satisfying all mandatory requirements defined by:
 
 - AIOS Core;
 - this Runtime specification.
