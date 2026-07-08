@@ -1,16 +1,16 @@
-# AIOS Production v4.4 Draft
+# AIOS Production v4.4
 
 Version: 4.4
 
-Lifecycle Status: DRAFT
+Lifecycle Status: Released
 
-Specification Type: Draft Derived Specification
+Specification Type: Derived Specification
 
 Authority:
 Derived from AIOS Core v4.3 SSOT
 
 Runtime Dependency:
-AIOS Runtime v1.2 Draft
+AIOS Runtime v1.2
 
 ---
 
@@ -19,7 +19,7 @@ AIOS Runtime v1.2 Draft
 | Version | Status | Description |
 |----------|--------|-------------|
 | 4.3 | Released | Official Production SSOT baseline. |
-| 4.4 | Draft | Adds Production Preparation, Reference Analysis, Knowledge Extraction, Master Asset Registry, Asset Validation, Asset Lock, and Creative Planning for AIOS Production Operating System support. |
+| 4.4 | Released | Adds Production Preparation, Reference Analysis, Knowledge Extraction, Master Asset Registry, Asset Validation, Asset Lock, and Creative Planning for AIOS Production Operating System support. |
 
 ---
 
@@ -49,11 +49,11 @@ AIOS Core v4.3 SSOT
 
 ↓
 
-AIOS Runtime v1.2 Draft
+AIOS Runtime v1.2
 
 ↓
 
-AIOS Production v4.4 Draft
+AIOS Production v4.4
 
 AIOS Core SHALL remain the highest authority.
 
