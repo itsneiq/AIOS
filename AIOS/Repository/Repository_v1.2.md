@@ -15,7 +15,7 @@ Classification: DERIVED SPECIFICATION
 This specification derives its authority from the following Canonical Specifications:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.1 SSOT
+- AIOS Runtime v1.2 SSOT
 - AIOS Production v4.3 SSOT
 
 These Canonical Specifications remain the authoritative definition of AIOS.
@@ -60,7 +60,7 @@ This specification SHALL NOT define Runtime behavior, Production workflow, gover
 This specification SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.1 SSOT
+- AIOS Runtime v1.2 SSOT
 - AIOS Production v4.3 SSOT
 
 Where conflicts exist, the Canonical Specification SHALL prevail.
@@ -71,7 +71,7 @@ End of Front Matter
 
 ---
 
-AIOS Repository v1.1 SSOT
+AIOS Repository v1.2 SSOT
 
 Front Matter
 
@@ -1063,7 +1063,7 @@ Repository SHALL NOT redefine those concepts.
 The following specifications are normative:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.1 SSOT
+- AIOS Runtime v1.2 SSOT
 - AIOS Production v4.3 SSOT
 
 ---
@@ -1340,7 +1340,7 @@ End of Appendix E.
 
 # Final Lock Statement
 
-AIOS Repository v1.1 SSOT is a Derived Specification.
+AIOS Repository v1.2 SSOT is a Derived Specification.
 
 This document defines only the canonical organization of AIOS repository artifacts.
 
