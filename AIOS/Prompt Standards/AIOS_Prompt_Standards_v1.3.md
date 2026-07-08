@@ -1,12 +1,10 @@
-# AIOS Prompt Standards v1.3 Draft
+# AIOS Prompt Standards v1.3
 
-> Development note: Reference-driven prompting section will be added in Issue #1.
-> 
 **Single Source of Truth**
 
 Version: **1.3**
 
-Status: **DRAFT**
+Status: **REVIEW REQUIRED**
 
 Classification: **Normative Specification**
 
@@ -67,12 +65,12 @@ This specification depends upon the following normative documents:
 
 - AIOS Baseline v1.0
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Repository v1.1
-- AIOS Templates v1.1
-- AIOS QC Manual v1.1
-- AIOS Export Specification v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Repository v1.2
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These documents remain authoritative within their respective domains.
 
@@ -2272,11 +2270,11 @@ Every official AIOS prompt SHALL:
 This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Repository v1.1
-- AIOS Templates v1.1
-- AIOS QC Manual v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Repository v1.2
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -2650,11 +2648,11 @@ Internal implementation details SHALL NOT modify the normative composition model
 This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Repository v1.1
-- AIOS Templates v1.1
-- AIOS QC Manual v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Repository v1.2
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
 
 These documents remain authoritative within their respective domains.
 
@@ -2961,11 +2959,11 @@ Implementation optimizations SHALL NOT alter the logical Prompt Resolution Order
 This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Repository v1.1
-- AIOS Templates v1.1
-- AIOS QC Manual v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Repository v1.2
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
 
 These documents remain authoritative within their respective domains.
 
@@ -3280,11 +3278,11 @@ Editorial improvements SHALL NOT modify execution semantics.
 This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Repository v1.1
-- AIOS Templates v1.1
-- AIOS QC Manual v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Repository v1.2
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -3578,11 +3576,11 @@ Editorial changes SHALL NOT modify implementation semantics.
 This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Prompt Standards v1.3 Draft
-- AIOS Repository v1.1
-- AIOS QC Manual v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Prompt Standards v1.3
+- AIOS Repository v1.2
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -3623,7 +3621,7 @@ They SHALL NOT redefine architecture, production behavior, repository organizati
 Runtime Prompts derive their authority from:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
+- AIOS Runtime v1.2
 
 Prompt Standards govern only the construction of Runtime Prompts.
 
@@ -3892,11 +3890,11 @@ Editorial revisions SHALL NOT alter runtime semantics.
 This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Prompt Standards v1.3 Draft
-- AIOS Repository v1.1
-- AIOS QC Manual v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Prompt Standards v1.3
+- AIOS Repository v1.2
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -3916,7 +3914,7 @@ These specifications remain authoritative within their respective domains.
 
 This chapter defines the normative specification governing Production Prompts within the AIOS ecosystem.
 
-Production Prompts establish the standardized method for executing production-related operations while preserving the authority of AIOS Production v4.4 Draft.
+Production Prompts establish the standardized method for executing production-related operations while preserving the authority of AIOS Production v4.4.
 
 This specification defines how Production Prompts SHALL be designed, composed, validated, maintained, and executed.
 
@@ -3943,8 +3941,8 @@ They SHALL NOT redefine:
 Production Prompts derive their behavioral authority from:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
+- AIOS Runtime v1.2
+- AIOS Production v4.4
 
 Prompt Standards define only the construction of Production Prompts.
 
@@ -4241,13 +4239,13 @@ Editorial revisions SHALL NOT modify production semantics.
 This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Prompt Standards v1.3 Draft
-- AIOS Repository v1.1
-- AIOS Templates v1.1
-- AIOS QC Manual v1.1
-- AIOS Export Specification v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Prompt Standards v1.3
+- AIOS Repository v1.2
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -4296,9 +4294,9 @@ Blueprint Prompts SHALL serve as reusable implementation blueprints.
 Blueprint Prompts derive their authority from:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Templates v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Templates v1.2
 
 Prompt Standards define only how Blueprint Prompts are constructed.
 
@@ -4583,12 +4581,12 @@ Editorial improvements SHALL NOT alter blueprint semantics.
 This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Templates v1.1
-- AIOS Repository v1.1
-- AIOS QC Manual v1.1
-- AIOS Export Specification v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Templates v1.2
+- AIOS Repository v1.2
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -4638,9 +4636,9 @@ Generation Prompts SHALL remain implementation-independent.
 Generation Prompt behavior derives its authority from:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Prompt Standards v1.3 Draft
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Prompt Standards v1.3
 
 Generation Prompts SHALL execute within the constraints established by these authoritative specifications.
 
@@ -4890,10 +4888,10 @@ Implementation-specific optimizations MAY be introduced provided that:
 This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Templates v1.1
-- AIOS QC Manual v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
 
 ---
 
@@ -4943,10 +4941,10 @@ Validation SHALL remain independent from generation.
 Validation Prompt behavior derives its authority from:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Prompt Standards v1.3 Draft
-- AIOS QC Manual v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Prompt Standards v1.3
+- AIOS QC Manual v1.2
 
 Prompt Standards define how Validation Prompts are constructed.
 
@@ -5254,11 +5252,11 @@ Automation SHALL NOT alter normative validation semantics.
 This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Prompt Standards v1.3 Draft
-- AIOS QC Manual v1.1
-- AIOS Export Specification v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Prompt Standards v1.3
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -5312,10 +5310,10 @@ Review SHALL remain independent from generation and validation.
 Review Prompt behavior derives its authority from:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Prompt Standards v1.3 Draft
-- AIOS QC Manual v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Prompt Standards v1.3
+- AIOS QC Manual v1.2
 
 Prompt Standards define how Review Prompts are constructed.
 
@@ -5626,11 +5624,11 @@ Automation SHALL NOT alter the semantics of the review process.
 This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Prompt Standards v1.3 Draft
-- AIOS QC Manual v1.1
-- AIOS Export Specification v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Prompt Standards v1.3
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -5943,10 +5941,10 @@ Renderer-specific enhancements SHALL NOT become normative unless explicitly adop
 
 This chapter SHALL be interpreted together with:
 
-- AIOS Templates v1.1
-- AIOS Repository v1.1
-- AIOS Export Specification v1.1
-- AIOS QC Manual v1.1
+- AIOS Templates v1.2
+- AIOS Repository v1.2
+- AIOS Export Specification v1.2
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -6229,10 +6227,10 @@ Automatically generated navigation SHALL NOT modify document semantics.
 This chapter SHALL be interpreted together with:
 
 - Chapter 21 — Markdown Rules
-- AIOS Repository v1.1
-- AIOS Templates v1.1
-- AIOS QC Manual v1.1
-- AIOS Export Specification v1.1
+- AIOS Repository v1.2
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -6508,9 +6506,9 @@ This chapter SHALL be interpreted together with:
 
 - Chapter 21 — Markdown Rules
 - Chapter 22 — Heading Rules
-- AIOS Templates v1.1
-- AIOS QC Manual v1.1
-- AIOS Export Specification v1.1
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -6770,10 +6768,10 @@ This chapter SHALL be interpreted together with:
 - Chapter 21 — Markdown Rules
 - Chapter 22 — Heading Rules
 - Chapter 23 — Lists
-- AIOS Repository v1.1
-- AIOS Templates v1.1
-- AIOS QC Manual v1.1
-- AIOS Export Specification v1.1
+- AIOS Repository v1.2
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -7041,8 +7039,8 @@ This chapter SHALL be interpreted together with:
 - Chapter 22 — Heading Rules
 - Chapter 23 — Lists
 - Chapter 24 — Tables
-- AIOS Templates v1.1
-- AIOS Export Specification v1.1
+- AIOS Templates v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -7313,9 +7311,9 @@ Automatically generated metadata SHALL remain semantically equivalent to the can
 The following example illustrates the recommended metadata layout.
 
 ````markdown
-# AIOS Prompt Standards v1.3 Draft
+# AIOS Prompt Standards v1.3
 
-**Document Title:** AIOS Prompt Standards v1.3 Draft
+**Document Title:** AIOS Prompt Standards v1.3
 
 **Version:** 1.2
 
@@ -7323,7 +7321,7 @@ The following example illustrates the recommended metadata layout.
 
 **Classification:** Normative Specification
 
-**Authority:** AIOS Prompt Standards v1.3 Draft
+**Authority:** AIOS Prompt Standards v1.3
 
 **Owner:** AIOS Documentation Authority
 
@@ -7333,9 +7331,9 @@ This chapter SHALL be interpreted together with:
 
 Chapter 21 — Markdown Rules
 Chapter 22 — Heading Rules
-AIOS Repository v1.1
-AIOS QC Manual v1.1
-AIOS Export Specification v1.1
+AIOS Repository v1.2
+AIOS QC Manual v1.2
+AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -7469,7 +7467,7 @@ Cross-document references SHALL use the official document title.
 Example:
 
 ```
-AIOS Runtime v1.2 Draft
+AIOS Runtime v1.2
 ```
 
 Abbreviated document names SHOULD NOT be used unless previously defined.
@@ -7487,7 +7485,7 @@ Chapter references SHOULD identify:
 Example:
 
 ```
-AIOS Prompt Standards v1.3 Draft
+AIOS Prompt Standards v1.3
 Chapter 21 — Markdown Rules
 ```
 
@@ -7644,9 +7642,9 @@ This chapter SHALL be interpreted together with:
 - Chapter 22 — Heading Rules
 - Chapter 26 — Metadata Blocks
 - AIOS Baseline v1.0
-- AIOS Repository v1.1
-- AIOS QC Manual v1.1
-- AIOS Export Specification v1.1
+- AIOS Repository v1.2
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -7942,8 +7940,8 @@ This chapter SHALL be interpreted together with:
 - Chapter 22 — Heading Rules
 - Chapter 26 — Metadata Blocks
 - Chapter 27 — Reference Blocks
-- AIOS Runtime v1.2 Draft
-- AIOS Templates v1.1
+- AIOS Runtime v1.2
+- AIOS Templates v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -8251,8 +8249,8 @@ Editorial improvements SHALL NOT alter prompt semantics.
 
 This chapter SHALL be interpreted together with:
 
-- AIOS Prompt Standards v1.3 Draft
-- AIOS QC Manual v1.1
+- AIOS Prompt Standards v1.3
+- AIOS QC Manual v1.2
 - Chapter 31 — Determinism
 - Chapter 32 — Completeness
 
@@ -8541,10 +8539,10 @@ Editorial refinements SHALL NOT modify prompt semantics.
 
 This chapter SHALL be interpreted together with:
 
-- AIOS Prompt Standards v1.3 Draft
+- AIOS Prompt Standards v1.3
 - Chapter 29 — Clarity
 - Chapter 31 — Determinism
-- AIOS QC Manual v1.1
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -8594,8 +8592,8 @@ This chapter defines prompt quality only.
 
 Execution behavior remains governed by:
 
-- AIOS Runtime v1.2 Draft;
-- AIOS Production v4.4 Draft.
+- AIOS Runtime v1.2;
+- AIOS Production v4.4.
 
 This specification SHALL NOT redefine runtime execution semantics.
 
@@ -8822,12 +8820,12 @@ Implementation optimizations SHALL NOT introduce observable non-determinism.
 
 This chapter SHALL be interpreted together with:
 
-- AIOS Prompt Standards v1.3 Draft
+- AIOS Prompt Standards v1.3
 - Chapter 2 — Deterministic Prompting
 - Chapter 29 — Clarity
 - Chapter 30 — Specificity
-- AIOS Runtime v1.2 Draft
-- AIOS QC Manual v1.1
+- AIOS Runtime v1.2
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -9109,11 +9107,11 @@ Editorial enhancements SHALL NOT modify execution semantics.
 
 This chapter SHALL be interpreted together with:
 
-- AIOS Prompt Standards v1.3 Draft
+- AIOS Prompt Standards v1.3
 - Chapter 29 — Clarity
 - Chapter 30 — Specificity
 - Chapter 31 — Determinism
-- AIOS QC Manual v1.1
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -9392,11 +9390,11 @@ Specialization SHALL NOT modify the canonical reusable prompt.
 
 This chapter SHALL be interpreted together with:
 
-- AIOS Prompt Standards v1.3 Draft
+- AIOS Prompt Standards v1.3
 - Chapter 28 — Prompt Variables
-- AIOS Templates v1.1
-- AIOS Repository v1.1
-- AIOS QC Manual v1.1
+- AIOS Templates v1.2
+- AIOS Repository v1.2
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -9673,11 +9671,11 @@ Maintenance activities SHALL NOT introduce unintended behavioral changes.
 
 This chapter SHALL be interpreted together with:
 
-- AIOS Prompt Standards v1.3 Draft
+- AIOS Prompt Standards v1.3
 - Chapter 3 — Prompt Stability
 - Chapter 35 — Versioning
-- AIOS Repository v1.1
-- AIOS QC Manual v1.1
+- AIOS Repository v1.2
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -10020,11 +10018,11 @@ Automation SHALL NOT alter normative version meaning.
 
 This chapter SHALL be interpreted together with:
 
-- AIOS Prompt Standards v1.3 Draft
+- AIOS Prompt Standards v1.3
 - Chapter 7 — Prompt Lifecycle
 - Chapter 34 — Maintainability
-- AIOS Repository v1.1
-- AIOS Export Specification v1.1
+- AIOS Repository v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -10088,8 +10086,8 @@ Validation Rules SHALL apply before publication, release, production use, or inc
 
 Prompt Validation is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS QC Manual v1.1;
+- AIOS Prompt Standards v1.3;
+- AIOS QC Manual v1.2;
 - applicable AIOS SSOT documents.
 
 Prompt Standards define validation rules.
@@ -10380,11 +10378,11 @@ Automation SHALL NOT modify normative validation semantics.
 
 This chapter SHALL be interpreted together with:
 
-- AIOS Prompt Standards v1.3 Draft
+- AIOS Prompt Standards v1.3
 - PART V — Prompt Quality Standard
-- AIOS QC Manual v1.1
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
+- AIOS QC Manual v1.2
+- AIOS Runtime v1.2
+- AIOS Production v4.4
 
 These specifications remain authoritative within their respective domains.
 
@@ -10431,8 +10429,8 @@ Validation Criteria SHALL be applied consistently regardless of implementation p
 
 Validation Criteria are governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS QC Manual v1.1;
+- AIOS Prompt Standards v1.3;
+- AIOS QC Manual v1.2;
 - the applicable governing AIOS specification.
 
 This chapter defines evaluation criteria only.
@@ -10691,8 +10689,8 @@ This chapter SHALL be interpreted together with:
 
 - PART V — Prompt Quality Standard
 - Chapter 36 — Validation Rules
-- AIOS QC Manual v1.1
-- AIOS Repository v1.1
+- AIOS QC Manual v1.2
+- AIOS Repository v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -10738,8 +10736,8 @@ The Validation Procedure SHALL be followed whenever formal prompt validation is 
 
 The Validation Procedure is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS QC Manual v1.1.
+- AIOS Prompt Standards v1.3;
+- AIOS QC Manual v1.2.
 
 Validation Rules remain defined by Chapter 36.
 
@@ -11039,9 +11037,9 @@ This chapter SHALL be interpreted together with:
 
 - Chapter 36 — Validation Rules
 - Chapter 37 — Validation Criteria
-- AIOS QC Manual v1.1
-- AIOS Repository v1.1
-- AIOS Export Specification v1.1
+- AIOS QC Manual v1.2
+- AIOS Repository v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -11088,8 +11086,8 @@ This specification applies to every finding produced during official AIOS prompt
 
 Validation Findings are governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS QC Manual v1.1.
+- AIOS Prompt Standards v1.3;
+- AIOS QC Manual v1.2.
 
 This chapter defines finding management only.
 
@@ -11335,8 +11333,8 @@ This chapter SHALL be interpreted together with:
 - Chapter 36 — Validation Rules
 - Chapter 37 — Validation Criteria
 - Chapter 38 — Validation Procedure
-- AIOS QC Manual v1.1
-- AIOS Repository v1.1
+- AIOS QC Manual v1.2
+- AIOS Repository v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -11387,8 +11385,8 @@ Validation Reports SHALL be generated whenever formal validation is completed.
 
 Validation Reports are governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS QC Manual v1.1.
+- AIOS Prompt Standards v1.3;
+- AIOS QC Manual v1.2.
 
 This chapter defines report structure only.
 
@@ -11691,8 +11689,8 @@ This chapter SHALL be interpreted together with:
 - Chapter 37 — Validation Criteria
 - Chapter 38 — Validation Procedure
 - Chapter 39 — Validation Findings
-- AIOS QC Manual v1.1
-- AIOS Export Specification v1.1
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -11741,8 +11739,8 @@ Validation Approval SHALL occur only after completion of formal validation.
 
 Validation Approval is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS QC Manual v1.1;
+- AIOS Prompt Standards v1.3;
+- AIOS QC Manual v1.2;
 - applicable AIOS governance specifications.
 
 This chapter defines approval decisions only.
@@ -11987,8 +11985,8 @@ This chapter SHALL be interpreted together with:
 - Chapter 38 — Validation Procedure
 - Chapter 39 — Validation Findings
 - Chapter 40 — Validation Report
-- AIOS QC Manual v1.1
-- AIOS Repository v1.1
+- AIOS QC Manual v1.2
+- AIOS Repository v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -12066,8 +12064,8 @@ Ownership SHALL apply throughout the entire prompt lifecycle.
 
 Prompt Ownership is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS Repository v1.1;
+- AIOS Prompt Standards v1.3;
+- AIOS Repository v1.2;
 - applicable AIOS SSOT documents.
 
 This chapter defines ownership only.
@@ -12319,10 +12317,10 @@ Automation SHALL NOT alter normative ownership relationships.
 
 This chapter SHALL be interpreted together with:
 
-- AIOS Repository v1.1
+- AIOS Repository v1.2
 - Chapter 35 — Versioning
 - Chapter 41 — Validation Approval
-- AIOS QC Manual v1.1
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -12374,7 +12372,7 @@ Authority SHALL remain applicable throughout the prompt lifecycle.
 Prompt Authority is governed by:
 
 - AIOS Core v4.3 SSOT;
-- AIOS Prompt Standards v1.3 Draft.
+- AIOS Prompt Standards v1.3.
 
 This chapter defines prompt authority relationships only.
 
@@ -12645,9 +12643,9 @@ This chapter SHALL be interpreted together with:
 
 - AIOS Core v4.3 SSOT
 - Chapter 42 — Prompt Ownership
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Repository v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Repository v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -12697,8 +12695,8 @@ Lifecycle governance SHALL apply regardless of implementation platform.
 
 Prompt Lifecycle Governance is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS Repository v1.1.
+- AIOS Prompt Standards v1.3;
+- AIOS Repository v1.2.
 
 Lifecycle execution remains governed by the applicable AIOS Runtime, Production, and Repository specifications.
 
@@ -12973,8 +12971,8 @@ This chapter SHALL be interpreted together with:
 - Chapter 41 — Validation Approval
 - Chapter 42 — Prompt Ownership
 - Chapter 43 — Prompt Authority
-- AIOS Repository v1.1
-- AIOS QC Manual v1.1
+- AIOS Repository v1.2
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -13027,8 +13025,8 @@ Change Control SHALL apply regardless of implementation platform.
 
 Prompt Change Control is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS Repository v1.1;
+- AIOS Prompt Standards v1.3;
+- AIOS Repository v1.2;
 - applicable AIOS governance specifications.
 
 This chapter governs change management only.
@@ -13314,8 +13312,8 @@ This chapter SHALL be interpreted together with:
 - Chapter 41 — Validation Approval
 - Chapter 42 — Prompt Ownership
 - Chapter 44 — Prompt Lifecycle Governance
-- AIOS Repository v1.1
-- AIOS QC Manual v1.1
+- AIOS Repository v1.2
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -13368,8 +13366,8 @@ Compliance SHALL apply throughout the prompt lifecycle.
 
 Prompt Compliance is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS QC Manual v1.1;
+- AIOS Prompt Standards v1.3;
+- AIOS QC Manual v1.2;
 - applicable AIOS SSOT documents.
 
 This chapter governs compliance only.
@@ -13616,8 +13614,8 @@ This chapter SHALL be interpreted together with:
 - PART VI — Prompt Validation
 - Chapter 42 — Prompt Ownership
 - Chapter 45 — Prompt Change Control
-- AIOS QC Manual v1.1
-- AIOS Repository v1.1
+- AIOS QC Manual v1.2
+- AIOS Repository v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -13667,9 +13665,9 @@ Governance Audit SHALL apply regardless of implementation platform.
 
 Prompt Governance Audit is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS QC Manual v1.1;
-- AIOS Repository v1.1.
+- AIOS Prompt Standards v1.3;
+- AIOS QC Manual v1.2;
+- AIOS Repository v1.2.
 
 This chapter governs governance auditing only.
 
@@ -13917,8 +13915,8 @@ This chapter SHALL be interpreted together with:
 - Chapter 44 — Prompt Lifecycle Governance
 - Chapter 45 — Prompt Change Control
 - Chapter 46 — Prompt Compliance
-- AIOS QC Manual v1.1
-- AIOS Repository v1.1
+- AIOS QC Manual v1.2
+- AIOS Repository v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -13997,8 +13995,8 @@ Library Architecture SHALL apply regardless of implementation platform.
 
 Prompt Library Architecture is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS Repository v1.1.
+- AIOS Prompt Standards v1.3;
+- AIOS Repository v1.2.
 
 This chapter defines library architecture only.
 
@@ -14248,10 +14246,10 @@ Implementation optimizations SHALL NOT alter normative library semantics.
 
 This chapter SHALL be interpreted together with:
 
-- AIOS Repository v1.1
+- AIOS Repository v1.2
 - Chapter 42 — Prompt Ownership
 - Chapter 45 — Prompt Change Control
-- AIOS Templates v1.1
+- AIOS Templates v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -14303,8 +14301,8 @@ Classification SHALL remain applicable throughout the prompt lifecycle.
 
 Prompt Classification is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS Repository v1.1.
+- AIOS Prompt Standards v1.3;
+- AIOS Repository v1.2.
 
 This chapter defines classification only.
 
@@ -14547,8 +14545,8 @@ This chapter SHALL be interpreted together with:
 
 - Chapter 48 — Prompt Library Architecture
 - Chapter 42 — Prompt Ownership
-- AIOS Repository v1.1
-- AIOS Templates v1.1
+- AIOS Repository v1.2
+- AIOS Templates v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -14601,8 +14599,8 @@ Indexing SHALL remain applicable throughout the prompt lifecycle.
 
 Prompt Indexing is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS Repository v1.1.
+- AIOS Prompt Standards v1.3;
+- AIOS Repository v1.2.
 
 This chapter defines indexing only.
 
@@ -14845,8 +14843,8 @@ This chapter SHALL be interpreted together with:
 
 - Chapter 48 — Prompt Library Architecture
 - Chapter 49 — Prompt Classification
-- AIOS Repository v1.1
-- AIOS Templates v1.1
+- AIOS Repository v1.2
+- AIOS Templates v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -14899,8 +14897,8 @@ Metadata SHALL remain applicable throughout the prompt lifecycle.
 
 Prompt Metadata is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS Repository v1.1.
+- AIOS Prompt Standards v1.3;
+- AIOS Repository v1.2.
 
 This chapter defines metadata only.
 
@@ -15139,8 +15137,8 @@ This chapter SHALL be interpreted together with:
 - Chapter 48 — Prompt Library Architecture
 - Chapter 49 — Prompt Classification
 - Chapter 50 — Prompt Indexing
-- AIOS Repository v1.1
-- AIOS Export Specification v1.1
+- AIOS Repository v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -15192,8 +15190,8 @@ Library Management SHALL apply throughout the library lifecycle.
 
 Prompt Library Management is governed by:
 
-- AIOS Prompt Standards v1.3 Draft;
-- AIOS Repository v1.1.
+- AIOS Prompt Standards v1.3;
+- AIOS Repository v1.2.
 
 This chapter defines library management only.
 
@@ -15420,8 +15418,8 @@ This chapter SHALL be interpreted together with:
 - Chapter 49 — Prompt Classification
 - Chapter 50 — Prompt Indexing
 - Chapter 51 — Prompt Metadata
-- AIOS Repository v1.1
-- AIOS QC Manual v1.1
+- AIOS Repository v1.2
+- AIOS QC Manual v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -15469,7 +15467,7 @@ This chapter defines the normative prompt standards for reference-driven prompti
 
 Reference-driven prompting ensures that prompts derive their factual and visual context from approved references before generating, compiling, validating, or exporting production artifacts.
 
-This chapter SHALL be interpreted together with AIOS Runtime v1.2 Draft and AIOS Production v4.4 Draft.
+This chapter SHALL be interpreted together with AIOS Runtime v1.2 and AIOS Production v4.4.
 
 ---
 
@@ -16023,7 +16021,7 @@ A prompt conforms to this chapter only if it passes asset-driven prompt validati
 
 ## 53.1 Purpose
 
-This chapter defines the official Release Notes for AIOS Prompt Standards v1.3 Draft.
+This chapter defines the official Release Notes for AIOS Prompt Standards v1.3.
 
 Release Notes summarize the normative evolution of the specification and identify the major capabilities introduced by this release.
 
@@ -16037,11 +16035,11 @@ They SHALL NOT introduce new normative behavior.
 
 | Field | Value |
 |--------|-------|
-| Document | AIOS Prompt Standards v1.3 Draft |
+| Document | AIOS Prompt Standards v1.3 |
 | Version | 1.2 |
 | Status | LOCKED |
 | Classification | Normative Specification |
-| Authority | AIOS Prompt Standards v1.3 Draft |
+| Authority | AIOS Prompt Standards v1.3 |
 
 ---
 
@@ -16085,12 +16083,12 @@ Compared with previous revisions, Version 1.2 introduces:
 This release is designed to operate together with:
 
 - AIOS Core v4.3 SSOT;
-- AIOS Runtime v1.2 Draft;
-- AIOS Production v4.4 Draft;
-- AIOS Repository v1.1;
-- AIOS Templates v1.1;
-- AIOS QC Manual v1.1;
-- AIOS Export Specification v1.1.
+- AIOS Runtime v1.2;
+- AIOS Production v4.4;
+- AIOS Repository v1.2;
+- AIOS Templates v1.2;
+- AIOS QC Manual v1.2;
+- AIOS Export Specification v1.2.
 
 Compatibility SHALL remain governed by the applicable specification.
 
@@ -16133,9 +16131,9 @@ This chapter SHALL be interpreted together with:
 
 - AIOS Baseline v1.0
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Repository v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Repository v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -16153,7 +16151,7 @@ These specifications remain authoritative within their respective domains.
 
 ## 54.1 Purpose
 
-This chapter defines the official Compatibility Matrix for AIOS Prompt Standards v1.3 Draft.
+This chapter defines the official Compatibility Matrix for AIOS Prompt Standards v1.3.
 
 The Compatibility Matrix identifies the official AIOS specifications with which this document is intended to operate.
 
@@ -16268,12 +16266,12 @@ This chapter SHALL be interpreted together with:
 
 - AIOS Baseline v1.0
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
-- AIOS Repository v1.1
-- AIOS Templates v1.1
-- AIOS QC Manual v1.1
-- AIOS Export Specification v1.1
+- AIOS Runtime v1.2
+- AIOS Production v4.4
+- AIOS Repository v1.2
+- AIOS Templates v1.2
+- AIOS QC Manual v1.2
+- AIOS Export Specification v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -16291,7 +16289,7 @@ These specifications remain authoritative within their respective domains.
 
 ## 55.1 Purpose
 
-This chapter defines the official Revision History for AIOS Prompt Standards v1.3 Draft.
+This chapter defines the official Revision History for AIOS Prompt Standards v1.3.
 
 Revision History provides a traceable record of released versions, significant revisions, publication status, and compatibility milestones throughout the lifecycle of this specification.
 
@@ -16333,15 +16331,15 @@ Added:
 
 Changed:
 
-- Prompt authority alignment with AIOS Runtime v1.2 Draft
-- Prompt authority alignment with AIOS Production v4.4 Draft
+- Prompt authority alignment with AIOS Runtime v1.2
+- Prompt authority alignment with AIOS Production v4.4
 - Prompt behavior from prompt-as-source to prompt-as-derived-artifact
 
 Compatibility:
 
 - AIOS Core v4.3 SSOT
-- AIOS Runtime v1.2 Draft
-- AIOS Production v4.4 Draft
+- AIOS Runtime v1.2
+- AIOS Production v4.4
 
 ---
 
@@ -16455,7 +16453,7 @@ This chapter SHALL be interpreted together with:
 - Chapter 35 — Versioning
 - Chapter 54 — Compatibility Matrix
 - AIOS Baseline v1.0
-- AIOS Repository v1.1
+- AIOS Repository v1.2
 
 These specifications remain authoritative within their respective domains.
 
@@ -16473,7 +16471,7 @@ These specifications remain authoritative within their respective domains.
 
 ## 56.1 Purpose
 
-This chapter formally declares the completion and release status of the **AIOS Prompt Standards v1.3 Draft**.
+This chapter formally declares the completion and release status of the **AIOS Prompt Standards v1.3**.
 
 The Final Lock Statement establishes this document as the authoritative specification governing prompt engineering within the AIOS ecosystem.
 
@@ -16483,7 +16481,7 @@ This chapter marks the normative completion of the specification.
 
 ## 56.2 Official Status
 
-AIOS Prompt Standards v1.3 Draft is hereby declared:
+AIOS Prompt Standards v1.3 is hereby declared:
 
 - **Normative**
 - **Official**
@@ -16496,7 +16494,7 @@ Upon publication, this specification SHALL become the official Prompt Standards 
 
 ## 56.3 Single Source of Truth
 
-AIOS Prompt Standards v1.3 Draft SHALL serve as the **Single Source of Truth (SSOT)** for:
+AIOS Prompt Standards v1.3 SHALL serve as the **Single Source of Truth (SSOT)** for:
 
 - Prompt Philosophy;
 - Prompt Architecture;
@@ -16519,12 +16517,12 @@ This specification SHALL preserve the authority of other official AIOS specifica
 In particular, AIOS Prompt Standards SHALL NOT redefine:
 
 - AIOS Core v4.3 SSOT;
-- AIOS Runtime v1.2 Draft;
-- AIOS Production v4.4 Draft;
-- AIOS Repository v1.1;
-- AIOS Templates v1.1;
-- AIOS QC Manual v1.1;
-- AIOS Export Specification v1.1.
+- AIOS Runtime v1.2;
+- AIOS Production v4.4;
+- AIOS Repository v1.2;
+- AIOS Templates v1.2;
+- AIOS QC Manual v1.2;
+- AIOS Export Specification v1.2.
 
 Those documents SHALL remain the Single Source of Truth within their respective domains.
 
@@ -16567,7 +16565,7 @@ Derived specifications SHALL NOT override this specification.
 
 ## 56.8 Compliance Statement
 
-All official AIOS prompt assets, prompt libraries, prompt documentation, validation procedures, governance processes, and future prompt-related specifications SHALL comply with AIOS Prompt Standards v1.3 Draft.
+All official AIOS prompt assets, prompt libraries, prompt documentation, validation procedures, governance processes, and future prompt-related specifications SHALL comply with AIOS Prompt Standards v1.3.
 
 Non-conforming specifications SHALL be revised before official release.
 
@@ -16575,7 +16573,7 @@ Non-conforming specifications SHALL be revised before official release.
 
 ## 56.9 Final Declaration
 
-AIOS Prompt Standards v1.3 Draft is hereby designated as the official normative specification governing prompt engineering throughout the AIOS ecosystem.
+AIOS Prompt Standards v1.3 is hereby designated as the official normative specification governing prompt engineering throughout the AIOS ecosystem.
 
 Its authority SHALL remain in effect until superseded by a formally released successor specification.
 
@@ -16585,13 +16583,13 @@ Its authority SHALL remain in effect until superseded by a formally released suc
 
 ---
 
-**Document:** AIOS Prompt Standards v1.3 Draft
+**Document:** AIOS Prompt Standards v1.3
 
 **Status:** DRAFT
 
 **Classification:** Normative Specification
 
-**Authority:** AIOS Prompt Standards v1.3 Draft
+**Authority:** AIOS Prompt Standards v1.3
 
 **Single Source of Truth:** DRAFT
 
