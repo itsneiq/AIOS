@@ -131,7 +131,7 @@ Release references SHALL use the target set listed in Part I unless a document i
 
 ## Part VII — GPT Knowledge Map
 
-The Knowledge GPT package SHOULD include the release-target SSOT set in the following reading order:
+The Knowledge GPT package SHOULD include only the release-target SSOT set in the following reading order:
 
 1. AIOS Baseline v1.0
 2. AIOS Core v4.3 SSOT
@@ -142,7 +142,8 @@ The Knowledge GPT package SHOULD include the release-target SSOT set in the foll
 7. AIOS Repository v1.2
 8. AIOS QC Manual v1.2
 9. AIOS Export Specification v1.2
-10. Release notes and release manifest
+
+The Knowledge GPT package SHALL NOT include draft files, patch notes, temporary audit notes, issue notes, release checklist drafts, or superseded document versions unless they are explicitly added as historical archive material outside the active Knowledge package.
 
 ---
 
