@@ -1,5 +1,7 @@
 # AIOS Prompt Standards v1.3 Draft
 
+> Development note: Reference-driven prompting section will be added in Issue #1.
+> 
 **Single Source of Truth**
 
 Version: **1.3**
