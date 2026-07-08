@@ -56,6 +56,8 @@ Current release preparation files:
 - `ROADMAP.md`
 - `CODE_OF_CONDUCT.md`
 - `CHANGELOG.md`
+- `SECURITY.md`
+- `CODEOWNERS`
 
 ## Release Readiness
 
