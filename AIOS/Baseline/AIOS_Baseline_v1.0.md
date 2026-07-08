@@ -47,7 +47,7 @@ The AIOS v1.0.0 release target consists of the following canonical document set:
 | AIOS Runtime | `AIOS/Runtime/AIOS_Runtime_v1.2.md` | 1.2 |
 | AIOS Production | `AIOS/Production/AIOS_Production_v4.4.md` | 4.4 |
 | AIOS Prompt Standards | `AIOS/Prompt Standards/AIOS_Prompt_Standards_v1.3.md` | 1.3 |
-| AIOS Templates | `AIOS/Templates/Templates_v1.2 SSOT.md` | 1.2 |
+| AIOS Templates | `AIOS/Templates/Templates_v1.2.md` | 1.2 |
 | AIOS Repository | `AIOS/Repository/Repository_v1.2.md` | 1.2 |
 | AIOS QC Manual | `AIOS/QC/QC_Manual_v1.2.md` | 1.2 |
 | AIOS Export Specification | `AIOS/Export/Export_Specification_v1.2.md` | 1.2 |
