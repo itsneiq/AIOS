@@ -1,0 +1,13 @@
+{
+  "name": "aios-auto-editor-v1",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local Windows batch affiliate video editor",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check renderer.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
