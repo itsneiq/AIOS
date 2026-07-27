@@ -1,13 +1,45 @@
 {
   "name": "aios-auto-editor-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "Local Windows batch affiliate video editor",
+  "description": "AIOS desktop batch affiliate video editor for Windows",
+  "main": "electron/main.js",
   "scripts": {
-    "start": "node server.js",
-    "check": "node --check server.js && node --check renderer.js"
+    "start": "electron .",
+    "start:web": "node server.js",
+    "check": "node --check server.js && node --check renderer.js && node --check electron/main.js && node --check electron/preload.js",
+    "dist": "electron-builder --win nsis"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.aios.autoeditor",
+    "productName": "AIOS Auto Editor",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "public/**/*",
+      "data/**/*",
+      "templates/**/*",
+      "server.js",
+      "renderer.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }
