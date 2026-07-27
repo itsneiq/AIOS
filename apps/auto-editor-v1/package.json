@@ -1,6 +1,6 @@
 {
   "name": "aios-auto-editor-v1",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "AIOS desktop batch affiliate video editor for Windows",
   "author": "AIOS",
@@ -10,7 +10,7 @@
     "start": "electron .",
     "start:web": "node server.js",
     "check": "node --check server.js && node --check renderer.js && node --check electron/main.js && node --check electron/preload.js",
-    "dist": "electron-builder --win nsis",
+    "dist": "electron-builder --win nsis --publish never",
     "version:patch": "npm version patch",
     "version:minor": "npm version minor",
     "version:major": "npm version major"
