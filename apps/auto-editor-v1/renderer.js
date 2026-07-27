@@ -5,14 +5,15 @@ const path = require("path");
 const { spawn } = require("child_process");
 
 const ROOT = __dirname;
-const CONFIG_FILE = path.join(ROOT, "data", "config.json");
-const QUEUE_FILE = path.join(ROOT, "data", "queue.json");
-const STATE_FILE = path.join(ROOT, "data", "state.json");
-const WORK = path.join(ROOT, "data", "work");
+const DATA = process.env.AIOS_DATA_DIR || path.join(ROOT, "data");
+const CONFIG_FILE = path.join(DATA, "config.json");
+const QUEUE_FILE = path.join(DATA, "queue.json");
+const STATE_FILE = path.join(DATA, "state.json");
+const WORK = path.join(DATA, "work");
 fs.mkdirSync(WORK, {recursive:true});
 
 function readJson(f, fallback) { try { return JSON.parse(fs.readFileSync(f,"utf8")); } catch { return fallback; } }
-function writeJson(f,v) { fs.writeFileSync(f,JSON.stringify(v,null,2),"utf8"); }
+function writeJson(f,v) { const t=`${f}.tmp`; fs.writeFileSync(t,JSON.stringify(v,null,2),"utf8"); fs.renameSync(t,f); }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 function escAss(s){ return String(s||"").replace(/\r?\n/g,"\\N").replace(/[{}]/g,""); }
 function assTime(sec){
@@ -23,10 +24,11 @@ function assTime(sec){
 }
 function run(cmd,args,opts={}) {
   return new Promise((resolve,reject)=>{
-    const p=spawn(cmd,args,{shell:true,...opts});
+    const p=spawn(cmd,args,{shell:true,windowsHide:true,...opts});
     let so="",se="";
     p.stdout?.on("data",d=>so+=d);
     p.stderr?.on("data",d=>se+=d);
+    p.on("error",reject);
     p.on("close",c=>c===0?resolve({stdout:so,stderr:se}):reject(new Error(`${cmd} exited ${c}\n${se}`)));
   });
 }
@@ -43,6 +45,7 @@ function updateState(patch){
   const s=readJson(STATE_FILE,{running:true,current:null,log:[]});
   writeJson(STATE_FILE,{...s,...patch});
 }
+function stopRequested(){ return !!readJson(STATE_FILE,{}).stopRequested; }
 function makeAss(file,dur,cfg){
   const hookEnd=Math.min(1.8,dur*0.3);
   const benefitStart=hookEnd;
@@ -109,7 +112,6 @@ async function render(item,index,cfg,variant){
 
   const assEsc=ass.replace(/\\/g,"/").replace(/:/g,"\\:");
   const vf=`scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,subtitles='${assEsc}'`;
-
   const args=["-y","-i",`"${item.source}"`];
   if(voiceExists) args.push("-i",`"${wav}"`);
   if(cfg.musicEnabled && cfg.musicFile && fs.existsSync(cfg.musicFile)) args.push("-stream_loop","-1","-i",`"${cfg.musicFile}"`);
@@ -139,6 +141,7 @@ async function render(item,index,cfg,variant){
   const cfg=readJson(CONFIG_FILE,{});
   let q=readJson(QUEUE_FILE,[]);
   for(let i=0;i<q.length;i++){
+    if(stopRequested()) break;
     q=readJson(QUEUE_FILE,[]);
     const item=q[i];
     if(!item || item.status==="done") continue;
@@ -148,20 +151,22 @@ async function render(item,index,cfg,variant){
       let last="";
       const variants=Math.max(1,Math.min(5,Number(cfg.variants)||1));
       for(let v=1;v<=variants;v++){
+        if(stopRequested()) throw new Error("Produksi dihentikan pengguna");
         updateItem(item.id,{progress:15+Math.round((v-1)/variants*75),message:`Render varian ${v}/${variants}`});
         last=await render(item,i,cfg,v);
       }
       updateItem(item.id,{status:"done",progress:100,message:"Selesai",output:last});
       console.log(`Selesai: ${item.name}`);
     }catch(e){
-      updateItem(item.id,{status:"failed",progress:0,message:e.message.slice(0,180)});
-      console.error(`Gagal ${item.name}: ${e.message}`);
+      const stopped=stopRequested();
+      updateItem(item.id,{status:stopped?"queued":"failed",progress:stopped?0:0,message:stopped?"Dihentikan":e.message.slice(0,180)});
+      if(!stopped) console.error(`Gagal ${item.name}: ${e.message}`);
     }
     await sleep(250);
   }
-  updateState({running:false,current:null});
+  updateState({running:false,current:null,stopRequested:false});
 })().catch(e=>{
   console.error(e);
-  updateState({running:false,current:null});
+  updateState({running:false,current:null,stopRequested:false});
   process.exit(1);
 });
