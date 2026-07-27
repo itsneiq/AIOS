@@ -2,6 +2,7 @@
 
 const { app, BrowserWindow, dialog, ipcMain, shell } = require("electron");
 const path = require("path");
+const fs = require("fs");
 const { spawn } = require("child_process");
 const http = require("http");
 
@@ -13,10 +14,7 @@ function waitForServer(url, timeoutMs = 15000) {
   const started = Date.now();
   return new Promise((resolve, reject) => {
     const probe = () => {
-      const req = http.get(url, res => {
-        res.resume();
-        resolve();
-      });
+      const req = http.get(url, res => { res.resume(); resolve(); });
       req.on("error", () => {
         if (Date.now() - started > timeoutMs) return reject(new Error("AIOS server gagal dijalankan."));
         setTimeout(probe, 250);
@@ -30,18 +28,12 @@ function waitForServer(url, timeoutMs = 15000) {
 function startLocalServer() {
   const appRoot = app.isPackaged ? process.resourcesPath : path.resolve(__dirname, "..");
   const serverPath = path.join(appRoot, "server.js");
-
   serverProcess = spawn(process.execPath, [serverPath], {
     cwd: appRoot,
-    env: {
-      ...process.env,
-      ELECTRON_RUN_AS_NODE: "1",
-      PORT: String(PORT)
-    },
+    env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", PORT: String(PORT) },
     windowsHide: true,
     stdio: "pipe"
   });
-
   serverProcess.stdout.on("data", data => console.log(`[AIOS] ${data}`));
   serverProcess.stderr.on("data", data => console.error(`[AIOS] ${data}`));
   serverProcess.on("exit", code => console.log(`AIOS server exited with code ${code}`));
@@ -49,7 +41,6 @@ function startLocalServer() {
 
 async function createWindow() {
   startLocalServer();
-
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 920,
@@ -64,7 +55,6 @@ async function createWindow() {
       nodeIntegration: false
     }
   });
-
   try {
     await waitForServer(`http://127.0.0.1:${PORT}`);
     await mainWindow.loadURL(`http://127.0.0.1:${PORT}`);
@@ -72,7 +62,6 @@ async function createWindow() {
     dialog.showErrorBox("AIOS gagal dibuka", error.message);
     app.quit();
   }
-
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: "deny" };
@@ -90,6 +79,11 @@ ipcMain.handle("choose-file", async (_event, options = {}) => {
     filters: options.filters || []
   });
   return result.canceled ? null : result.filePaths[0];
+});
+
+ipcMain.handle("open-path", async (_event, target) => {
+  if (!target || typeof target !== "string" || !fs.existsSync(target)) return "Path tidak ditemukan.";
+  return shell.openPath(target);
 });
 
 app.whenReady().then(createWindow);
