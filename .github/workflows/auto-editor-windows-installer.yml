@@ -1,0 +1,64 @@
+name: AIOS Auto Editor Windows Installer
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/auto-editor-v1/**"
+      - ".github/workflows/auto-editor-windows-installer.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/auto-editor-v1/**"
+      - ".github/workflows/auto-editor-windows-installer.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-installer:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: apps/auto-editor-v1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/auto-editor-v1/package-lock.json
+
+      - name: Install dependencies
+        shell: pwsh
+        run: npm install
+
+      - name: Validate JavaScript
+        shell: pwsh
+        run: npm run check
+
+      - name: Build NSIS installer
+        shell: pwsh
+        run: npm run dist
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: List build output
+        shell: pwsh
+        run: Get-ChildItem -Path dist -Recurse | Select-Object FullName, Length
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: AIOS-Auto-Editor-Windows-Installer
+          path: |
+            apps/auto-editor-v1/dist/*.exe
+            apps/auto-editor-v1/dist/*.yml
+            apps/auto-editor-v1/dist/*.blockmap
+          if-no-files-found: error
+          retention-days: 14
