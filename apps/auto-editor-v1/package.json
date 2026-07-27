@@ -1,6 +1,6 @@
 {
   "name": "aios-auto-editor-v1",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "AIOS desktop batch affiliate video editor for Windows",
   "author": "AIOS",
@@ -49,8 +49,7 @@
       }
     ],
     "win": {
-      "target": "nsis",
-      "publisherName": "AIOS"
+      "target": "nsis"
     },
     "nsis": {
       "oneClick": false,
