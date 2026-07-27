@@ -9,12 +9,14 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
     paths:
       - "apps/auto-editor-v1/**"
       - ".github/workflows/auto-editor-windows-installer.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-installer:
@@ -46,11 +48,16 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
 
-      - name: List build output
+      - name: Verify installer output
         shell: pwsh
-        run: Get-ChildItem -Path dist -Recurse | Select-Object FullName, Length
+        run: |
+          $installers = Get-ChildItem -Path dist -Filter "*.exe" -File
+          if ($installers.Count -lt 1) {
+            throw "Electron Builder tidak menghasilkan installer .exe."
+          }
+          $installers | Select-Object FullName, Length
 
-      - name: Upload Windows installer
+      - name: Upload Windows installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: AIOS-Auto-Editor-Windows-Installer
@@ -60,3 +67,14 @@ jobs:
             apps/auto-editor-v1/dist/*.blockmap
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            apps/auto-editor-v1/dist/*.exe
+            apps/auto-editor-v1/dist/*.yml
+            apps/auto-editor-v1/dist/*.blockmap
