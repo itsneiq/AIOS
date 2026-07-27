@@ -25,12 +25,29 @@ function waitForServer(url, timeoutMs = 15000) {
   });
 }
 
+function stopProcessTree(child) {
+  if (!child || child.killed) return;
+  if (process.platform === "win32" && child.pid) {
+    spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], { windowsHide: true });
+  } else {
+    child.kill("SIGTERM");
+  }
+}
+
 function startLocalServer() {
   const appRoot = app.isPackaged ? process.resourcesPath : path.resolve(__dirname, "..");
   const serverPath = path.join(appRoot, "server.js");
+  const dataDir = path.join(app.getPath("userData"), "runtime-data");
+  fs.mkdirSync(dataDir, { recursive: true });
+
   serverProcess = spawn(process.execPath, [serverPath], {
     cwd: appRoot,
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", PORT: String(PORT) },
+    env: {
+      ...process.env,
+      ELECTRON_RUN_AS_NODE: "1",
+      PORT: String(PORT),
+      AIOS_DATA_DIR: dataDir
+    },
     windowsHide: true,
     stdio: "pipe"
   });
@@ -88,12 +105,10 @@ ipcMain.handle("open-path", async (_event, target) => {
 
 app.whenReady().then(createWindow);
 app.on("window-all-closed", () => {
-  if (serverProcess && !serverProcess.killed) serverProcess.kill();
+  stopProcessTree(serverProcess);
   if (process.platform !== "darwin") app.quit();
 });
-app.on("before-quit", () => {
-  if (serverProcess && !serverProcess.killed) serverProcess.kill();
-});
+app.on("before-quit", () => stopProcessTree(serverProcess));
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
