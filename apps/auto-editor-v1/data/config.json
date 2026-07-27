@@ -1,0 +1,16 @@
+{
+  "inputFolder": "",
+  "outputFolder": "",
+  "platform": "tiktok",
+  "style": "ugc",
+  "voiceEnabled": true,
+  "musicEnabled": false,
+  "musicFile": "",
+  "volumeMusic": 0.12,
+  "filenamePattern": "{base}_AIOS_{index}_v{variant}",
+  "hook": "Wajib lihat detail produk ini!",
+  "benefit": "Desain menarik, detail rapi, dan cocok dipakai sehari-hari.",
+  "cta": "Klik keranjang kuning dan cek promonya sekarang.",
+  "voiceRate": 0,
+  "variants": 1
+}
