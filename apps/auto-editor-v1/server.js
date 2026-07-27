@@ -9,12 +9,12 @@ const { URL } = require("url");
 const PORT = Number(process.env.PORT || 4174);
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, "public");
-const DATA = path.join(ROOT, "data");
+const DATA = process.env.AIOS_DATA_DIR || path.join(ROOT, "data");
 const CONFIG_FILE = path.join(DATA, "config.json");
 const QUEUE_FILE = path.join(DATA, "queue.json");
 const STATE_FILE = path.join(DATA, "state.json");
 
-for (const dir of [DATA]) fs.mkdirSync(dir, { recursive: true });
+fs.mkdirSync(DATA, { recursive: true });
 
 const defaults = {
   inputFolder: "",
@@ -38,7 +38,9 @@ function readJson(file, fallback) {
   catch { return fallback; }
 }
 function writeJson(file, value) {
-  fs.writeFileSync(file, JSON.stringify(value, null, 2), "utf8");
+  const temp = `${file}.tmp`;
+  fs.writeFileSync(temp, JSON.stringify(value, null, 2), "utf8");
+  fs.renameSync(temp, file);
 }
 if (!fs.existsSync(CONFIG_FILE)) writeJson(CONFIG_FILE, defaults);
 if (!fs.existsSync(QUEUE_FILE)) writeJson(QUEUE_FILE, []);
@@ -53,17 +55,22 @@ function getBody(req) {
     let data = "";
     req.on("data", c => {
       data += c;
-      if (data.length > 2_000_000) reject(new Error("Request too large"));
+      if (data.length > 2_000_000) reject(new Error("Request terlalu besar"));
     });
     req.on("end", () => {
       try { resolve(data ? JSON.parse(data) : {}); }
-      catch { reject(new Error("Invalid JSON")); }
+      catch { reject(new Error("JSON tidak valid")); }
     });
     req.on("error", reject);
   });
 }
+function validateFolder(folder, label) {
+  if (!folder || typeof folder !== "string") throw new Error(`${label} belum dipilih.`);
+  if (!fs.existsSync(folder)) throw new Error(`${label} tidak ditemukan.`);
+  if (!fs.statSync(folder).isDirectory()) throw new Error(`${label} bukan folder.`);
+}
 function listVideos(folder) {
-  if (!folder || !fs.existsSync(folder)) return [];
+  validateFolder(folder, "Folder video");
   const allowed = new Set([".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v"]);
   return fs.readdirSync(folder, { withFileTypes:true })
     .filter(x => x.isFile() && allowed.has(path.extname(x.name).toLowerCase()))
@@ -79,44 +86,56 @@ function listVideos(folder) {
     }));
 }
 function appendLog(message) {
+  if (!String(message).trim()) return;
   const state = readJson(STATE_FILE, {running:false,current:null,log:[]});
-  state.log = [...(state.log || []), `[${new Date().toLocaleTimeString()}] ${message}`].slice(-300);
+  state.log = [...(state.log || []), `[${new Date().toLocaleTimeString("id-ID")}] ${String(message).trim()}`].slice(-300);
   writeJson(STATE_FILE, state);
 }
 
 let worker = null;
 function startWorker() {
   const state = readJson(STATE_FILE, {running:false,current:null,log:[]});
-  if (state.running || worker) return false;
+  const queue = readJson(QUEUE_FILE, []);
+  if (state.running || worker) throw new Error("Produksi masih berjalan.");
+  if (!queue.length) throw new Error("Queue kosong. Pilih folder lalu klik Scan.");
+  const cfg = readJson(CONFIG_FILE, defaults);
+  if (cfg.outputFolder) {
+    if (!fs.existsSync(cfg.outputFolder)) fs.mkdirSync(cfg.outputFolder, { recursive: true });
+    validateFolder(cfg.outputFolder, "Folder output");
+  }
+
   state.running = true;
-  state.log = [...(state.log || []), `[${new Date().toLocaleTimeString()}] Produksi dimulai`];
+  state.stopRequested = false;
+  state.log = [...(state.log || []), `[${new Date().toLocaleTimeString("id-ID")}] Produksi dimulai`];
   writeJson(STATE_FILE, state);
 
   worker = spawn(process.execPath, [path.join(ROOT, "renderer.js")], {
     cwd: ROOT,
+    env: { ...process.env, AIOS_DATA_DIR: DATA, ELECTRON_RUN_AS_NODE: "1" },
+    windowsHide: true,
     stdio: ["ignore", "pipe", "pipe"]
   });
-  worker.stdout.on("data", d => appendLog(String(d).trim()));
-  worker.stderr.on("data", d => appendLog("ERROR: " + String(d).trim()));
+  worker.stdout.on("data", d => appendLog(String(d)));
+  worker.stderr.on("data", d => appendLog("ERROR: " + String(d)));
   worker.on("exit", code => {
     const s = readJson(STATE_FILE, {});
     s.running = false;
     s.current = null;
-    s.log = [...(s.log || []), `[${new Date().toLocaleTimeString()}] Worker selesai (${code})`].slice(-300);
+    s.log = [...(s.log || []), `[${new Date().toLocaleTimeString("id-ID")}] Worker selesai (${code})`].slice(-300);
     writeJson(STATE_FILE, s);
     worker = null;
   });
   return true;
 }
 function stopWorker() {
-  if (!worker) return false;
-  worker.kill();
-  worker = null;
   const state = readJson(STATE_FILE, {});
+  state.stopRequested = true;
   state.running = false;
   state.current = null;
-  state.log = [...(state.log || []), `[${new Date().toLocaleTimeString()}] Produksi dihentikan`].slice(-300);
+  state.log = [...(state.log || []), `[${new Date().toLocaleTimeString("id-ID")}] Permintaan berhenti dikirim`].slice(-300);
   writeJson(STATE_FILE, state);
+  if (worker && !worker.killed) worker.kill("SIGTERM");
+  worker = null;
   return true;
 }
 function serveStatic(req, res, pathname) {
@@ -143,6 +162,8 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "POST" && p === "/api/config") {
       const body = await getBody(req);
       const cfg = { ...defaults, ...body };
+      cfg.variants = Math.max(1, Math.min(5, Number(cfg.variants) || 1));
+      cfg.voiceRate = Math.max(-5, Math.min(5, Number(cfg.voiceRate) || 0));
       writeJson(CONFIG_FILE, cfg);
       return send(res, 200, cfg);
     }
@@ -150,6 +171,7 @@ const server = http.createServer(async (req, res) => {
       const body = await getBody(req);
       const videos = listVideos(body.inputFolder);
       writeJson(QUEUE_FILE, videos);
+      appendLog(`${videos.length} video ditemukan di folder input`);
       return send(res, 200, { count: videos.length, queue: videos });
     }
     if (req.method === "GET" && p === "/api/queue") return send(res, 200, readJson(QUEUE_FILE, []));
@@ -158,10 +180,7 @@ const server = http.createServer(async (req, res) => {
       writeJson(QUEUE_FILE, q);
       return send(res, 200, q);
     }
-    if (req.method === "POST" && p === "/api/start") {
-      const ok = startWorker();
-      return send(res, ok ? 200 : 409, {ok});
-    }
+    if (req.method === "POST" && p === "/api/start") return send(res, 200, {ok:startWorker()});
     if (req.method === "POST" && p === "/api/stop") return send(res, 200, {ok:stopWorker()});
     if (req.method === "GET" && p === "/api/state") {
       return send(res, 200, {
@@ -170,10 +189,11 @@ const server = http.createServer(async (req, res) => {
       });
     }
     if (req.method === "GET" && p === "/api/check") {
-      const ffmpeg = spawn("ffmpeg", ["-version"], {shell:true});
+      const ffmpeg = spawn("ffmpeg", ["-version"], {shell:true, windowsHide:true});
       let out = "";
       ffmpeg.stdout.on("data", d => out += d);
       ffmpeg.stderr.on("data", d => out += d);
+      ffmpeg.on("error", () => send(res, 200, { node:process.version, ffmpeg:false, ffmpegInfo:"" }));
       ffmpeg.on("close", code => send(res, 200, {
         node: process.version,
         ffmpeg: code === 0,
@@ -183,10 +203,10 @@ const server = http.createServer(async (req, res) => {
     }
     return serveStatic(req, res, p);
   } catch (e) {
-    send(res, 500, { error: e.message });
+    send(res, 400, { error: e.message });
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`AIOS Auto Editor berjalan di http://localhost:${PORT}`);
+server.listen(PORT, "127.0.0.1", () => {
+  console.log(`AIOS Auto Editor berjalan di http://127.0.0.1:${PORT}`);
 });
