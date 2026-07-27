@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="AIOS Auto Editor icon">
+  <rect width="512" height="512" rx="112" fill="#0f1115"/>
+  <rect x="56" y="56" width="400" height="400" rx="96" fill="#7c5cff"/>
+  <path d="M151 374 239 138h67l88 236h-66l-17-51H229l-17 51h-61Zm98-111h43l-21-69-22 69Z" fill="#fff"/>
+</svg>
