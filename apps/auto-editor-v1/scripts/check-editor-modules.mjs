@@ -11,7 +11,8 @@ const files=[
   "public/editor/media.js",
   "public/editor/project.js",
   "public/editor/export-manifest.js",
-  "public/editor/export-ui.js"
+  "public/editor/export-ui.js",
+  "public/editor/autosave.js"
 ];
 
 let failed=false;
