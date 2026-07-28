@@ -6,6 +6,7 @@ const { spawn } = require("child_process");
 const { synthesizeVoice } = require("./voice-engine");
 const { resolveScript } = require("./script-engine");
 const { findEmphasisWords, planSubtitles } = require("./subtitle-planner");
+const { motionFilter, planMotion } = require("./motion-planner");
 
 const ROOT = __dirname;
 const DATA = process.env.AIOS_DATA_DIR || path.join(ROOT, "data");
@@ -105,7 +106,8 @@ async function render(item,index,cfg,variant){
   }
 
   const assEsc=ass.replace(/\\/g,"/").replace(/:/g,"\\:");
-  const vf=`scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,subtitles='${assEsc}'`;
+  const motion=motionFilter(planMotion({duration:dur,preset:cfg.motionPreset,seed:`${item.base}:${variant}`}));
+  const vf=["scale=1080:1920:force_original_aspect_ratio=decrease","pad=1080:1920:(ow-iw)/2:(oh-ih)/2",motion,`subtitles='${assEsc}'`].filter(Boolean).join(",");
   const args=["-y","-i",`"${item.source}"`];
   if(voiceExists) args.push("-i",`"${wav}"`);
   if(cfg.musicEnabled && cfg.musicFile && fs.existsSync(cfg.musicFile)) args.push("-stream_loop","-1","-i",`"${cfg.musicFile}"`);
