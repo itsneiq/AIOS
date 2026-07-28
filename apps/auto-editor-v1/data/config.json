@@ -3,6 +3,7 @@
   "outputFolder": "",
   "platform": "tiktok",
   "subtitlePreset": "tiktok",
+  "motionPreset": "balanced",
   "style": "ugc",
   "voiceEnabled": true,
   "musicEnabled": false,
