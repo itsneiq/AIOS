@@ -1,0 +1,48 @@
+name: Windows QA
+
+on:
+  pull_request:
+    paths:
+      - "apps/auto-editor-v1/**"
+      - ".github/workflows/windows-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-package:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: apps/auto-editor-v1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/auto-editor-v1/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run regression checks
+        run: npm run check
+
+      - name: Run release readiness validation
+        run: npm run qa:release
+
+      - name: Build Windows installer
+        run: npm run dist
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AIOS-Windows-Installer
+          path: apps/auto-editor-v1/dist/*.exe
+          if-no-files-found: error
+          retention-days: 14
