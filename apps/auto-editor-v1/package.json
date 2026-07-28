@@ -9,8 +9,8 @@
   "scripts": {
     "start": "electron .",
     "start:web": "node server.js",
-    "test": "node tests/voice-engine.test.cjs && node tests/export-manifest.test.mjs && node tests/relink.test.mjs && node tests/export-diagnostics.test.cjs && node tests/performance.test.mjs && node tests/autosave.test.mjs && node tests/startup-diagnostics.test.cjs && node tests/worker-runtime.test.cjs",
-    "check": "node --check server.js && node --check renderer.js && node --check electron/main.js && node --check electron/preload.js && node --check electron/export-engine.js && node --check electron/startup-diagnostics.js && node --experimental-vm-modules scripts/check-editor-modules.mjs && npm test",
+    "test": "node tests/script-engine.test.cjs && node tests/voice-engine.test.cjs && node tests/export-manifest.test.mjs && node tests/relink.test.mjs && node tests/export-diagnostics.test.cjs && node tests/performance.test.mjs && node tests/autosave.test.mjs && node tests/startup-diagnostics.test.cjs && node tests/worker-runtime.test.cjs",
+    "check": "node --check script-engine.js && node --check server.js && node --check renderer.js && node --check electron/main.js && node --check electron/preload.js && node --check electron/export-engine.js && node --check electron/startup-diagnostics.js && node --experimental-vm-modules scripts/check-editor-modules.mjs && npm test",
     "qa:release": "node scripts/release-check.mjs",
     "release:verify": "npm run check && npm run qa:release",
     "dist": "electron-builder --win nsis --publish never",
@@ -29,7 +29,7 @@
     "appId": "com.aios.autoeditor",
     "productName": "AIOS Auto Editor",
     "artifactName": "AIOS-Auto-Editor-Setup-${version}.${ext}",
-    "copyright": "Copyright \u00a9 2026 AIOS",
+    "copyright": "Copyright © 2026 AIOS",
     "directories": {
       "output": "dist",
       "buildResources": "build"
@@ -43,7 +43,8 @@
       "server.js",
       "renderer.js",
       "package.json",
-      "voice-engine.js"
+      "voice-engine.js",
+      "script-engine.js"
     ],
     "publish": [
       {
