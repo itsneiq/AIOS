@@ -1,0 +1,11 @@
+"use strict";
+const assert=require("assert");
+const {analyzeMarketing,inferCategory}=require("../marketing-analyzer");
+assert.equal(inferCategory({filename:"tas-wanita-baru.mp4"}).category,"fashion");
+assert.equal(inferCategory({title:"serum wajah brightening"}).category,"beauty");
+assert.equal(analyzeMarketing({filename:"blender-dapur.mp4"}).angle,"problem_solution");
+assert.equal(analyzeMarketing({filename:"headset-gaming.mp4"}).angle,"curiosity");
+assert.equal(analyzeMarketing({filename:"tas-wanita.mp4",style:"hard"}).angle,"fomo");
+assert.equal(analyzeMarketing({category:"home",filename:"serum.mp4"}).category,"home");
+assert.equal(analyzeMarketing({filename:"produk-001.mp4"}).category,"general");
+console.log("marketing analyzer tests passed");
