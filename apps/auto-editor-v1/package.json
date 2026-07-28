@@ -9,7 +9,7 @@
   "scripts": {
     "start": "electron .",
     "start:web": "node server.js",
-    "test": "node tests/export-manifest.test.mjs && node tests/relink.test.mjs && node tests/export-diagnostics.test.cjs && node tests/performance.test.mjs && node tests/autosave.test.mjs && node tests/startup-diagnostics.test.cjs",
+    "test": "node tests/export-manifest.test.mjs && node tests/relink.test.mjs && node tests/export-diagnostics.test.cjs && node tests/performance.test.mjs && node tests/autosave.test.mjs && node tests/startup-diagnostics.test.cjs && node tests/worker-runtime.test.cjs",
     "check": "node --check server.js && node --check renderer.js && node --check electron/main.js && node --check electron/preload.js && node --check electron/export-engine.js && node --check electron/startup-diagnostics.js && node --experimental-vm-modules scripts/check-editor-modules.mjs && npm test",
     "qa:release": "node scripts/release-check.mjs",
     "release:verify": "npm run check && npm run qa:release",
