@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
 const { synthesizeVoice } = require("./voice-engine");
+const { resolveScript } = require("./script-engine");
 
 const ROOT = __dirname;
 const DATA = process.env.AIOS_DATA_DIR || path.join(ROOT, "data");
@@ -47,7 +48,7 @@ function updateState(patch){
   writeJson(STATE_FILE,{...s,...patch});
 }
 function stopRequested(){ return !!readJson(STATE_FILE,{}).stopRequested; }
-function makeAss(file,dur,cfg){
+function makeAss(file,dur,script){
   const hookEnd=Math.min(1.8,dur*0.3);
   const benefitStart=hookEnd;
   const benefitEnd=Math.max(benefitStart+0.5, dur-1.4);
@@ -67,9 +68,9 @@ Style: CTA,Arial,55,&H00FFFFFF,&H000000FF,&H00101010,&H90000000,-1,0,0,0,100,100
 
 [Events]
 Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
-Dialogue: 0,${assTime(0)},${assTime(hookEnd)},Hook,,0,0,0,,${escAss(cfg.hook)}
-Dialogue: 0,${assTime(benefitStart)},${assTime(benefitEnd)},Body,,0,0,0,,${escAss(cfg.benefit)}
-Dialogue: 0,${assTime(ctaStart)},${assTime(dur)},CTA,,0,0,0,,${escAss(cfg.cta)}
+Dialogue: 0,${assTime(0)},${assTime(hookEnd)},Hook,,0,0,0,,${escAss(script.hook)}
+Dialogue: 0,${assTime(benefitStart)},${assTime(benefitEnd)},Body,,0,0,0,,${escAss(script.benefit)}
+Dialogue: 0,${assTime(ctaStart)},${assTime(dur)},CTA,,0,0,0,,${escAss(script.cta)}
 `;
   fs.writeFileSync(file,content,"utf8");
 }
@@ -79,11 +80,12 @@ function outputName(cfg,item,index,variant){
   return s.replace(/[<>:"/\\|?*]/g,"_");
 }
 async function render(item,index,cfg,variant){
+  const script=resolveScript(cfg,item,index,variant);
   const dur=await duration(item.source);
   const token=`${Date.now()}-${index}-${variant}`;
   const ass=path.join(WORK,`${token}.ass`);
   const wav=path.join(WORK,`${token}.${cfg.voiceProvider === "windows" ? "wav" : "mp3"}`);
-  makeAss(ass,dur,cfg);
+  makeAss(ass,dur,script);
 
   const outDir=cfg.outputFolder || path.join(path.dirname(item.source),"AIOS_Output");
   fs.mkdirSync(outDir,{recursive:true});
@@ -92,8 +94,8 @@ async function render(item,index,cfg,variant){
   let voiceExists=false;
   if(cfg.voiceEnabled){
     try {
-      const provider=await synthesizeVoice({text:`${cfg.hook}. ${cfg.benefit}. ${cfg.cta}`,output:wav,voice:cfg.voiceName,rate:cfg.voiceRate,provider:cfg.voiceProvider,fallback:cfg.voiceFallback,workDir:WORK});
-      console.log(`Voice-over dibuat dengan ${provider === "edge" ? "Edge Neural TTS" : "Windows Speech"}`);
+      const provider=await synthesizeVoice({text:`${script.hook}. ${script.benefit}. ${script.cta}`,output:wav,voice:cfg.voiceName,rate:cfg.voiceRate,provider:cfg.voiceProvider,fallback:cfg.voiceFallback,workDir:WORK});
+      console.log(`Voice-over dibuat dengan ${provider === "edge" ? "Edge Neural TTS" : "Windows Speech"}; script angle: ${script.angle}`);
       voiceExists=fs.existsSync(wav);
     } catch(e){ console.log(`Voice-over gagal, lanjut tanpa VO: ${e.message}`); }
   }
@@ -122,7 +124,7 @@ async function render(item,index,cfg,variant){
   args.push(`"${fc}"`,...maps,"-c:v","libx264","-preset","medium","-crf","20","-c:a","aac","-b:a","192k","-shortest",`"${out}"`);
   await run("ffmpeg",args);
   for(const f of [ass,wav]) try{ if(fs.existsSync(f)) fs.unlinkSync(f); }catch{}
-  return out;
+  return {out,script};
 }
 
 (async()=>{
@@ -136,18 +138,19 @@ async function render(item,index,cfg,variant){
     updateState({current:item.name});
     updateItem(item.id,{status:"processing",progress:5,message:"Menganalisis video"});
     try{
-      let last="";
+      let last="",lastScript=null;
       const variants=Math.max(1,Math.min(5,Number(cfg.variants)||1));
       for(let v=1;v<=variants;v++){
         if(stopRequested()) throw new Error("Produksi dihentikan pengguna");
         updateItem(item.id,{progress:15+Math.round((v-1)/variants*75),message:`Render varian ${v}/${variants}`});
-        last=await render(item,i,cfg,v);
+        const result=await render(item,i,cfg,v);
+        last=result.out;lastScript=result.script;
       }
-      updateItem(item.id,{status:"done",progress:100,message:"Selesai",output:last});
+      updateItem(item.id,{status:"done",progress:100,message:"Selesai",output:last,script:lastScript});
       console.log(`Selesai: ${item.name}`);
     }catch(e){
       const stopped=stopRequested();
-      updateItem(item.id,{status:stopped?"queued":"failed",progress:stopped?0:0,message:stopped?"Dihentikan":e.message.slice(0,180)});
+      updateItem(item.id,{status:stopped?"queued":"failed",progress:0,message:stopped?"Dihentikan":e.message.slice(0,180)});
       if(!stopped) console.error(`Gagal ${item.name}: ${e.message}`);
     }
     await sleep(250);
