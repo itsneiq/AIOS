@@ -2,6 +2,7 @@
 
 const { analyzeMarketing } = require("./marketing-analyzer");
 const { analyzeProduct } = require("./product-analyzer");
+const { planCreative } = require("./creative-planner");
 
 const ANGLES = Object.freeze({
   balanced: {
@@ -60,8 +61,10 @@ function resolveScript(config={},item={},index=0,variant=1){
   if(config.scriptMode!=="auto")return {hook:String(config.hook||"").trim(),benefit:String(config.benefit||"").trim(),cta:String(config.cta||"").trim(),angle:"manual"};
   const product=analyzeProduct({title:config.productName,brand:config.productBrand,category:config.productCategory,description:config.productDescription,attributes:config.productAttributes,filename:item.name||item.base});
   const marketing=config.scriptAngle==="auto"?analyzeMarketing({category:product.category,title:product.title,filename:item.name||item.base,description:config.productDescription,style:config.style,platform:config.platform}):null;
-  const script=generateScript({angle:marketing?.angle||config.scriptAngle,seed:item.base||item.name||"video",index,variant,product});
-  return {...script,product,...(marketing?{marketing}:{})};
+  const angle=marketing?.angle||config.scriptAngle;
+  const creative=planCreative({category:product.category,angle,style:config.style,platform:config.platform,seed:`${item.base||item.name}:${variant}`,keywords:product.keywords,motionPreset:config.motionPreset,subtitlePreset:config.subtitlePreset});
+  const script=generateScript({angle,seed:item.base||item.name||"video",index,variant,product});
+  return {...script,product,creative,...(marketing?{marketing}:{})};
 }
 function generateScriptSet(options={}){const count=clampCount(options.count);return Array.from({length:count},(_,index)=>generateScript({...options,index,variant:index+1}))}
 
