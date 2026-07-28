@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id);
-const fields=["inputFolder","outputFolder","platform","style","variants","filenamePattern","hook","benefit","cta","voiceEnabled","voiceRate","musicEnabled","musicFile"];
+const fields=["inputFolder","outputFolder","platform","style","variants","filenamePattern","hook","benefit","cta","voiceEnabled","voiceProvider","voiceName","voiceRate","voiceFallback","musicEnabled","musicFile"];
 let timer;
 
 function toast(msg){$("toast").textContent=msg;$("toast").classList.add("show");setTimeout(()=>$(("toast")).classList.remove("show"),2600)}

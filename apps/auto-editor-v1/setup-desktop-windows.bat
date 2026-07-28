@@ -14,6 +14,13 @@ if errorlevel 1 (
   exit /b 1
 )
 
+where edge-tts >nul 2>nul
+if errorlevel 1 (
+  echo Menginstal Edge Neural TTS...
+  py -m pip install edge-tts
+  if errorlevel 1 echo PERINGATAN: Edge TTS belum terpasang. Windows Speech tetap tersedia sebagai fallback.
+)
+
 call npm install
 if errorlevel 1 (
   echo Instalasi dependency gagal.

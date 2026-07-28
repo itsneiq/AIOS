@@ -3,6 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
+const { synthesizeVoice } = require("./voice-engine");
 
 const ROOT = __dirname;
 const DATA = process.env.AIOS_DATA_DIR || path.join(ROOT, "data");
@@ -72,20 +73,6 @@ Dialogue: 0,${assTime(ctaStart)},${assTime(dur)},CTA,,0,0,0,,${escAss(cfg.cta)}
 `;
   fs.writeFileSync(file,content,"utf8");
 }
-async function makeVoice(text,wav,rate){
-  const ps1=path.join(WORK,`tts-${Date.now()}-${Math.random().toString(36).slice(2)}.ps1`);
-  const safe=String(text).replace(/'/g,"''");
-  const script=`Add-Type -AssemblyName System.Speech
-$s = New-Object System.Speech.Synthesis.SpeechSynthesizer
-$s.Rate = ${Math.max(-5,Math.min(5,Number(rate)||0))}
-$s.SetOutputToWaveFile('${wav.replace(/'/g,"''")}')
-$s.Speak('${safe}')
-$s.Dispose()
-`;
-  fs.writeFileSync(ps1,script,"utf8");
-  try { await run("powershell",["-NoProfile","-ExecutionPolicy","Bypass","-File",`"${ps1}"`]); }
-  finally { try{fs.unlinkSync(ps1)}catch{} }
-}
 function outputName(cfg,item,index,variant){
   let s=cfg.filenamePattern || "{base}_AIOS_{index}";
   s=s.replaceAll("{base}",item.base).replaceAll("{index}",String(index+1).padStart(2,"0")).replaceAll("{variant}",String(variant));
@@ -95,7 +82,7 @@ async function render(item,index,cfg,variant){
   const dur=await duration(item.source);
   const token=`${Date.now()}-${index}-${variant}`;
   const ass=path.join(WORK,`${token}.ass`);
-  const wav=path.join(WORK,`${token}.wav`);
+  const wav=path.join(WORK,`${token}.${cfg.voiceProvider === "windows" ? "wav" : "mp3"}`);
   makeAss(ass,dur,cfg);
 
   const outDir=cfg.outputFolder || path.join(path.dirname(item.source),"AIOS_Output");
@@ -105,7 +92,8 @@ async function render(item,index,cfg,variant){
   let voiceExists=false;
   if(cfg.voiceEnabled){
     try {
-      await makeVoice(`${cfg.hook}. ${cfg.benefit}. ${cfg.cta}`,wav,cfg.voiceRate);
+      const provider=await synthesizeVoice({text:`${cfg.hook}. ${cfg.benefit}. ${cfg.cta}`,output:wav,voice:cfg.voiceName,rate:cfg.voiceRate,provider:cfg.voiceProvider,fallback:cfg.voiceFallback,workDir:WORK});
+      console.log(`Voice-over dibuat dengan ${provider === "edge" ? "Edge Neural TTS" : "Windows Speech"}`);
       voiceExists=fs.existsSync(wav);
     } catch(e){ console.log(`Voice-over gagal, lanjut tanpa VO: ${e.message}`); }
   }

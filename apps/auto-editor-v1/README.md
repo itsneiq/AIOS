@@ -8,7 +8,7 @@ Aplikasi lokal Windows untuk mengedit satu folder video menjadi video affiliate 
 - Queue batch dan progress.
 - Resize/pad otomatis ke 1080×1920.
 - Hook, benefit, dan CTA sebagai subtitle bergaya.
-- Voice-over lokal memakai suara Windows (`System.Speech`).
+- Edge Neural TTS Bahasa Indonesia (Gadis/Ardi) digunakan bila tersedia, dengan Windows `System.Speech` sebagai fallback offline.
 - Musik latar opsional.
 - 1–5 varian output per video.
 - Penamaan output otomatis.
@@ -18,10 +18,13 @@ Aplikasi lokal Windows untuk mengedit satu folder video menjadi video affiliate 
 ## Instalasi Windows
 
 1. Pastikan Node.js sudah terpasang.
-2. Klik `install-ffmpeg.bat`.
-3. Tutup dan buka kembali Command Prompt setelah FFmpeg selesai diinstal.
-4. Klik `start-windows.bat`.
-5. Buka `http://localhost:4174`.
+2. Instal Edge TTS dengan `py -m pip install edge-tts` untuk memakai suara neural; sintesis memerlukan internet.
+3. Klik `install-ffmpeg.bat`.
+4. Tutup dan buka kembali Command Prompt setelah FFmpeg selesai diinstal.
+5. Klik `start-windows.bat`.
+6. Buka `http://localhost:4174`.
+
+Jika `edge-tts` tidak tersedia atau sintesis gagal, AIOS otomatis memakai Windows Speech selama opsi fallback diaktifkan.
 
 ## Penggunaan
 
@@ -53,7 +56,7 @@ Fondasi v1.0 sudah berjalan sebagai batch renderer. Sprint selanjutnya akan meng
 - Template naskah masih berlaku untuk seluruh batch.
 - Belum membaca link produk atau Excel.
 - Belum memiliki scene-aware marketing analysis.
-- Voice-over tergantung suara yang tersedia di Windows.
+- Edge Neural TTS memerlukan koneksi internet dan perintah `edge-tts`; proses dibatasi waktu dan kegagalan otomatis beralih ke suara Windows jika fallback diaktifkan.
 
 ## Roadmap
 
