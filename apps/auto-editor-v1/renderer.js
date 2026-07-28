@@ -5,7 +5,8 @@ const path = require("path");
 const { spawn } = require("child_process");
 const { synthesizeVoice } = require("./voice-engine");
 const { resolveScript } = require("./script-engine");
-const { findEmphasisWords, planSubtitles } = require("./subtitle-planner");
+const { planSubtitles } = require("./subtitle-planner");
+const { renderEmphasis } = require("./caption-emphasis-engine");
 const { motionFilter, planMotion } = require("./motion-planner");
 const { analyzeScenes, findNearDuplicates, parseSceneLog, sceneDetectionFilter } = require("./scene-analyzer");
 const { selectHighlights } = require("./highlight-selector");
@@ -43,7 +44,7 @@ async function analyzeSource(file,dur){
 function updateItem(id, patch){const q=readJson(QUEUE_FILE,[]);const i=q.findIndex(x=>x.id===id);if(i>=0){q[i]={...q[i],...patch};writeJson(QUEUE_FILE,q);}}
 function updateState(patch){const s=readJson(STATE_FILE,{running:true,current:null,log:[]});writeJson(STATE_FILE,{...s,...patch});}
 function stopRequested(){return !!readJson(STATE_FILE,{}).stopRequested;}
-function emphasizeAss(text){const emphasis=new Set(findEmphasisWords(text).map(word=>word.toLocaleLowerCase("id-ID").replace(/[^a-z0-9%]/g,"")));return escAss(text).split(/(\s+)/).map(part=>{const normalized=part.toLocaleLowerCase("id-ID").replace(/[^a-z0-9%]/g,"");return emphasis.has(normalized)?`{\\c&H00D7FF&}${part}{\\c&HFFFFFF&}`:part;}).join("");}
+function emphasizeAss(text){return renderEmphasis(escAss(text),word=>`{\\c&H00D7FF&}${word}{\\c&HFFFFFF&}`);}
 function makeAss(file,dur,script,platform){const plan=planSubtitles({script,duration:dur,platform});const {preset}=plan;const content=`[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080

@@ -7,10 +7,7 @@ const PLATFORM_PRESETS = Object.freeze({
   youtube: Object.freeze({ id: "youtube", maxChars: 34, maxWords: 7, marginL: 90, marginR: 90, bodyMarginV: 250, ctaMarginV: 270 })
 });
 
-const EMPHASIS_WORDS = new Set([
-  "baru", "bonus", "diskon", "gratis", "hemat", "promo", "praktis", "wajib",
-  "murah", "premium", "cepat", "mudah", "sekarang", "terbatas"
-]);
+const { EMPHASIS_TERMS: EMPHASIS_WORDS, findEmphasisWords } = require("./caption-emphasis-engine");
 
 function getPreset(platform) {
   return PLATFORM_PRESETS[platform] || PLATFORM_PRESETS.tiktok;
@@ -73,13 +70,6 @@ function planSubtitles({ script = {}, duration = 6, platform = "tiktok" } = {}) 
   ].filter(cue => cue.end - cue.start >= 0.08);
 
   return { preset, duration: videoDuration, cues };
-}
-
-function findEmphasisWords(text) {
-  return String(text || "").split(/\s+/).filter(word => {
-    const normalized = word.toLocaleLowerCase("id-ID").replace(/[^a-z0-9%]/g, "");
-    return EMPHASIS_WORDS.has(normalized) || /^(?:rp)?\d[\d.,]*%?$/.test(normalized);
-  });
 }
 
 module.exports = { EMPHASIS_WORDS, PLATFORM_PRESETS, findEmphasisWords, getPreset, planSubtitles, splitReadable };
