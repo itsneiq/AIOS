@@ -1,6 +1,10 @@
 # AIOS Roadmap
 
-This roadmap tracks AIOS release preparation and future development direction.
+This roadmap tracks AIOS repository governance, release preparation, and product development direction.
+
+## Roadmap Documents
+
+- [AIOS Product Roadmap](docs/PRODUCT_ROADMAP.md) — desktop application, AI intelligence, smart editing, affiliate automation, and creative-studio development.
 
 ## v1.0.0 — Initial Official Release
 
