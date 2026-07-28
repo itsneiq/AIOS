@@ -9,7 +9,7 @@
   "scripts": {
     "start": "electron .",
     "start:web": "node server.js",
-    "check": "node --check server.js && node --check renderer.js && node --check electron/main.js && node --check electron/preload.js",
+    "check": "node --check server.js && node --check renderer.js && node --check electron/main.js && node --check electron/preload.js && node --experimental-vm-modules scripts/check-editor-modules.mjs",
     "dist": "electron-builder --win nsis --publish never",
     "version:patch": "npm version patch",
     "version:minor": "npm version minor",
@@ -36,6 +36,7 @@
       "public/**/*",
       "data/**/*",
       "templates/**/*",
+      "scripts/**/*",
       "server.js",
       "renderer.js",
       "package.json"
