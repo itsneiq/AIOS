@@ -3,12 +3,14 @@
 const DEFAULT_THRESHOLD=0.32;
 function clamp(value,min=0,max=100){return Math.max(min,Math.min(max,Number(value)||0))}
 function round(value,digits=3){const p=10**digits;return Math.round(Number(value)*p)/p}
-function sceneDetectionFilter(threshold=DEFAULT_THRESHOLD){const t=Math.max(0.05,Math.min(0.95,Number(threshold)||DEFAULT_THRESHOLD));return `select='gt(scene,${t})',showinfo`}
+function finiteNumber(value,fallback=0){const number=Number(value);return Number.isFinite(number)?number:fallback}
+function sceneDetectionFilter(threshold=DEFAULT_THRESHOLD){const t=Math.max(0.05,Math.min(0.95,finiteNumber(threshold,DEFAULT_THRESHOLD)));return `select='gt(scene,${t})',showinfo`}
 function parseSceneLog(log,duration=0){
-  const total=Math.max(0,Number(duration)||0);const cuts=[0];
-  for(const match of String(log||"").matchAll(/pts_time:([0-9.]+)/g)){const time=round(Number(match[1]));if(time>0&&(!total||time<total)&&time-cuts[cuts.length-1]>=0.25)cuts.push(time)}
+  const total=Math.max(0,finiteNumber(duration));const cuts=[0];
+  const timestamps=[...String(log||"").matchAll(/pts_time:([0-9]+(?:\.[0-9]+)?)/g)].map(match=>round(match[1])).sort((a,b)=>a-b);
+  for(const time of timestamps)if(time>0&&(!total||time<total)&&time-cuts[cuts.length-1]>=0.25)cuts.push(time);
   if(total>0&&total-cuts[cuts.length-1]>=0.1)cuts.push(round(total));
-  if(cuts.length===1)cuts.push(round(total||0));
+  if(cuts.length===1&&total>0)cuts.push(round(total));
   return cuts.slice(0,-1).map((start,index)=>({index,start,end:cuts[index+1],duration:round(cuts[index+1]-start)}));
 }
 function qualityScore(metrics={}){
@@ -25,10 +27,11 @@ function classifyScene(scene={}){
 }
 function cameraType(scene={}){const detail=clamp(scene.detail??50);return detail>=75?"close_up":detail>=45?"medium":"wide"}
 function analyzeScenes({scenes=[],duration=0,metrics=[]}={}){
-  const source=scenes.length?scenes:[{index:0,start:0,end:Number(duration)||0,duration:Number(duration)||0}];
-  const analyzed=source.map((scene,index)=>{const m={...(metrics[index]||{}),...scene};const quality=qualityScore(m);return {...scene,index,type:classifyScene(m),camera:cameraType(m),quality,motion:clamp(m.motion??50),usable:quality>=45&&Number(scene.duration)>=0.35}});
+  const total=Math.max(0,finiteNumber(duration));
+  const source=scenes.length?scenes:(total>0?[{index:0,start:0,end:total,duration:total}]:[]);
+  const analyzed=source.map((scene,index)=>{const start=Math.max(0,finiteNumber(scene.start));const end=Math.max(start,finiteNumber(scene.end,start));const normalized={...scene,index,start:round(start),end:round(end),duration:round(end-start)};const m={...(metrics[index]||{}),...normalized};const quality=qualityScore(m);return {...normalized,type:classifyScene(m),camera:cameraType(m),quality,motion:clamp(m.motion??50),usable:quality>=45&&normalized.duration>=0.35}});
   const usable=analyzed.filter(scene=>scene.usable).sort((a,b)=>b.quality-a.quality||a.index-b.index);
-  return {duration:round(duration||analyzed.at(-1)?.end||0),sceneCount:analyzed.length,usableCount:usable.length,bestScene:usable[0]?.index??null,scenes:analyzed};
+  return {duration:round(total||analyzed.at(-1)?.end||0),sceneCount:analyzed.length,usableCount:usable.length,bestScene:usable[0]?.index??null,scenes:analyzed};
 }
 function findNearDuplicates(scenes=[],tolerance=6){const duplicates=[];for(let i=0;i<scenes.length;i++)for(let j=i+1;j<scenes.length;j++){const a=scenes[i],b=scenes[j];if(a.type===b.type&&a.camera===b.camera&&Math.abs((a.quality||0)-(b.quality||0))<=tolerance)duplicates.push([a.index,b.index])}return duplicates}
 module.exports={DEFAULT_THRESHOLD,analyzeScenes,cameraType,classifyScene,findNearDuplicates,parseSceneLog,qualityScore,sceneDetectionFilter};
