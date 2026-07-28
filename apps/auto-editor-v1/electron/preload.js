@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld("aiosDesktop", {
   openPath: target => ipcRenderer.invoke("open-path", target),
   getFilePath: file => webUtils.getPathForFile(file),
   exportTimeline: manifest => ipcRenderer.invoke("export-timeline", manifest),
+  getLastExportManifest: () => ipcRenderer.invoke("get-last-export-manifest"),
   cancelExport: () => ipcRenderer.invoke("cancel-export"),
   onExportProgress: callback => {
     const listener=(_event,payload)=>callback(payload);
