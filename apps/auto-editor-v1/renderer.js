@@ -5,6 +5,7 @@ const path = require("path");
 const { spawn } = require("child_process");
 const { synthesizeVoice } = require("./voice-engine");
 const { resolveScript } = require("./script-engine");
+const { findEmphasisWords, planSubtitles } = require("./subtitle-planner");
 
 const ROOT = __dirname;
 const DATA = process.env.AIOS_DATA_DIR || path.join(ROOT, "data");
@@ -48,11 +49,16 @@ function updateState(patch){
   writeJson(STATE_FILE,{...s,...patch});
 }
 function stopRequested(){ return !!readJson(STATE_FILE,{}).stopRequested; }
-function makeAss(file,dur,script){
-  const hookEnd=Math.min(1.8,dur*0.3);
-  const benefitStart=hookEnd;
-  const benefitEnd=Math.max(benefitStart+0.5, dur-1.4);
-  const ctaStart=Math.max(0,dur-1.4);
+function emphasizeAss(text){
+  const emphasis=new Set(findEmphasisWords(text).map(word=>word.toLocaleLowerCase("id-ID").replace(/[^a-z0-9%]/g,"")));
+  return escAss(text).split(/(\s+)/).map(part=>{
+    const normalized=part.toLocaleLowerCase("id-ID").replace(/[^a-z0-9%]/g,"");
+    return emphasis.has(normalized)?`{\\c&H00D7FF&}${part}{\\c&HFFFFFF&}`:part;
+  }).join("");
+}
+function makeAss(file,dur,script,platform){
+  const plan=planSubtitles({script,duration:dur,platform});
+  const {preset}=plan;
   const content=`[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
@@ -62,15 +68,13 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
-Style: Hook,Arial,66,&H00FFFFFF,&H000000FF,&H00101010,&H78000000,-1,0,0,0,100,100,0,0,1,4,2,8,70,70,120,1
-Style: Body,Arial,50,&H00FFFFFF,&H000000FF,&H00101010,&H78000000,-1,0,0,0,100,100,0,0,1,3,1,2,70,70,165,1
-Style: CTA,Arial,55,&H00FFFFFF,&H000000FF,&H00101010,&H90000000,-1,0,0,0,100,100,0,0,3,2,0,2,70,70,140,1
+Style: Hook,Arial,66,&H00FFFFFF,&H000000FF,&H00101010,&H78000000,-1,0,0,0,100,100,0,0,1,4,2,8,${preset.marginL},${preset.marginR},120,1
+Style: Body,Arial,50,&H00FFFFFF,&H000000FF,&H00101010,&H78000000,-1,0,0,0,100,100,0,0,1,3,1,2,${preset.marginL},${preset.marginR},${preset.bodyMarginV},1
+Style: CTA,Arial,55,&H00FFFFFF,&H000000FF,&H00101010,&H90000000,-1,0,0,0,100,100,0,0,3,2,0,2,${preset.marginL},${preset.marginR},${preset.ctaMarginV},1
 
 [Events]
 Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
-Dialogue: 0,${assTime(0)},${assTime(hookEnd)},Hook,,0,0,0,,${escAss(script.hook)}
-Dialogue: 0,${assTime(benefitStart)},${assTime(benefitEnd)},Body,,0,0,0,,${escAss(script.benefit)}
-Dialogue: 0,${assTime(ctaStart)},${assTime(dur)},CTA,,0,0,0,,${escAss(script.cta)}
+${plan.cues.map(cue=>`Dialogue: 0,${assTime(cue.start)},${assTime(cue.end)},${cue.role === "hook" ? "Hook" : cue.role === "cta" ? "CTA" : "Body"},,0,0,0,,${emphasizeAss(cue.text)}`).join("\n")}
 `;
   fs.writeFileSync(file,content,"utf8");
 }
@@ -85,7 +89,7 @@ async function render(item,index,cfg,variant){
   const token=`${Date.now()}-${index}-${variant}`;
   const ass=path.join(WORK,`${token}.ass`);
   const wav=path.join(WORK,`${token}.${cfg.voiceProvider === "windows" ? "wav" : "mp3"}`);
-  makeAss(ass,dur,script);
+  makeAss(ass,dur,script,cfg.subtitlePreset || cfg.platform);
 
   const outDir=cfg.outputFolder || path.join(path.dirname(item.source),"AIOS_Output");
   fs.mkdirSync(outDir,{recursive:true});
