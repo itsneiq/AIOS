@@ -10,7 +10,7 @@ const { resolveAppRoot, createStartupLogger, formatStartupFailure } = require(".
 
 const PORT = 4174;
 let mainWindow;
-let serverProcess;
+let serverHandle;
 let exportController;
 let lastExportManifest = null;
 let startupState = null;
@@ -20,9 +20,6 @@ function waitForServer(url, timeoutMs = 15000) {
   return new Promise((resolve, reject) => {
     const probe = () => {
       if (startupState?.spawnError) return reject(startupState.spawnError);
-      if (startupState?.exitCode !== undefined && startupState.exitCode !== null) {
-        return reject(new Error(`AIOS server berhenti sebelum siap (exit ${startupState.exitCode}).`));
-      }
       const req = http.get(url, res => { res.resume(); resolve(); });
       req.on("error", () => {
         if (Date.now() - started > timeoutMs) return reject(new Error("AIOS server tidak merespons dalam 15 detik."));
@@ -50,13 +47,14 @@ function manifestPath() { return path.join(runtimeDir(), "last-export-manifest.j
 function saveLastManifest(manifest) { lastExportManifest = structuredClone(manifest); fs.writeFileSync(manifestPath(), JSON.stringify(lastExportManifest, null, 2)); }
 function readLastManifest() { if (lastExportManifest) return structuredClone(lastExportManifest); try { return JSON.parse(fs.readFileSync(manifestPath(), "utf8")); } catch { return null; } }
 
-function startLocalServer() {
+async function startLocalServer() {
+  if (serverHandle?.listening) return startupState;
   const appRoot = resolveAppRoot({ isPackaged: app.isPackaged, appPath: app.getAppPath(), dirname: __dirname });
   const serverPath = path.join(appRoot, "server.js");
   const dataDir = runtimeDir();
   const logger = createStartupLogger(path.join(dataDir, "logs"));
-  startupState = { appRoot, serverPath, logPath: logger.logPath, stderr: "", exitCode: null, spawnError: null };
-  logger.info(`Starting AIOS server. packaged=${app.isPackaged} appRoot=${appRoot} serverPath=${serverPath}`);
+  startupState = { appRoot, serverPath, logPath: logger.logPath, stderr: "", exitCode: null, spawnError: null, mode: "in-process" };
+  logger.info(`Starting AIOS server in-process. packaged=${app.isPackaged} appRoot=${appRoot} serverPath=${serverPath}`);
 
   if (!fs.existsSync(serverPath)) {
     const error = new Error(`server.js tidak ditemukan di ${serverPath}`);
@@ -66,25 +64,34 @@ function startLocalServer() {
   }
 
   try {
-    serverProcess = spawn(process.execPath, [serverPath], {
-      cwd: appRoot,
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", PORT: String(PORT), AIOS_DATA_DIR: dataDir },
-      windowsHide: true,
-      stdio: "pipe"
+    process.env.PORT = String(PORT);
+    process.env.AIOS_DATA_DIR = dataDir;
+    const { startServer } = require(serverPath);
+    if (typeof startServer !== "function") throw new Error("server.js tidak mengekspor startServer().");
+    serverHandle = await startServer({ port: PORT, host: "127.0.0.1" });
+    logger.info(`AIOS server ready in-process on port ${PORT}`);
+    serverHandle.on("error", error => {
+      startupState.stderr += `${error.stack || error.message}\n`;
+      logger.error(error.stack || error.message);
     });
-    serverProcess.stdout.on("data", data => { const text = data.toString(); logger.info(text); console.log(`[AIOS] ${text}`); });
-    serverProcess.stderr.on("data", data => { const text = data.toString(); startupState.stderr += text; logger.error(text); console.error(`[AIOS] ${text}`); });
-    serverProcess.on("error", error => { startupState.spawnError = error; logger.error(`Spawn failed: ${error.stack || error.message}`); });
-    serverProcess.on("exit", code => { startupState.exitCode = code; logger.error(`Server exited with code ${code}`); });
+    serverHandle.on("close", () => logger.info("AIOS server closed"));
   } catch (error) {
     startupState.spawnError = error;
-    logger.error(`Spawn exception: ${error.stack || error.message}`);
+    startupState.stderr += `${error.stack || error.message}\n`;
+    logger.error(`In-process startup failed: ${error.stack || error.message}`);
   }
   return startupState;
 }
 
+async function closeLocalServer() {
+  if (!serverHandle) return;
+  const current = serverHandle;
+  serverHandle = null;
+  await new Promise(resolve => current.close(() => resolve()));
+}
+
 async function createWindow() {
-  const startup = startLocalServer();
+  const startup = await startLocalServer();
   mainWindow = new BrowserWindow({ width: 1440, height: 920, minWidth: 1100, minHeight: 700, title: "AIOS Auto Editor", backgroundColor: "#0f1115", autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, nodeIntegration: false } });
   try {
     await waitForServer(`http://127.0.0.1:${PORT}`);
@@ -108,6 +115,12 @@ ipcMain.handle("export-timeline", async (_event, manifest) => { if (exportContro
 ipcMain.handle("cancel-export", async () => { exportController?.abort(); return true; });
 
 app.whenReady().then(createWindow);
-app.on("window-all-closed", () => { stopProcessTree(serverProcess); if (process.platform !== "darwin") app.quit(); });
-app.on("before-quit", () => { exportController?.abort(); stopProcessTree(serverProcess); });
+app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
+app.on("before-quit", event => {
+  exportController?.abort();
+  if (serverHandle) {
+    event.preventDefault();
+    closeLocalServer().finally(() => app.exit(0));
+  }
+});
 app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
