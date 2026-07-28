@@ -1,0 +1,17 @@
+"use strict";
+const assert=require("node:assert/strict");
+const {analyzeScenes,findNearDuplicates,parseSceneLog,qualityScore,sceneDetectionFilter}=require("../scene-analyzer");
+assert.equal(sceneDetectionFilter(0.4),"select='gt(scene,0.4)',showinfo");
+const parsed=parseSceneLog("n:1 pts_time:1.25\nn:2 pts_time:3.5",5);
+assert.deepEqual(parsed.map(x=>[x.start,x.end]),[[0,1.25],[1.25,3.5],[3.5,5]]);
+assert.equal(qualityScore({blur:80,exposure:70,motion:60,stability:90}),77);
+const analysis=analyzeScenes({duration:5,scenes:parsed,metrics:[{detail:80,blur:90,exposure:85,motion:30,stability:90},{faces:1,detail:30,blur:70,exposure:70,motion:40,stability:70},{detail:40,blur:20,exposure:30,motion:80,stability:20}]});
+assert.equal(analysis.sceneCount,3);
+assert.equal(analysis.scenes[0].type,"product_detail");
+assert.equal(analysis.scenes[0].camera,"close_up");
+assert.equal(analysis.scenes[1].type,"talking_head");
+assert.equal(analysis.bestScene,0);
+assert.equal(analysis.scenes[2].usable,false);
+assert.deepEqual(findNearDuplicates([{index:0,type:"general",camera:"medium",quality:70},{index:1,type:"general",camera:"medium",quality:74},{index:2,type:"lifestyle",camera:"wide",quality:72}]),[[0,1]]);
+assert.deepEqual(analysis,analyzeScenes({duration:5,scenes:parsed,metrics:[{detail:80,blur:90,exposure:85,motion:30,stability:90},{faces:1,detail:30,blur:70,exposure:70,motion:40,stability:70},{detail:40,blur:20,exposure:30,motion:80,stability:20}]}));
+console.log("scene analyzer tests passed");
