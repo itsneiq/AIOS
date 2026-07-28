@@ -2,6 +2,7 @@
   "inputFolder": "",
   "outputFolder": "",
   "platform": "tiktok",
+  "subtitlePreset": "tiktok",
   "style": "ugc",
   "voiceEnabled": true,
   "musicEnabled": false,
