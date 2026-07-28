@@ -1,8 +1,8 @@
 const $=id=>document.getElementById(id);
-const fields=["inputFolder","outputFolder","platform","style","variants","filenamePattern","hook","benefit","cta","voiceEnabled","voiceProvider","voiceName","voiceRate","voiceFallback","musicEnabled","musicFile"];
+const fields=["inputFolder","outputFolder","platform","style","variants","filenamePattern","scriptMode","scriptAngle","hook","benefit","cta","voiceEnabled","voiceProvider","voiceName","voiceRate","voiceFallback","musicEnabled","musicFile"];
 let timer;
 
-function toast(msg){$("toast").textContent=msg;$("toast").classList.add("show");setTimeout(()=>$(("toast")).classList.remove("show"),2600)}
+function toast(msg){$("toast").textContent=msg;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),2600)}
 async function api(url,options={}){const r=await fetch(url,{headers:{"Content-Type":"application/json"},...options});let j={};try{j=await r.json()}catch{}if(!r.ok)throw new Error(j.error||"Request gagal");return j}
 function configFromUI(){const x={};for(const f of fields){const e=$(f);x[f]=e.type==="checkbox"?e.checked:e.type==="number"?Number(e.value):e.value}return x}
 function setBusy(running){$("startBtn").classList.toggle("hidden",running);$("stopBtn").classList.toggle("hidden",!running);$("scanBtn").disabled=running;$("chooseInputBtn").disabled=running;$("chooseOutputBtn").disabled=running}

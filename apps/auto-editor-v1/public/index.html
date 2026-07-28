@@ -38,8 +38,13 @@
       </div>
     </section>
     <section class="card">
-      <h2>3. Naskah Otomatis</h2>
-      <div class="grid three"><div><label>Hook</label><textarea id="hook"></textarea></div><div><label>Benefit</label><textarea id="benefit"></textarea></div><div><label>CTA</label><textarea id="cta"></textarea></div></div>
+      <h2>3. AI Script Engine</h2>
+      <div class="grid two compact">
+        <div><label>Mode naskah</label><select id="scriptMode"><option value="auto">Otomatis per video/varian</option><option value="manual">Manual untuk seluruh batch</option></select></div>
+        <div><label>Marketing angle</label><select id="scriptAngle"><option value="balanced">Balanced</option><option value="curiosity">Curiosity</option><option value="problem_solution">Problem–Solution</option><option value="fomo">FOMO</option></select></div>
+      </div>
+      <p class="hint">Mode otomatis memutar Hook, Benefit, dan CTA secara deterministik agar video dalam satu batch tidak memakai naskah yang sama.</p>
+      <div class="grid three"><div><label>Hook manual</label><textarea id="hook"></textarea></div><div><label>Benefit manual</label><textarea id="benefit"></textarea></div><div><label>CTA manual</label><textarea id="cta"></textarea></div></div>
     </section>
     <section class="grid two">
       <div class="card">

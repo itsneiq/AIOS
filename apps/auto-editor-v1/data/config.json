@@ -8,6 +8,8 @@
   "musicFile": "",
   "volumeMusic": 0.12,
   "filenamePattern": "{base}_AIOS_{index}_v{variant}",
+  "scriptMode": "auto",
+  "scriptAngle": "balanced",
   "hook": "Wajib lihat detail produk ini!",
   "benefit": "Desain menarik, detail rapi, dan cocok dipakai sehari-hari.",
   "cta": "Klik keranjang kuning dan cek promonya sekarang.",
