@@ -14,51 +14,24 @@
     <div class="status-card"><div class="dot" id="healthDot"></div><div><b id="healthText">Memeriksa sistem…</b><span id="healthSub"></span></div></div>
   </aside>
   <main>
-    <header>
-      <div><h1>Batch Video Editor</h1><p>Pilih folder, scan video, lalu jalankan produksi.</p></div>
-      <div class="actions"><button class="ghost" id="saveBtn">Simpan</button><button class="primary" id="startBtn">▶ Start Production</button><button class="danger hidden" id="stopBtn">■ Stop</button></div>
-    </header>
+    <header><div><h1>Batch Video Editor</h1><p>Pilih folder, scan video, lalu jalankan produksi.</p></div><div class="actions"><button class="ghost" id="saveBtn">Simpan</button><button class="primary" id="startBtn">▶ Start Production</button><button class="danger hidden" id="stopBtn">■ Stop</button></div></header>
     <section class="grid two">
-      <div class="card">
-        <h2>1. Folder Produksi</h2>
-        <label>Folder video mentah</label>
-        <div class="row"><input id="inputFolder" placeholder="Pilih folder video"><button id="chooseInputBtn">Pilih</button><button id="scanBtn">Scan</button></div>
-        <label>Folder output</label>
-        <div class="row"><input id="outputFolder" placeholder="Pilih folder output"><button id="chooseOutputBtn">Pilih</button><button id="openOutputBtn">Buka</button></div>
-        <p class="hint">Tombol pemilih folder tersedia saat AIOS dijalankan sebagai aplikasi desktop.</p>
-      </div>
-      <div class="card">
-        <h2>2. Format Output</h2>
-        <div class="grid two compact">
-          <div><label>Platform</label><select id="platform"><option value="tiktok">TikTok 9:16</option><option value="shopee">Shopee Video 9:16</option><option value="meta">Meta Reels 9:16</option></select></div>
-          <div><label>Gaya</label><select id="style"><option value="ugc">UGC Natural</option><option value="hard">Hard Selling</option><option value="clean">Clean Premium</option></select></div>
-          <div><label>Jumlah varian/video</label><input id="variants" type="number" min="1" max="5" value="1"></div>
-          <div><label>Pola nama file</label><input id="filenamePattern" value="{base}_AIOS_{index}"></div>
-        </div>
-      </div>
+      <div class="card"><h2>1. Folder Produksi</h2><label>Folder video mentah</label><div class="row"><input id="inputFolder" placeholder="Pilih folder video"><button id="chooseInputBtn">Pilih</button><button id="scanBtn">Scan</button></div><label>Folder output</label><div class="row"><input id="outputFolder" placeholder="Pilih folder output"><button id="chooseOutputBtn">Pilih</button><button id="openOutputBtn">Buka</button></div><p class="hint">Tombol pemilih folder tersedia saat AIOS dijalankan sebagai aplikasi desktop.</p></div>
+      <div class="card"><h2>2. Format Output</h2><div class="grid two compact"><div><label>Platform</label><select id="platform"><option value="tiktok">TikTok 9:16</option><option value="shopee">Shopee Video 9:16</option><option value="meta">Meta Reels 9:16</option></select></div><div><label>Gaya</label><select id="style"><option value="ugc">UGC Natural</option><option value="hard">Hard Selling</option><option value="clean">Clean Premium</option></select></div><div><label>Jumlah varian/video</label><input id="variants" type="number" min="1" max="5" value="1"></div><div><label>Pola nama file</label><input id="filenamePattern" value="{base}_AIOS_{index}"></div></div></div>
     </section>
     <section class="card">
-      <h2>3. AI Script Engine</h2>
+      <h2>3. Marketing Analyzer & AI Script Engine</h2>
       <div class="grid two compact">
+        <div><label>Nama produk (opsional)</label><input id="productName" placeholder="Contoh: Tas wanita kanvas"></div>
+        <div><label>Kategori produk</label><select id="productCategory"><option value="">Deteksi otomatis</option><option value="fashion">Fashion</option><option value="beauty">Beauty</option><option value="gadget">Gadget</option><option value="kitchen">Kitchen</option><option value="home">Home</option><option value="general">General</option></select></div>
         <div><label>Mode naskah</label><select id="scriptMode"><option value="auto">Otomatis per video/varian</option><option value="manual">Manual untuk seluruh batch</option></select></div>
-        <div><label>Marketing angle</label><select id="scriptAngle"><option value="balanced">Balanced</option><option value="curiosity">Curiosity</option><option value="problem_solution">Problem–Solution</option><option value="fomo">FOMO</option></select></div>
+        <div><label>Marketing angle</label><select id="scriptAngle"><option value="auto">Analisis otomatis</option><option value="balanced">Balanced</option><option value="curiosity">Curiosity</option><option value="problem_solution">Problem–Solution</option><option value="fomo">FOMO</option></select></div>
       </div>
-      <p class="hint">Mode otomatis memutar Hook, Benefit, dan CTA secara deterministik agar video dalam satu batch tidak memakai naskah yang sama.</p>
+      <p class="hint">Analisis otomatis membaca nama produk, kategori, nama file, platform, dan gaya untuk memilih strategi naskah yang paling relevan.</p>
       <div class="grid three"><div><label>Hook manual</label><textarea id="hook"></textarea></div><div><label>Benefit manual</label><textarea id="benefit"></textarea></div><div><label>CTA manual</label><textarea id="cta"></textarea></div></div>
     </section>
     <section class="grid two">
-      <div class="card">
-        <h2>4. Audio</h2>
-        <label class="check"><input type="checkbox" id="voiceEnabled"><span>Voice-over Bahasa Indonesia</span></label>
-        <div class="grid two compact">
-          <div><label>Provider suara</label><select id="voiceProvider"><option value="edge">Edge Neural TTS (disarankan)</option><option value="windows">Windows Speech (offline)</option></select></div>
-          <div><label>Suara Indonesia</label><select id="voiceName"><option value="id-ID-GadisNeural">Gadis — perempuan</option><option value="id-ID-ArdiNeural">Ardi — laki-laki</option></select></div>
-        </div>
-        <label>Kecepatan suara (-50% sampai +100%)</label><input id="voiceRate" type="number" min="-50" max="100" value="0">
-        <label class="check"><input type="checkbox" id="voiceFallback"><span>Gunakan Windows Speech jika Edge TTS gagal</span></label>
-        <label class="check"><input type="checkbox" id="musicEnabled"><span>Tambahkan musik latar</span></label>
-        <div class="row"><input id="musicFile" placeholder="Pilih file musik"><button id="chooseMusicBtn">Pilih</button></div>
-      </div>
+      <div class="card"><h2>4. Audio</h2><label class="check"><input type="checkbox" id="voiceEnabled"><span>Voice-over Bahasa Indonesia</span></label><div class="grid two compact"><div><label>Provider suara</label><select id="voiceProvider"><option value="edge">Edge Neural TTS (disarankan)</option><option value="windows">Windows Speech (offline)</option></select></div><div><label>Suara Indonesia</label><select id="voiceName"><option value="id-ID-GadisNeural">Gadis — perempuan</option><option value="id-ID-ArdiNeural">Ardi — laki-laki</option></select></div></div><label>Kecepatan suara (-50% sampai +100%)</label><input id="voiceRate" type="number" min="-50" max="100" value="0"><label class="check"><input type="checkbox" id="voiceFallback"><span>Gunakan Windows Speech jika Edge TTS gagal</span></label><label class="check"><input type="checkbox" id="musicEnabled"><span>Tambahkan musik latar</span></label><div class="row"><input id="musicFile" placeholder="Pilih file musik"><button id="chooseMusicBtn">Pilih</button></div></div>
       <div class="card"><h2>5. Ringkasan</h2><div class="stats"><div><b id="total">0</b><span>Total video</span></div><div><b id="done">0</b><span>Selesai</span></div><div><b id="failed">0</b><span>Gagal</span></div><div><b id="progress">0%</b><span>Progress</span></div></div></div>
     </section>
     <section class="card"><div class="section-head"><div><h2>Production Queue</h2><p id="current">Belum ada produksi aktif.</p></div><button class="ghost" id="resetBtn">Reset Status</button></div><div class="table-wrap"><table><thead><tr><th>File</th><th>Status</th><th>Progress</th><th>Output</th></tr></thead><tbody id="queue"></tbody></table></div></section>
