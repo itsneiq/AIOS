@@ -27,6 +27,9 @@ Thumbs.db
 /build/
 /exports/
 
+# JavaScript dependencies
+node_modules/
+
 # Environment files
 .env
 .env.*
