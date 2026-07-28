@@ -10,28 +10,45 @@ function duplicateGroups(scenes,duplicates){
   return new Map(scenes.map(scene=>[scene.index,find(scene.index)]));
 }
 
+function rankedScenes(scenes){return [...scenes].sort((a,b)=>(b.quality||0)-(a.quality||0)||a.index-b.index)}
+
 function allocateScenes({beats=[],scenes=[],duplicates=[],duplicateMode="STRICT",reusePolicy="FALLBACK"}={}){
   const usable=scenes.filter(scene=>scene.usable!==false&&Number(scene.duration??scene.end-scene.start)>EPSILON).map(scene=>{
     const duration=Math.max(0,Number(scene.duration??scene.end-scene.start)||0);
-    return {...scene,start:Number(scene.start)||0,duration,allocated:0,remaining:duration};
+    return {...scene,start:Number(scene.start)||0,duration,allocated:0,remaining:duration,reuseCursor:0,reuseCount:0};
   });
   const groups=duplicateGroups(usable,duplicates),usedGroups=new Set();
   let uniqueAllocated=0,requestedDuration=0;
   const allocations=beats.map((beat,beatIndex)=>{
     const requested=Math.max(0,Number(beat.duration??(beat.end-beat.start))||0);requestedDuration+=requested;
-    const available=usable.filter(scene=>scene.remaining>EPSILON&&!(duplicateMode==="STRICT"&&usedGroups.has(groups.get(scene.index))&&!scene.allocated));
-    available.sort((a,b)=>(b.quality||0)-(a.quality||0)||a.index-b.index);
-    let scene=available.find(candidate=>candidate.allocated>EPSILON)||available[0],reused=false;
-    if(!scene&&reusePolicy!=="FORBID"&&usable.length){scene=[...usable].sort((a,b)=>(b.quality||0)-(a.quality||0)||a.index-b.index)[beatIndex%usable.length];reused=true}
-    if(!scene)return {...beat,requestedDuration:round(requested),allocatedDuration:0,sceneSelection:null};
-    const amount=round(Math.min(requested,reused?scene.duration:scene.remaining));
-    const sourceStart=round(scene.start+(reused?0:scene.allocated));
-    const sourceEnd=round(sourceStart+amount);
-    if(!reused){scene.allocated=round(scene.allocated+amount);scene.remaining=round(Math.max(0,scene.duration-scene.allocated));uniqueAllocated+=amount;usedGroups.add(groups.get(scene.index));}
-    return {...beat,requestedDuration:round(requested),allocatedDuration:amount,sceneSelection:{sceneIndex:scene.index,sourceStart,sourceEnd,allocatedStart:sourceStart,allocatedEnd:sourceEnd,remaining:scene.remaining,reused}};
+    let needed=requested;
+    const segments=[];
+    while(needed>EPSILON){
+      const available=usable.filter(scene=>scene.remaining>EPSILON&&!(duplicateMode==="STRICT"&&usedGroups.has(groups.get(scene.index))&&scene.allocated<=EPSILON));
+      const ranked=rankedScenes(available);
+      const scene=ranked.find(candidate=>candidate.allocated>EPSILON)||ranked[0];
+      if(!scene)break;
+      const amount=round(Math.min(needed,scene.remaining));
+      const sourceStart=round(scene.start+scene.allocated),sourceEnd=round(sourceStart+amount);
+      scene.allocated=round(scene.allocated+amount);scene.remaining=round(Math.max(0,scene.duration-scene.allocated));
+      uniqueAllocated=round(uniqueAllocated+amount);needed=round(Math.max(0,needed-amount));usedGroups.add(groups.get(scene.index));
+      segments.push({sceneIndex:scene.index,sourceStart,sourceEnd,allocatedStart:sourceStart,allocatedEnd:sourceEnd,remaining:scene.remaining,reused:false});
+    }
+    while(needed>EPSILON&&reusePolicy!=="FORBID"&&usable.length){
+      const ranked=rankedScenes(usable).sort((a,b)=>a.reuseCount-b.reuseCount||(b.quality||0)-(a.quality||0)||a.index-b.index);
+      const scene=ranked[beatIndex%ranked.length];
+      const available=Math.max(EPSILON,scene.duration-scene.reuseCursor);
+      const amount=round(Math.min(needed,available));
+      const sourceStart=round(scene.start+scene.reuseCursor),sourceEnd=round(sourceStart+amount);
+      scene.reuseCursor=round((scene.reuseCursor+amount)>=scene.duration-EPSILON?0:scene.reuseCursor+amount);scene.reuseCount+=1;needed=round(Math.max(0,needed-amount));
+      segments.push({sceneIndex:scene.index,sourceStart,sourceEnd,allocatedStart:sourceStart,allocatedEnd:sourceEnd,remaining:scene.remaining,reused:true});
+    }
+    const allocatedDuration=round(requested-needed);
+    return {...beat,requestedDuration:round(requested),allocatedDuration,segments,sceneSelection:segments.length===1?segments[0]:segments.length?{segments,sourceStart:segments[0].sourceStart,sourceEnd:segments.at(-1).sourceEnd,reused:segments.some(segment=>segment.reused)}:null};
   });
-  const budgets=usable.map(scene=>({sceneIndex:scene.index,duration:round(scene.duration),allocated:round(scene.allocated),remaining:round(scene.remaining)}));
-  return {beats:allocations,budgets,requestedDuration:round(requestedDuration),allocatedDuration:round(uniqueAllocated),coverage:requestedDuration?round(Math.min(1,uniqueAllocated/requestedDuration)):1};
+  const budgets=usable.map(scene=>({sceneIndex:scene.index,duration:round(scene.duration),allocated:round(scene.allocated),remaining:round(scene.remaining),reuseCount:scene.reuseCount}));
+  const renderedDuration=round(allocations.reduce((total,beat)=>total+beat.allocatedDuration,0));
+  return {beats:allocations,budgets,requestedDuration:round(requestedDuration),allocatedDuration:round(uniqueAllocated),renderedDuration,coverage:requestedDuration?round(Math.min(1,uniqueAllocated/requestedDuration)):1};
 }
 
 module.exports={allocateScenes};
