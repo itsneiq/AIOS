@@ -9,7 +9,7 @@
   "scripts": {
     "start": "electron .",
     "start:web": "node server.js",
-    "test": "node tests/export-manifest.test.mjs && node tests/relink.test.mjs && node tests/export-diagnostics.test.cjs",
+    "test": "node tests/export-manifest.test.mjs && node tests/relink.test.mjs && node tests/export-diagnostics.test.cjs && node tests/performance.test.mjs",
     "check": "node --check server.js && node --check renderer.js && node --check electron/main.js && node --check electron/preload.js && node --check electron/export-engine.js && node --experimental-vm-modules scripts/check-editor-modules.mjs && npm test",
     "dist": "electron-builder --win nsis --publish never",
     "version:patch": "npm version patch",

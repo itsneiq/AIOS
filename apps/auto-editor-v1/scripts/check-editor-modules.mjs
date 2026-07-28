@@ -13,7 +13,8 @@ const files=[
   "public/editor/export-manifest.js",
   "public/editor/export-ui.js",
   "public/editor/autosave.js",
-  "public/editor/relink.js"
+  "public/editor/relink.js",
+  "public/editor/performance.js"
 ];
 
 let failed=false;
