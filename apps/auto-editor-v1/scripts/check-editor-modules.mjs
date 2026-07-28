@@ -9,7 +9,9 @@ const files=[
   "public/editor/state.js",
   "public/editor/history.js",
   "public/editor/media.js",
-  "public/editor/project.js"
+  "public/editor/project.js",
+  "public/editor/export-manifest.js",
+  "public/editor/export-ui.js"
 ];
 
 let failed=false;
