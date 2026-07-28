@@ -1,0 +1,11 @@
+"use strict";
+const fs=require("fs"),path=require("path");
+const {spawn}=require("child_process");
+const INDONESIAN_EDGE_VOICES=Object.freeze([{id:"id-ID-GadisNeural",name:"Gadis",gender:"Perempuan"},{id:"id-ID-ArdiNeural",name:"Ardi",gender:"Laki-laki"}]);
+function run(command,args){return new Promise((resolve,reject)=>{const child=spawn(command,args,{shell:false,windowsHide:true});let stderr="";child.stderr?.on("data",d=>stderr+=d);child.on("error",reject);child.on("close",code=>code===0?resolve():reject(new Error(`${command} exited ${code}: ${stderr.trim()}`)))})}
+function edgeRate(value){const rate=Math.max(-50,Math.min(100,Number(value)||0));return `${rate>=0?"+":""}${rate}%`}
+function validateEdgeVoice(voice){return INDONESIAN_EDGE_VOICES.some(v=>v.id===voice)?voice:INDONESIAN_EDGE_VOICES[0].id}
+async function synthesizeEdge({text,output,voice,rate},execute=run){await execute("edge-tts",["--voice",validateEdgeVoice(voice),"--rate",edgeRate(rate),"--text",String(text),"--write-media",output]);if(!fs.existsSync(output)||fs.statSync(output).size===0)throw new Error("Edge TTS tidak menghasilkan audio.")}
+async function synthesizeWindows({text,output,rate,workDir},execute=run){const ps1=path.join(workDir,`tts-${Date.now()}-${Math.random().toString(36).slice(2)}.ps1`),windowsRate=Math.max(-5,Math.min(5,Math.round((Number(rate)||0)/10)));const script=`Add-Type -AssemblyName System.Speech\n$s = New-Object System.Speech.Synthesis.SpeechSynthesizer\n$s.Rate = ${windowsRate}\n$s.SetOutputToWaveFile('${output.replace(/'/g,"''")}')\n$s.Speak('${String(text).replace(/'/g,"''")}')\n$s.Dispose()\n`;fs.writeFileSync(ps1,script,"utf8");try{await execute("powershell",["-NoProfile","-ExecutionPolicy","Bypass","-File",ps1])}finally{try{fs.unlinkSync(ps1)}catch{}}}
+async function synthesizeVoice(options,execute=run){const provider=options.provider==="windows"?"windows":"edge";try{provider==="windows"?await synthesizeWindows(options,execute):await synthesizeEdge(options,execute);return provider}catch(error){if(provider!=="edge"||options.fallback===false)throw error;await synthesizeWindows(options,execute);return "windows"}}
+module.exports={INDONESIAN_EDGE_VOICES,edgeRate,synthesizeEdge,synthesizeWindows,synthesizeVoice,validateEdgeVoice};

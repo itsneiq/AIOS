@@ -44,8 +44,13 @@
     <section class="grid two">
       <div class="card">
         <h2>4. Audio</h2>
-        <label class="check"><input type="checkbox" id="voiceEnabled"><span>Voice-over Bahasa Indonesia memakai suara Windows</span></label>
-        <label>Kecepatan suara (-5 sampai 5)</label><input id="voiceRate" type="number" min="-5" max="5" value="0">
+        <label class="check"><input type="checkbox" id="voiceEnabled"><span>Voice-over Bahasa Indonesia</span></label>
+        <div class="grid two compact">
+          <div><label>Provider suara</label><select id="voiceProvider"><option value="edge">Edge Neural TTS (disarankan)</option><option value="windows">Windows Speech (offline)</option></select></div>
+          <div><label>Suara Indonesia</label><select id="voiceName"><option value="id-ID-GadisNeural">Gadis — perempuan</option><option value="id-ID-ArdiNeural">Ardi — laki-laki</option></select></div>
+        </div>
+        <label>Kecepatan suara (-50% sampai +100%)</label><input id="voiceRate" type="number" min="-50" max="100" value="0">
+        <label class="check"><input type="checkbox" id="voiceFallback"><span>Gunakan Windows Speech jika Edge TTS gagal</span></label>
         <label class="check"><input type="checkbox" id="musicEnabled"><span>Tambahkan musik latar</span></label>
         <div class="row"><input id="musicFile" placeholder="Pilih file musik"><button id="chooseMusicBtn">Pilih</button></div>
       </div>

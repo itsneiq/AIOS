@@ -5,4 +5,7 @@ echo.
 echo FFmpeg:
 ffmpeg -version
 echo.
+echo Edge Neural TTS:
+edge-tts --version
+echo.
 pause
