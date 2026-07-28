@@ -15,6 +15,7 @@ function run(command, args, { timeoutMs = 0 } = {}) {
     const child = spawn(command, args, { shell: false, windowsHide: true });
     let stderr = "";
     let settled = false;
+    let timer = null;
 
     const finish = (callback, value) => {
       if (settled) return;
@@ -32,12 +33,12 @@ function run(command, args, { timeoutMs = 0 } = {}) {
       finish(reject, new Error(`${command} exited ${code}: ${stderr.trim()}`));
     });
 
-    const timer = timeoutMs > 0
-      ? setTimeout(() => {
-          try { child.kill("SIGKILL"); } catch {}
-          finish(reject, new Error(`${command} timeout setelah ${timeoutMs} ms`));
-        }, timeoutMs)
-      : null;
+    if (timeoutMs > 0) {
+      timer = setTimeout(() => {
+        try { child.kill("SIGKILL"); } catch {}
+        finish(reject, new Error(`${command} timeout setelah ${timeoutMs} ms`));
+      }, timeoutMs);
+    }
   });
 }
 
