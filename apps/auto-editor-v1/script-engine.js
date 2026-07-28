@@ -1,6 +1,7 @@
 "use strict";
 
 const { analyzeMarketing } = require("./marketing-analyzer");
+const { analyzeProduct } = require("./product-analyzer");
 
 const ANGLES = Object.freeze({
   balanced: {
@@ -53,17 +54,33 @@ function clampCount(value,max=5){return Math.max(1,Math.min(max,Number(value)||1
 function hash(value){let h=2166136261;for(const char of String(value||"")){h^=char.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function rotate(list,seed,offset=0){return list[(hash(seed)+offset)%list.length]}
 function pool(angle,key){return ANGLES[angle]?.[key]||ANGLES.balanced[key]}
+function productBenefit(product,fallback){
+  const benefit=product?.benefits?.[0];
+  if(!benefit)return fallback;
+  const title=product.title&&product.title!=="Produk"?product.title:"Produk ini";
+  return `${title} ${benefit}.`;
+}
 function generateScript(options={}){
   const seed=`${options.seed||"aios"}:${options.index||0}:${options.variant||1}`;
   const angle=ANGLES[options.angle]?options.angle:"balanced";
-  return {hook:rotate(pool(angle,"hooks"),seed,0),benefit:rotate(pool(angle,"benefits"),seed,1),cta:rotate(pool(angle,"ctas"),seed,2),angle};
+  const fallbackBenefit=rotate(pool(angle,"benefits"),seed,1);
+  return {hook:rotate(pool(angle,"hooks"),seed,0),benefit:productBenefit(options.product,fallbackBenefit),cta:rotate(pool(angle,"ctas"),seed,2),angle};
 }
 function resolveScript(config={},item={},index=0,variant=1){
   if(config.scriptMode!=="auto")return {hook:String(config.hook||"").trim(),benefit:String(config.benefit||"").trim(),cta:String(config.cta||"").trim(),angle:"manual"};
-  const marketing=config.scriptAngle==="auto"?analyzeMarketing({category:config.productCategory,title:config.productName,filename:item.name||item.base,style:config.style,platform:config.platform}):null;
-  const script=generateScript({angle:marketing?.angle||config.scriptAngle,seed:item.base||item.name||"video",index,variant});
-  return marketing?{...script,marketing}:script;
+  const product=analyzeProduct({
+    title:config.productName,
+    brand:config.productBrand,
+    category:config.productCategory,
+    price:config.productPrice,
+    description:config.productDescription,
+    attributes:config.productAttributes,
+    filename:item.name||item.base
+  });
+  const marketing=config.scriptAngle==="auto"?analyzeMarketing({category:product.category,title:product.title,filename:item.name||item.base,description:config.productDescription,style:config.style,platform:config.platform}):null;
+  const script=generateScript({angle:marketing?.angle||config.scriptAngle,seed:item.base||item.name||"video",index,variant,product});
+  return {...script,product,...(marketing?{marketing}:{})};
 }
 function generateScriptSet(options={}){const count=clampCount(options.count);return Array.from({length:count},(_,index)=>generateScript({...options,index,variant:index+1}))}
 
-module.exports={ANGLES,clampCount,generateScript,generateScriptSet,resolveScript};
+module.exports={ANGLES,clampCount,generateScript,generateScriptSet,productBenefit,resolveScript};
