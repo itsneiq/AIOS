@@ -6,8 +6,11 @@ const os = require("os");
 const path = require("path");
 const {
   DEFAULT_EDGE_TIMEOUT_MS,
+  edgePitch,
   edgeRate,
   edgeRateToWindowsRate,
+  optimizeSpeechText,
+  prepareSpeechOptions,
   synthesizeEdge,
   synthesizeVoice,
   validateEdgeVoice
@@ -15,10 +18,29 @@ const {
 
 assert.equal(edgeRate(25), "+25%");
 assert.equal(edgeRate(-80), "-50%");
+assert.equal(edgePitch("-250Hz"), "-100Hz");
+assert.equal(edgePitch("invalid"), "+0Hz");
 assert.equal(edgeRateToWindowsRate(100), 5);
 assert.equal(edgeRateToWindowsRate(-50), -5);
 assert.equal(validateEdgeVoice("id-ID-ArdiNeural"), "id-ID-ArdiNeural");
 assert.equal(validateEdgeVoice("en-US-Unknown"), "id-ID-GadisNeural");
+
+assert.equal(
+  optimizeSpeechText({
+    style: "affiliate",
+    segments: [
+      { role: "hook", text: "Tas lucu ini wajib kamu lihat" },
+      { role: "benefit", text: "ringan   dan muat banyak" },
+      { role: "cta", text: "cek promonya sekarang" }
+    ]
+  }),
+  "Tas lucu ini wajib kamu lihat?\n\nringan dan muat banyak.\n\ncek promonya sekarang!"
+);
+
+assert.deepEqual(
+  prepareSpeechOptions({ text: "Halo", style: "ugc", rate: 0 }),
+  { text: "Halo.", style: "ugc", rate: 3, pitch: "+5Hz" }
+);
 
 (async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aios-voice-"));
@@ -89,20 +111,32 @@ assert.equal(validateEdgeVoice("en-US-Unknown"), "id-ID-GadisNeural");
 
     const timeoutOutput = path.join(dir, "timeout.mp3");
     let timeoutOptions;
+    let edgeArgs;
     await synthesizeEdge(
       {
-        text: "Halo",
+        segments: [
+          { role: "hook", text: "Lagi cari tas baru" },
+          { role: "cta", text: "cek sekarang" }
+        ],
+        style: "affiliate",
         output: timeoutOutput,
         voice: "id-ID-GadisNeural",
         rate: 0,
         timeoutMs: 1234
       },
       async (command, args, options) => {
+        edgeArgs = args;
         timeoutOptions = options;
         fs.writeFileSync(timeoutOutput, "audio");
       }
     );
     assert.equal(timeoutOptions.timeoutMs, 1234);
+    assert.equal(edgeArgs[edgeArgs.indexOf("--rate") + 1], "+4%");
+    assert.equal(edgeArgs[edgeArgs.indexOf("--pitch") + 1], "+6Hz");
+    assert.equal(
+      edgeArgs[edgeArgs.indexOf("--text") + 1],
+      "Lagi cari tas baru?\n\ncek sekarang!"
+    );
 
     console.log("voice-engine tests passed");
   } finally {
