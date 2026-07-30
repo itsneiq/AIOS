@@ -10,6 +10,14 @@ const INDONESIAN_EDGE_VOICES = Object.freeze([
   { id: "id-ID-ArdiNeural", name: "Ardi", gender: "Laki-laki" }
 ]);
 
+const SPEECH_PRESETS = Object.freeze({
+  affiliate: Object.freeze({ rateOffset: 4, pitch: "+6Hz", pause: "\n\n" }),
+  ugc: Object.freeze({ rateOffset: 3, pitch: "+5Hz", pause: "\n\n" }),
+  storytelling: Object.freeze({ rateOffset: -3, pitch: "+0Hz", pause: "\n\n" }),
+  podcast: Object.freeze({ rateOffset: -1, pitch: "-2Hz", pause: "\n" }),
+  default: Object.freeze({ rateOffset: 0, pitch: "+0Hz", pause: "\n\n" })
+});
+
 function run(command, args, { timeoutMs = 0 } = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { shell: false, windowsHide: true });
@@ -42,9 +50,21 @@ function run(command, args, { timeoutMs = 0 } = {}) {
   });
 }
 
+function clampRate(value) {
+  return Math.max(-50, Math.min(100, Number(value) || 0));
+}
+
 function edgeRate(value) {
-  const rate = Math.max(-50, Math.min(100, Number(value) || 0));
+  const rate = clampRate(value);
   return `${rate >= 0 ? "+" : ""}${rate}%`;
+}
+
+function edgePitch(value) {
+  const match = String(value ?? "+0Hz").trim().match(/^([+-]?)(\d{1,3})\s*Hz$/i);
+  if (!match) return "+0Hz";
+  const amount = Math.max(0, Math.min(100, Number(match[2]) || 0));
+  const sign = match[1] === "-" ? "-" : "+";
+  return `${sign}${amount}Hz`;
 }
 
 function edgeRateToWindowsRate(value) {
@@ -57,37 +77,90 @@ function validateEdgeVoice(voice) {
     : INDONESIAN_EDGE_VOICES[0].id;
 }
 
-async function synthesizeEdge(
-  { text, output, voice, rate, timeoutMs = DEFAULT_EDGE_TIMEOUT_MS },
-  execute = run
-) {
+function resolveSpeechPreset(style) {
+  const value = String(style || "").toLowerCase();
+  if (value.includes("affiliate") || value.includes("jualan") || value.includes("sales")) return SPEECH_PRESETS.affiliate;
+  if (value.includes("ugc")) return SPEECH_PRESETS.ugc;
+  if (value.includes("story")) return SPEECH_PRESETS.storytelling;
+  if (value.includes("podcast") || value.includes("talking")) return SPEECH_PRESETS.podcast;
+  return SPEECH_PRESETS.default;
+}
+
+function cleanSpeechSegment(value) {
+  return String(value || "")
+    .replace(/\r?\n+/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\.{3,}/g, "…")
+    .replace(/\s+([,!?;:.])/g, "$1")
+    .trim();
+}
+
+function finishSegment(text, role) {
+  if (!text) return "";
+  if (/[.!?…]$/.test(text)) return text;
+  if (role === "hook") return `${text}?`;
+  if (role === "cta") return `${text}!`;
+  return `${text}.`;
+}
+
+function optimizeSpeechText({ text, segments, style } = {}) {
+  const preset = resolveSpeechPreset(style);
+  const sourceSegments = Array.isArray(segments) && segments.length
+    ? segments
+    : [{ role: "body", text }];
+
+  const optimized = sourceSegments
+    .map(segment => {
+      const role = typeof segment === "object" ? segment.role : "body";
+      const value = typeof segment === "object" ? segment.text : segment;
+      return finishSegment(cleanSpeechSegment(value), role);
+    })
+    .filter(Boolean);
+
+  return optimized.join(preset.pause);
+}
+
+function prepareSpeechOptions(options = {}) {
+  const preset = resolveSpeechPreset(options.style);
+  return {
+    ...options,
+    text: optimizeSpeechText(options),
+    rate: clampRate((Number(options.rate) || 0) + preset.rateOffset),
+    pitch: edgePitch(options.pitch || preset.pitch)
+  };
+}
+
+async function synthesizeEdge(options, execute = run) {
+  const prepared = prepareSpeechOptions(options);
   await execute(
     "edge-tts",
     [
-      "--voice", validateEdgeVoice(voice),
-      "--rate", edgeRate(rate),
-      "--text", String(text),
-      "--write-media", output
+      "--voice", validateEdgeVoice(prepared.voice),
+      "--rate", edgeRate(prepared.rate),
+      "--pitch", prepared.pitch,
+      "--text", prepared.text,
+      "--write-media", prepared.output
     ],
-    { timeoutMs }
+    { timeoutMs: prepared.timeoutMs || DEFAULT_EDGE_TIMEOUT_MS }
   );
 
-  if (!fs.existsSync(output) || fs.statSync(output).size === 0) {
+  if (!fs.existsSync(prepared.output) || fs.statSync(prepared.output).size === 0) {
     throw new Error("Edge TTS tidak menghasilkan audio.");
   }
 }
 
-async function synthesizeWindows({ text, output, rate, workDir }, execute = run) {
+async function synthesizeWindows(options, execute = run) {
+  const prepared = prepareSpeechOptions(options);
   const ps1 = path.join(
-    workDir,
+    prepared.workDir,
     `tts-${Date.now()}-${Math.random().toString(36).slice(2)}.ps1`
   );
-  const windowsRate = edgeRateToWindowsRate(rate);
+  const windowsRate = edgeRateToWindowsRate(prepared.rate);
   const script = `Add-Type -AssemblyName System.Speech
 $s = New-Object System.Speech.Synthesis.SpeechSynthesizer
 $s.Rate = ${windowsRate}
-$s.SetOutputToWaveFile('${output.replace(/'/g, "''")}')
-$s.Speak('${String(text).replace(/'/g, "''")}')
+$s.SetOutputToWaveFile('${prepared.output.replace(/'/g, "''")}')
+$s.Speak('${prepared.text.replace(/'/g, "''")}')
 $s.Dispose()
 `;
 
@@ -122,8 +195,13 @@ async function synthesizeVoice(options, execute = run) {
 module.exports = {
   DEFAULT_EDGE_TIMEOUT_MS,
   INDONESIAN_EDGE_VOICES,
+  SPEECH_PRESETS,
+  edgePitch,
   edgeRate,
   edgeRateToWindowsRate,
+  optimizeSpeechText,
+  prepareSpeechOptions,
+  resolveSpeechPreset,
   synthesizeEdge,
   synthesizeWindows,
   synthesizeVoice,
