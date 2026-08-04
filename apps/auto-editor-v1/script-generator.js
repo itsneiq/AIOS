@@ -19,6 +19,8 @@ const { qualityPromptRules } = require("./hook-quality");
 
 const ANGLE_BRIEFS = Object.freeze({
   before_after: "Tunjukkan kondisi sebelum dan sesudah pemakaian. Kontraskan keduanya secara jujur tanpa menjanjikan hasil pasti.",
+  styling: "Tunjukkan satu produk dipadukan ke beberapa gaya atau kesempatan berbeda. Jawab pertanyaan \"bisa dipakai ke mana saja\".",
+  value_reveal: "Angkat kesenjangan antara tampilan produk dan harganya. Terlihat mahal, ternyata terjangkau. Jangan menyebut angka yang tidak kamu ketahui.",
   demo: "Tunjukkan produk sedang dipakai dan hasilnya langsung terlihat.",
   problem_solution: "Buka dengan masalah harian yang relatable, lalu posisikan produk sebagai jalan keluarnya.",
   detail_reveal: "Bangun rasa penasaran pada satu detail produk yang tidak langsung terlihat.",
@@ -30,7 +32,7 @@ const ANGLE_BRIEFS = Object.freeze({
 // lebih sering muncul, bukan dipaksakan menjadi satu-satunya.
 const CATEGORY_PRIORITY_ANGLES = Object.freeze({
   beauty: ["before_after", "problem_solution"],
-  fashion: ["lifestyle", "before_after"],
+  fashion: ["styling", "value_reveal", "before_after"],
   kitchen: ["demo", "problem_solution"],
   home: ["demo", "lifestyle"],
   gadget: ["detail_reveal", "demo"]

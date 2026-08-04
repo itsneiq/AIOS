@@ -57,6 +57,22 @@ const SIGNALS = Object.freeze([
     pattern: /\b((\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh)\s*(tetes|ml|gram|detik|menit|hari|minggu|kali|lapis)|setetes|sekali usap|mungil|tipis|lengket)\b/i
   }),
   Object.freeze({
+    id: "value_contrast",
+    weight: 10,
+    label: "Nilai",
+    // Kesenjangan tampilan dan harga. Pola persuasi paling kuat di fashion
+    // affiliate: barangnya terlihat mahal, ternyata terjangkau.
+    pattern: /\b(kayak mahal|keliatan mahal|kelihatan mahal|gak nyangka harga|nggak nyangka harga|semurah|murah tapi|terjangkau tapi|harga segini)\b/i
+  }),
+  Object.freeze({
+    id: "wearability",
+    weight: 6,
+    label: "Nyaman",
+    // Keberatan yang paling sering muncul sebelum orang membeli pakaian.
+    // Menjawabnya di hook menghapus alasan untuk menggulir lewat.
+    pattern: /\b(adem|nerawang|gerah|melar|gak panas|nggak panas|seharian|gak sesak|nggak sesak|jatuhnya)\b/i
+  }),
+  Object.freeze({
     id: "expository",
     weight: -15,
     label: "Bernada artikel",
@@ -108,7 +124,8 @@ function qualityPromptRules() {
     "- Bicara langsung ke penonton. Hindari \"banyak orang\", \"para\", atau \"pecinta X\" yang membuat kalimat terasa berjarak.",
     "- Jangan membuka seperti artikel. \"Ini alasan kenapa...\", \"Berikut...\", dan \"Inilah...\" terbaca sebagai judul blog, bukan iklan.",
     "- Pakai detail fisik yang bisa dibayangkan: jumlah tetes, ukuran botol, tekstur, waktu pemakaian.",
-    "- Untuk produk perawatan, tunjukkan perubahan sebelum dan sesudah bila masuk akal. Format ini paling terbukti di kategori skincare."
+    "- Untuk produk perawatan, tunjukkan perubahan sebelum dan sesudah bila masuk akal. Format ini paling terbukti di kategori skincare.",
+    "- Untuk pakaian, jawab keberatan yang muncul sebelum orang membeli: apakah adem, nerawang, gerah, atau jatuhnya bagus. Boleh juga mengangkat kesenjangan antara tampilan mahal dan harga terjangkau."
   ].join("\n");
 }
 

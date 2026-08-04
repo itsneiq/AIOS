@@ -53,7 +53,20 @@ const gabungan = scoreAdHook("Jangan buang serum kamu, ternyata cuma butuh tiga 
 assert.ok(gabungan.signals.length >= 3);
 assert.ok(gabungan.adjustment > 20);
 
+// Sinyal khusus fashion. Dua kategori yang paling sering dipakai adalah
+// fashion dan beauty, jadi pola persuasi keduanya perlu terbaca.
+assert.ok(detectSignals("Keliatan mahal padahal harga segini doang").some(item => item.id === "value_contrast"));
+assert.ok(detectSignals("Bahannya adem dan gak nerawang buat dipakai seharian").some(item => item.id === "wearability"));
+assert.ok(!detectSignals("Serum ini cepat meresap di kulit").some(item => item.id === "wearability"));
+
+const fashionKuat = scoreAdHook("Keliatan mahal, ternyata bahannya adem dan gak nerawang", { baseScore: 60 });
+assert.ok(fashionKuat.strengths.includes("Nilai"));
+assert.ok(fashionKuat.strengths.includes("Nyaman"));
+assert.ok(fashionKuat.strengths.includes("Kontras"));
+assert.ok(fashionKuat.score > 85, "hook fashion yang menjawab keberatan sekaligus nilai harus menonjol");
+
 assert.ok(qualityPromptRules().includes("padahal"), "arahan harus bisa disuntikkan ke prompt");
+assert.ok(qualityPromptRules().includes("nerawang"), "arahan fashion ikut masuk ke prompt");
 assert.ok(qualityPromptRules().includes("skincare"));
 
 console.log("hook quality tests passed");
