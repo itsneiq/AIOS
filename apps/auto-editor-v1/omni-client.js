@@ -163,11 +163,22 @@ function createOmniClient({
       // Parameter yang ditolak menunjuk ke bentuk permintaan, bukan ke isi
       // prompt, jadi dibedakan agar perbaikannya langsung terarah.
       const unknownParameter = /unknown (parameter|field)/i.exec(body);
+      /*
+       * Kuota bernilai nol berbeda sifatnya dari kuota yang habis terpakai.
+       * Pembuatan video tidak punya jatah gratis sama sekali, sehingga
+       * menunggu atau mengulang tidak akan pernah berhasil; yang dibutuhkan
+       * adalah penagihan yang aktif. Membedakan keduanya mencegah percobaan
+       * ulang yang pasti gagal sekaligus menunjuk perbaikan yang benar.
+       */
+      const noFreeTier = response.status === 429 && (/limit:\s*0\b/i.test(body) || /billing/i.test(body));
       const code = unknownParameter ? "BAD_REQUEST_SHAPE"
+        : noFreeTier ? "BILLING_REQUIRED"
         : response.status === 404 ? "MODEL_NOT_FOUND"
         : response.status === 429 ? "RATE_LIMITED"
         : response.status >= 500 ? "SERVER_ERROR" : "REQUEST_FAILED";
-      const petunjuk = unknownParameter ? " Sesuaikan buildVideoRequest() di omni-client.js." : "";
+      const petunjuk = unknownParameter ? " Sesuaikan buildVideoRequest() di omni-client.js."
+        : noFreeTier ? " Pembuatan video tidak punya jatah gratis. Aktifkan penagihan pada project Google Cloud milik API key ini di https://aistudio.google.com/apikey."
+        : "";
       throw omniError(code, `Permintaan video gagal (HTTP ${response.status}). ${body.slice(0, 400)}${petunjuk}`);
     }
     return response.json();

@@ -113,6 +113,19 @@ assert.equal(readInteractionId({ name: "interactions/xyz" }), "interactions/xyz"
   const kuota = createOmniClient({ apiKey: "k", fetchImpl: async () => ({ ok: false, status: 429, text: async () => "quota" }) });
   await assert.rejects(() => kuota.probe(), error => error.diagnostic.code === "RATE_LIMITED");
 
+  /*
+   * Kuota bernilai nol berbeda sifatnya dari kuota yang habis terpakai:
+   * menunggu tidak akan pernah menolong, karena pembuatan video memang tidak
+   * punya jatah gratis. Keduanya harus terbaca berbeda agar tidak ada
+   * percobaan ulang yang pasti gagal.
+   */
+  const tanpaJatah = createOmniClient({
+    apiKey: "k",
+    fetchImpl: async () => ({ ok: false, status: 429, text: async () => '{"error":{"message":"Quota exceeded for metric: generate_content_free_tier_input_token_count, limit: 0, model: gemini-omni"}}' })
+  });
+  await assert.rejects(() => tanpaJatah.probe(), error =>
+    error.diagnostic.code === "BILLING_REQUIRED" && /penagihan/.test(error.message));
+
   // Parameter yang ditolak menunjuk ke bentuk permintaan, bukan ke isi prompt.
   const bentukSalah = createOmniClient({
     apiKey: "k",
