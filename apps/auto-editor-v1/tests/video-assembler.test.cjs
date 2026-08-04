@@ -102,6 +102,25 @@ assert.ok(finalWorkDir({ srtPath: "/tmp/aios/subtitle.srt" }).endsWith("aios"));
 assert.equal(finalWorkDir({}), undefined, "tanpa subtitle tidak perlu memindah direktori kerja");
 assert.ok(penuh.includes("[v]") && penuh.includes("[a]"));
 
+/*
+ * Panjang keluaran dipatok pada durasi rencana, bukan pada stream terpendek.
+ * "-shortest" memotong keluaran begitu stream terpendek habis, dan voiceover
+ * hampir selalu lebih pendek daripada videonya — sehingga penutup ikut hilang,
+ * justru di tempat CTA berada.
+ */
+const dipatok = buildFinalArgs({ videoPath: "v.mp4", voicePath: "vo.mp3", srtPath: "s.srt", output: "o.mp4", duration: 18 });
+assert.ok(!dipatok.includes("-shortest"), "-shortest memotong video mengikuti voiceover yang lebih pendek");
+assert.equal(dipatok[dipatok.indexOf("-t") + 1], "18");
+assert.ok(dipatok.indexOf("-t") > dipatok.indexOf("-c:v"), "-t harus berlaku pada keluaran, bukan pada masukan");
+
+// Tanpa durasi, tidak ada pemotongan yang dipaksakan.
+assert.ok(!buildFinalArgs({ videoPath: "v.mp4", output: "o.mp4" }).includes("-t"));
+assert.ok(!buildFinalArgs({ videoPath: "v.mp4", output: "o.mp4", duration: 0 }).includes("-t"));
+
+// Potongan per shot tetap memakai -shortest: sumber anullsrc tidak berujung,
+// jadi tanpa itu render tidak akan pernah selesai.
+assert.ok(buildSegmentArgs(foto, { output: "o.mp4" }).includes("-shortest"));
+
 // Setiap gabungan sumber suara harus menghasilkan perintah yang sah.
 const tanpaMusik = buildFinalArgs({ videoPath: "v.mp4", voicePath: "vo.mp3", output: "o.mp4" });
 assert.equal(tanpaMusik[tanpaMusik.indexOf("-map") + 1], "0:v");

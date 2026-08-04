@@ -138,6 +138,7 @@ try {
     musicPath: args.music || null,
     srtPath,
     output: outputPath,
+    duration,
     quality: args.quality || "balanced"
   }), "Render akhir", { cwd: finalWorkDir({ srtPath }) });
 

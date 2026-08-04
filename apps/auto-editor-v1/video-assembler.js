@@ -137,7 +137,7 @@ function finalWorkDir({ srtPath } = {}) {
   return srtPath ? path.dirname(srtPath) : undefined;
 }
 
-function buildFinalArgs({ videoPath, voicePath, musicPath, srtPath, output, quality = "balanced", musicVolume = 0.18, subtitleStyle } = {}) {
+function buildFinalArgs({ videoPath, voicePath, musicPath, srtPath, output, duration, quality = "balanced", musicVolume = 0.18, subtitleStyle } = {}) {
   /*
    * Berkas subtitle dirujuk hanya dengan nama berkasnya, dan proses dijalankan
    * dari direktori tempat berkas itu berada.
@@ -179,7 +179,17 @@ function buildFinalArgs({ videoPath, voicePath, musicPath, srtPath, output, qual
   if (audioLabel) args.push("-map", audioLabel);
 
   args.push("-c:v", "libx264", ...qualityArgs(quality), "-pix_fmt", "yuv420p");
-  if (audioLabel) args.push("-c:a", "aac", "-ar", "48000", "-ac", "2", "-shortest");
+  if (audioLabel) args.push("-c:a", "aac", "-ar", "48000", "-ac", "2");
+  /*
+   * Panjang keluaran dipatok pada durasi rencana, bukan pada stream terpendek.
+   *
+   * "-shortest" memotong keluaran begitu stream terpendek habis. Voiceover
+   * hampir selalu lebih pendek daripada videonya, sehingga bagian penutup ikut
+   * terpotong — dan justru di sanalah CTA berada. Dengan "-t", audio yang lebih
+   * pendek cukup menyisakan hening di ekor, dan audio yang lebih panjang
+   * dipangkas mengikuti video.
+   */
+  if (Number(duration) > 0) args.push("-t", String(round(duration)));
   args.push(output);
   return args;
 }
