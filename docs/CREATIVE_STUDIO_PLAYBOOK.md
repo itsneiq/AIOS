@@ -78,8 +78,8 @@ sama kuat secara tata bahasa namun berbeda jauh sebagai iklan.
 
 | Sinyal | Contoh | Kenapa |
 |---|---|---|
-| Bernada artikel | "Ini alasan kenapa...", "Berikut..." | Terbaca sebagai judul blog, bukan iklan |
-| Berjarak | "banyak yang dicari", "para pecinta" | Bicara tentang orang, bukan kepada penonton |
+| Bernada artikel | "Ini alasan kenapa...", "Berikut...", "Inilah..." | Terbaca sebagai judul blog, bukan iklan |
+| Jarak | "banyak yang dicari", "para pecinta", "kebanyakan orang" | Bicara **tentang** sekelompok orang, bukan **kepada** penonton di depan layar |
 
 Perbandingan nyata, keduanya berskor dasar sama:
 
@@ -100,6 +100,7 @@ sini — itu tahap perakitan.
 ### Meta Ads
 
 - Hook 5–14 kata
+- Caption maksimal 32 karakter / 6 kata per baris
 - Nada rapi dan meyakinkan, boleh lebih tenang daripada konten marketplace
 - **CTA mengarah keluar ke halaman produk.** Contoh: *"Cek selengkapnya lewat
   tautan"*, *"Ketuk untuk lihat pilihan variannya"*
@@ -112,6 +113,7 @@ sini — itu tahap perakitan.
 ### Shopee Video
 
 - Hook 3–10 kata
+- Caption maksimal 30 karakter / 6 kata per baris
 - Nada langsung dan transaksional; harga dan promo boleh disebut terang-terangan
 - **CTA mengarah ke keranjang di dalam aplikasi.** Contoh: *"Cek keranjang di
   bawah"*
@@ -122,6 +124,7 @@ sini — itu tahap perakitan.
 ### TikTok Shop
 
 - Hook 4–12 kata
+- Caption maksimal 28 karakter / 5 kata per baris
 - Nada santai seperti bercerita ke teman, tempo cepat
 - **CTA:** *"Cek keranjang kuning di bawah"*
 - Urgensi tinggi
@@ -150,9 +153,9 @@ menghasilkan data apa pun.
 
 ### Sedang — berisiko
 
-**Janji berjangka waktu** — `putih dalam 7 hari`, `instan glowing`
+**Janji hasil berjangka waktu** — `putih dalam 7 hari`, `instan glowing`
 **Superlatif tanpa bukti** — `terbaik di dunia`, `nomor 1 di Indonesia`
-**Urgensi menakut-nakuti** — `awas menyesal`, `bahaya kalau tidak`
+**Urgensi berlebihan** — `awas menyesal`, `bahaya kalau tidak`
 
 Beat **agitate** paling rawan menyerempet atribut pribadi, karena tugasnya
 memang membuat masalah terasa. Periksa beat ini paling teliti.
@@ -192,6 +195,18 @@ pakai set berbeda.
 | studio-polos | Latar abu muda, tanpa properti | Dua softbox, bayangan minimal | Berputar pelan |
 | lemari-pagi | Depan lemari terbuka | Kamar pagi, hangat lembut | Memilih lalu mengenakan |
 
+### Kategori lain
+
+Dangkal karena jarang dipakai. Kalau produknya di luar fashion dan beauty,
+susun set baru mengikuti pola yang sama: latar, cahaya, kamera, wardrobe, aksi.
+
+| Kategori | Set |
+|---|---|
+| kitchen | dapur-terang (meja dapur, bahan segar) · meja-kayu (makro, softbox samping) |
+| home | ruang-tamu (sofa netral, sore lembut) · sudut-rapi (meja kerja minimalis) |
+| gadget | meja-kerja (laptop, buku catatan) · genggam-dekat (latar gelap, cahaya tepi) |
+| general | netral-terang (permukaan polos) · meja-hangat (meja kayu, cahaya samping) |
+
 ---
 
 ## 7. Arah visual per sudut
@@ -203,16 +218,77 @@ katalog, dan tiga detik pertama terbuang.
 Arahan ditulis sebagai kejadian yang bisa difilmkan. *"Tangan menyingkirkan
 tumpukan botol"* bisa dieksekusi model video; *"tampilkan kesan praktis"* tidak.
 
-| Sudut | Pembuka | Lanjutannya |
-|---|---|---|
-| problem_solution | Kondisi masalahnya dulu, **bukan produk** | Usaha yang sudah dicoba tapi gagal: tumpukan produk lain, raut lelah |
-| before_after | Kondisi sebelum, jujur apa adanya | Tahan sebentar agar penonton mengenalinya sebagai keadaannya sendiri |
-| value_reveal | Kesan mahal dari jarak sangat dekat | Kamera menarik mundur, ternyata sederhana dan terjangkau |
-| styling | Produk tergantung, sebelum dipakai | Transisi cepat antar padu-padan memakai produk yang sama |
-| demo | Tepat saat produk mulai dipakai | Berlanjut sampai hasil terlihat, satu gerakan menyambung |
-| detail_reveal | Sangat dekat pada detail yang belum jelas apa | Kamera mundur, terlihat bagian dari produk dan gunanya |
-| lifestyle | Momen sehari-hari, produk belum jadi pusat | Produk masuk dengan wajar, tanpa dipamerkan |
-| urgency | Rak tinggal sedikit, tangan ambil sisa terakhir | Produk berpindah cepat, kesan banyak yang mencari |
+### problem_solution
+
+> Buka dengan masalah harian yang relatable, lalu posisikan produk sebagai jalan keluarnya.
+
+- **hook** — Buka pada kondisi masalahnya lebih dulu, bukan pada produk. Perlihatkan situasi yang bikin kesal sebelum produk muncul sama sekali
+- **agitate** — Perlihatkan usaha yang sudah dilakukan tapi belum berhasil: tumpukan produk lain, langkah yang berulang, raut lelah
+- **solve** — Produk masuk ke frame sebagai jalan keluar, dipakai dengan satu langkah sederhana
+- **cta** — Kondisi setelahnya terlihat lega, produk diletakkan di depan kamera
+
+### before_after
+
+> Tunjukkan kondisi sebelum dan sesudah pemakaian. Kontraskan keduanya secara jujur tanpa menjanjikan hasil pasti.
+
+- **hook** — Buka pada kondisi sebelum pemakaian, jujur apa adanya, tanpa dilebih-lebihkan
+- **agitate** — Tahan sebentar pada kondisi sebelum itu agar penonton sempat mengenalinya sebagai keadaannya sendiri
+- **solve** — Perlihatkan peralihan ke kondisi sesudah dalam satu gerakan menyambung, bukan potongan terpisah
+- **cta** — Kondisi sesudah ditahan di layar bersama produk
+
+### value_reveal
+
+> Angkat kesenjangan antara tampilan produk dan harganya. Terlihat mahal, ternyata terjangkau. Jangan menyebut angka yang tidak kamu ketahui.
+
+- **hook** — Buka dengan kesan mahal: bahan, kemasan, atau detail yang terlihat premium dari jarak sangat dekat
+- **agitate** — Perlihatkan pembanding yang biasanya jauh lebih mahal untuk kesan serupa
+- **solve** — Kamera menarik mundur memperlihatkan produk sesungguhnya, sederhana dan terjangkau
+- **cta** — Produk ditampilkan utuh, kesan premium tetap terjaga
+
+### styling
+
+> Tunjukkan satu produk dipadukan ke beberapa gaya atau kesempatan berbeda. Jawab pertanyaan "bisa dipakai ke mana saja".
+
+- **hook** — Buka pada satu produk tergantung atau tergeletak, sebelum dipakai
+- **agitate** — Perlihatkan kebingungan memadukan: beberapa pilihan dibolak-balik tanpa keputusan
+- **solve** — Transisi cepat antar beberapa padu-padan memakai produk yang sama persis
+- **cta** — Padu-padan terakhir ditahan, produk terlihat jelas
+
+### demo
+
+> Tunjukkan produk sedang dipakai dan hasilnya langsung terlihat.
+
+- **hook** — Buka tepat pada momen produk mulai dipakai, tanpa pengantar
+- **agitate** — Perlihatkan bagian yang biasanya paling merepotkan saat memakai produk sejenis
+- **solve** — Pemakaian berlanjut sampai hasilnya terlihat dalam satu gerakan menyambung
+- **cta** — Hasil akhir ditahan berdampingan dengan produk
+
+### detail_reveal
+
+> Bangun rasa penasaran pada satu detail produk yang tidak langsung terlihat.
+
+- **hook** — Buka sangat dekat pada satu detail yang belum jelas apa, memancing penasaran
+- **agitate** — Tahan pada detail itu sedikit lebih lama sampai penonton ingin tahu
+- **solve** — Kamera menarik mundur, terlihat detail itu bagian dari produk dan apa gunanya
+- **cta** — Produk utuh ditampilkan, detail tadi tetap terbaca
+
+### lifestyle
+
+> Tempatkan produk di dalam momen sehari-hari yang ingin ditiru penonton.
+
+- **hook** — Buka pada momen sehari-hari yang sedang berlangsung, produk belum jadi pusat perhatian
+- **agitate** — Perlihatkan bagian rutinitas yang terasa terburu-buru atau merepotkan
+- **solve** — Produk masuk ke rutinitas itu dengan wajar, tanpa dipamerkan
+- **cta** — Momen ditutup tenang, produk terlihat di dalam suasananya
+
+### urgency
+
+> Tekankan momentum: promo, stok, atau alasan untuk cek sekarang, tanpa menakut-nakuti.
+
+- **hook** — Buka pada isyarat persediaan menipis: rak yang tinggal sedikit, tangan mengambil sisa terakhir
+- **agitate** — Perlihatkan produk berpindah cepat, kesan banyak yang mencari
+- **solve** — Produk terakhir diamankan dan diperlihatkan utuh
+- **cta** — Produk ditahan di depan kamera bersama isyarat ajakan bertindak
 
 ### Sudut yang cocok per kategori
 
@@ -337,6 +413,18 @@ minggu berjalan.
 **Yang perlu diuji:** konsistensi klip Flow antar shot belum terbukti di
 pemakaian nyata. Kalau ternyata melompat, rancangan dua klip perlu ditinjau
 ulang — mungkin jadi satu klip panjang dengan porsi foto lebih besar.
+
+**Bug yang belum diperbaiki di `make-video.mjs`:**
+
+- Margin caption dihitung per platform lalu dibuang; nilainya dipatok 90 dari
+  bawah, sehingga caption bisa menutupi nama produk. Perbaikannya menyambungkan
+  `subtitles.preset` ke `buildFinalArgs`.
+- Pemotongan caption murni berdasarkan hitungan kata dan karakter, tanpa
+  memperhatikan batas frasa. Hasilnya terbaca patah-patah: "merawat kulit kusam
+  agar tampak" lalu "lebih cerah dan segar setiap" lalu "hari".
+
+Keduanya urusan perakitan, bukan konten. Sampai diperbaiki, periksa hasil
+akhirnya secara manual.
 
 **Kapan kembali ke alat:** pada 15–30 video per bulan, pengulangan cukup tinggi
 untuk dikodekan dan percakapan mulai terasa lambat. Kode dan pengetahuan di
