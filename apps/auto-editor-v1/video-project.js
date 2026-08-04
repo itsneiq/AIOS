@@ -28,6 +28,7 @@ const slug = value => String(value || "proyek")
 function projectPaths(root) {
   return {
     root,
+    master: path.join(root, "master"),
     clips: path.join(root, "clips"),
     photos: path.join(root, "photos"),
     output: path.join(root, "output"),
@@ -36,18 +37,19 @@ function projectPaths(root) {
   };
 }
 
-function createProject(root, { plan, variant, product }) {
+function createProject(root, { plan, variant, product, masters = [] }) {
   const paths = projectPaths(root);
-  for (const dir of [paths.root, paths.clips, paths.photos, paths.output]) fs.mkdirSync(dir, { recursive: true });
+  for (const dir of [paths.root, paths.master, paths.clips, paths.photos, paths.output]) fs.mkdirSync(dir, { recursive: true });
   const manifest = {
     version: 1,
     createdAt: new Date().toISOString(),
     product: { title: product.title, category: product.category },
     variant: { angle: variant.angle, hook: variant.hook, benefit: variant.benefit, cta: variant.cta, score: variant.score },
-    plan
+    plan,
+    masters
   };
   fs.writeFileSync(paths.manifest, JSON.stringify(manifest, null, 2));
-  fs.writeFileSync(paths.prompts, renderPrompts(plan, product));
+  fs.writeFileSync(paths.prompts, renderPrompts(plan, product, masters));
   return { paths, manifest };
 }
 
@@ -125,24 +127,59 @@ function resolveAssets(root) {
  * Flow, lengkap dengan nomor shot dan nama berkas yang diharapkan, sehingga
  * pemakai tahu persis apa yang harus dilakukan dengan setiap hasil unduhan.
  */
-function renderPrompts(plan, product = {}) {
+function renderPrompts(plan, product = {}, masters = []) {
   const aiShots = plan.shots.filter(shot => shot.kind === "ai");
   const lines = [
-    `PROMPT VIDEO — ${product.title || "Produk"}`,
-    `${aiShots.length} klip, total ${plan.aiSeconds} detik`,
-    "",
-    "Cara pakai:",
-    "1. Buka Flow, buat proyek baru.",
-    "2. Unggah foto produk sebagai gambar referensi.",
-    "3. Tempel prompt di bawah satu per satu, generate, lalu unduh hasilnya.",
-    "4. Ganti nama unduhan menjadi shot-1.mp4, shot-2.mp4, dan seterusnya.",
-    "5. Pindahkan ke folder clips/ pada proyek ini.",
-    "",
-    "Generate berurutan dan jangan mulai proyek baru di tengah jalan.",
-    "Klip kedua dan seterusnya harus melanjutkan klip sebelumnya agar produk,",
-    "pencahayaan, dan sudut kamera tetap sama.",
+    `PROMPT — ${product.title || "Produk"}`,
+    `Set visual: ${plan.scene?.id || "-"}`,
     ""
   ];
+
+  /*
+   * Master image didahulukan karena kesalahan komposisi jauh lebih murah
+   * diperbaiki pada gambar daripada pada video, dan karena seluruh klip yang
+   * berangkat dari satu gambar yang sama akan jauh lebih menyambung daripada
+   * klip yang masing-masing mengarang dunianya sendiri dari foto berlatar putih.
+   */
+  if (masters.length) {
+    lines.push(
+      "#".repeat(72),
+      "TAHAP 1 — MASTER IMAGE  (kerjakan ini dulu)",
+      "#".repeat(72),
+      "",
+      "1. Unggah foto produk kamu sebagai gambar referensi.",
+      "2. Generate pilihan di bawah, lalu pilih satu yang paling pas.",
+      "3. Simpan yang terpilih sebagai master/master.jpg pada proyek ini.",
+      "",
+      "Periksa dulu: bentuk, warna, dan tulisan pada kemasan harus sama",
+      "persis dengan produk aslinya. Kalau meleset, generate ulang di tahap ini",
+      "— jauh lebih murah daripada mengulang video.",
+      ""
+    );
+    masters.forEach((master, index) => {
+      lines.push("=".repeat(72));
+      lines.push(`PILIHAN ${index + 1}  (set: ${master.sceneId})`);
+      lines.push("=".repeat(72));
+      lines.push(master.prompt);
+      lines.push("");
+    });
+  }
+
+  lines.push(
+    "#".repeat(72),
+    `TAHAP 2 — VIDEO  (${aiShots.length} klip, total ${plan.aiSeconds} detik)`,
+    "#".repeat(72),
+    "",
+    "1. Unggah master image sebagai gambar referensi, bukan foto produk mentah.",
+    "2. Tempel prompt di bawah satu per satu, generate, lalu unduh hasilnya.",
+    "3. Ganti nama unduhan menjadi shot-1.mp4, shot-2.mp4, dan seterusnya.",
+    "4. Pindahkan ke folder clips/ pada proyek ini.",
+    "",
+    "Generate berurutan dalam satu proyek Flow. Klip kedua dan seterusnya harus",
+    "melanjutkan klip sebelumnya agar produk, pencahayaan, dan sudut kamera",
+    "tetap sama.",
+    ""
+  );
   aiShots.forEach((shot, index) => {
     lines.push("=".repeat(72));
     lines.push(`SHOT ${index + 1}  (${shot.role}, ${shot.duration} detik)  →  simpan sebagai clips/shot-${index + 1}.mp4`);

@@ -77,3 +77,48 @@ assert.equal(tanpaFoto.missingPhotos, true);
 assert.deepEqual(planShots({ variant, product, photos, duration: 18, aiSeconds: 9 }), plan);
 
 console.log("shot planner tests passed");
+
+/*
+ * Set visual: seragam di dalam satu video, beragam antar produk. Keduanya
+ * mudah tertukar, dan tertukarnya mahal — video yang setnya berganti di tengah
+ * terlihat rusak, sedangkan lima puluh iklan bersert sama akan diabaikan.
+ */
+const { buildMasterImagePrompt, masterImageOptions, resolveScene } = require("../shot-planner");
+
+const rencanaBerset = planShots({ variant, product: { ...product, category: "fashion" }, photos, duration: 18, aiSeconds: 9 });
+assert.ok(rencanaBerset.scene && rencanaBerset.scene.world, "rencana harus menyebut set yang dipakai");
+for (const shot of rencanaBerset.shots.filter(item => item.kind === "ai")) {
+  assert.ok(shot.prompt.includes(rencanaBerset.scene.world), "semua shot AI terikat pada satu set yang sama");
+}
+
+// Produk berbeda mendapat set berbeda tanpa perlu diatur pemakai.
+const setA = planShots({ variant, product: { title: "Kemeja Oversize Katun", category: "fashion" }, photos }).scene.id;
+const setB = planShots({ variant, product: { title: "Sepatu Sneakers Putih", category: "fashion" }, photos }).scene.id;
+assert.notEqual(setA, setB, "dua produk berbeda tidak boleh selalu jatuh ke set yang sama");
+
+// Pemakai tetap bisa menimpa pilihan otomatis ketika merasa setnya berulang.
+const dipaksa = planShots({ variant, product: { title: "Kemeja", category: "fashion" }, photos, sceneId: "rooftop-sore" });
+assert.equal(dipaksa.scene.id, "rooftop-sore");
+assert.equal(resolveScene({ product: { category: "fashion" }, sceneId: "tidak-ada" }).world !== undefined, true, "id asing jatuh ke pilihan otomatis");
+
+/*
+ * Prompt master image wajib menegaskan produk tidak boleh diubah. Tanpa itu
+ * model kerap memperbaiki kemasan menurut seleranya sendiri, dan penonton
+ * menerima barang yang berbeda dari yang diiklankan.
+ */
+const master = buildMasterImagePrompt({ product: { title: "Serum Glow", category: "beauty" }, variant });
+assert.ok(master.prompt.includes("Serum Glow"));
+assert.ok(/jangan mengubah tulisan/i.test(master.prompt), "tulisan pada kemasan harus dikunci");
+assert.ok(/pertahankan bentuk, warna/i.test(master.prompt));
+assert.ok(master.prompt.includes("9:16"));
+assert.ok(!/watermark/i.test(master.prompt) === false, "watermark harus dilarang secara eksplisit");
+assert.ok(master.sceneId);
+
+// Beberapa pilihan master harus benar-benar berbeda, bukan variasi tipis.
+const pilihan = masterImageOptions({ product: { title: "Serum Glow", category: "beauty" }, variant, count: 3 });
+assert.equal(pilihan.length, 3);
+assert.equal(new Set(pilihan.map(item => item.sceneId)).size, 3);
+assert.equal(new Set(pilihan.map(item => item.scene.world)).size, 3, "latar ketiganya harus berbeda");
+assert.ok(pilihan.every(item => item.prompt.includes("Serum Glow")));
+
+console.log("shot planner scene tests passed");

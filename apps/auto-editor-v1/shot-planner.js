@@ -15,6 +15,7 @@
  */
 
 const { VIDEO_MAX_SECONDS_PER_CALL } = require("./gemini-client");
+const { describeScene, pickScenes, scenesFor } = require("./scene-library");
 
 const DEFAULT_DURATION = 18;
 const DEFAULT_AI_SECONDS = 9;
@@ -38,14 +39,56 @@ const AI_PRIORITY = Object.freeze(["hook", "benefit", "cta"]);
 
 const round = value => Number((Number(value) || 0).toFixed(2));
 
-function styleContract({ product = {}, tone = "terang" } = {}) {
+function resolveScene({ product = {}, scene, sceneId } = {}) {
+  if (scene && scene.world) return scene;
+  const pool = scenesFor(product.category);
+  const dipilih = sceneId && pool.find(item => item.id === sceneId);
+  return dipilih || pickScenes({ category: product.category, seed: product.title || "" })[0];
+}
+
+/*
+ * Kontrak gaya mengikat seluruh shot pada satu set yang sama. Keseragaman di
+ * dalam satu video itulah yang membuat potongan menyambung; keragaman berlaku
+ * antar produk, dan itu ditangani pemilihan set di scene-library.
+ */
+function styleContract({ product = {}, scene, sceneId } = {}) {
   const subject = product.title || "produk";
+  const dipakai = resolveScene({ product, scene, sceneId });
   return [
-    `Subjek utama: ${subject}, tampil identik dengan foto referensi di setiap shot.`,
-    `Pencahayaan ${tone} dan merata, latar bersih tanpa tulisan atau logo tambahan.`,
+    `Subjek utama: ${subject}, tampil identik dengan gambar referensi di setiap shot.`,
+    describeScene(dipakai),
+    "Tidak ada tulisan, logo, atau watermark tambahan di dalam gambar.",
     "Kamera stabil, gerakan halus, tanpa perpindahan gaya di tengah shot.",
     "Rasio 9:16 vertikal."
   ].join(" ");
+}
+
+/*
+ * Prompt master image dibuat lebih dulu supaya kesalahan komposisi tertangkap
+ * saat masih murah. Klip video kemudian berangkat dari satu gambar yang sudah
+ * benar, bukan mengarang dunianya masing-masing dari foto produk berlatar
+ * putih — di situlah perbedaan antar klip biasanya muncul.
+ */
+function buildMasterImagePrompt({ product = {}, scene, sceneId, variant = {} } = {}) {
+  const dipakai = resolveScene({ product, scene, sceneId });
+  const subject = product.title || "produk";
+  return {
+    sceneId: dipakai.id,
+    prompt: [
+      `Foto produk untuk iklan: ${subject}.`,
+      "Pertahankan bentuk, warna, dan seluruh detail kemasan persis seperti gambar referensi yang diunggah. Jangan mengubah tulisan pada kemasan.",
+      describeScene(dipakai),
+      variant.visualHint ? `Nuansa yang diinginkan: ${variant.visualHint}` : "",
+      "Kualitas foto komersial, fokus tajam pada produk, latar sedikit kabur.",
+      "Tidak ada tulisan, logo, atau watermark tambahan di dalam gambar.",
+      "Rasio 9:16 vertikal."
+    ].filter(Boolean).join(" ")
+  };
+}
+
+function masterImageOptions({ product = {}, variant = {}, count = 2 } = {}) {
+  return pickScenes({ category: product.category, seed: product.title || "", count })
+    .map(scene => ({ ...buildMasterImagePrompt({ product, scene, variant }), scene }));
 }
 
 function splitDurations(duration, pacing) {
@@ -100,13 +143,15 @@ function planShots(input = {}) {
     duration = DEFAULT_DURATION,
     aiSeconds = DEFAULT_AI_SECONDS,
     pacing = "medium",
-    tone
+    scene,
+    sceneId
   } = input;
 
   const total = Math.max(MIN_SHOT_SECONDS, Number(duration) || DEFAULT_DURATION);
   const segments = splitDurations(total, pacing);
   const { allocation, unused } = allocateAiSeconds(segments, Math.min(aiSeconds, total));
-  const contract = styleContract({ product, tone });
+  const activeScene = resolveScene({ product, scene, sceneId });
+  const contract = styleContract({ product, scene: activeScene });
 
   const shots = [];
   let aiIndex = 0;
@@ -150,6 +195,7 @@ function planShots(input = {}) {
   const aiTotal = round(shots.filter(shot => shot.kind === "ai").reduce((sum, shot) => sum + shot.duration, 0));
   return {
     duration: total,
+    scene: activeScene,
     contract,
     shots,
     aiSeconds: aiTotal,
@@ -162,6 +208,9 @@ function planShots(input = {}) {
 
 module.exports = {
   AI_PRIORITY,
+  buildMasterImagePrompt,
+  masterImageOptions,
+  resolveScene,
   DEFAULT_AI_SECONDS,
   DEFAULT_DURATION,
   MIN_SHOT_SECONDS,

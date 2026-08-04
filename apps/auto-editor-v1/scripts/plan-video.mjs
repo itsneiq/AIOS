@@ -16,7 +16,7 @@ import path from "node:path";
 
 const require = createRequire(import.meta.url);
 const { planScripts } = require("../script-pipeline.js");
-const { planShots } = require("../shot-planner.js");
+const { masterImageOptions, planShots } = require("../shot-planner.js");
 const { createGeminiClient } = require("../gemini-client.js");
 const { createProject, slug } = require("../video-project.js");
 
@@ -48,6 +48,8 @@ Opsi:
   --duration <detik> Durasi video (default 18)
   --ai <detik>       Porsi yang dibuat AI (default 9)
   --count <angka>    Jumlah varian yang dibuat sebelum memilih (default 12)
+  --masters <angka>  Jumlah pilihan master image (default 2)
+  --scene <id>       Paksa set visual tertentu, mis. rooftop-sore
 
 Tidak ada biaya video yang keluar di tahap ini. Prompt yang dihasilkan
 ditempel ke Flow, lalu klipnya diunduh ke folder clips/ pada proyek.`);
@@ -83,14 +85,18 @@ if (variant.policy.blocking) {
   process.exit(1);
 }
 
-const plan = planShots({ variant, product: hasil.product, photos: [], duration, aiSeconds });
+const plan = planShots({ variant, product: hasil.product, photos: [], duration, aiSeconds, sceneId: args.scene || undefined });
+const masters = masterImageOptions({ product: hasil.product, variant, count: Number(args.masters) || 2 });
 const root = path.resolve(args.out || "projects", slug(hasil.product.title));
-const { paths } = createProject(root, { plan, variant, product: hasil.product });
+const { paths } = createProject(root, { plan, variant, product: hasil.product, masters });
 
 console.log(`PRODUK    ${hasil.product.title}`);
 console.log(`KATEGORI  ${hasil.product.category}`);
 console.log(`VARIAN    #${pick} skor ${variant.score} [${variant.angle}]`);
 console.log(`          ${variant.hook}\n`);
+
+console.log(`SET VISUAL  ${plan.scene.id} — ${plan.scene.world}`);
+console.log(`            ${plan.scene.lighting}\n`);
 
 console.log("RENCANA SHOT");
 for (const shot of plan.shots) {
@@ -104,8 +110,10 @@ console.log(`          ${paths.prompts}\n`);
 
 console.log("LANGKAH BERIKUTNYA");
 console.log(`  1. Taruh foto produk di   ${paths.photos}`);
-console.log(`  2. Buka ${paths.prompts}, tempel prompt satu per satu ke Flow`);
-console.log(`  3. Unduh hasilnya, beri nama shot-1.mp4 dan seterusnya`);
-console.log(`  4. Taruh di                ${paths.clips}`);
+console.log(`  2. Buka ${paths.prompts}`);
+console.log(`  3. TAHAP 1 — generate ${masters.length} pilihan master image, pilih satu`);
+console.log(`     Simpan sebagai          ${path.join(paths.master, "master.jpg")}`);
+console.log(`  4. TAHAP 2 — pakai master itu sebagai referensi, generate klip video`);
+console.log(`     Beri nama shot-1.mp4, taruh di ${paths.clips}`);
 console.log(`  5. Rakit dengan            node scripts/make-video.mjs --project "${paths.root}"`);
 console.log("\nTidak ada biaya API video yang keluar di tahap ini.");
