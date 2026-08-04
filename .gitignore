@@ -37,3 +37,7 @@ node_modules/
 # Local notes
 .local/
 notes.local.md
+
+# profil Chrome untuk otomasi Flow (berisi sesi login)
+apps/auto-editor-v1/data/chrome-profile/
+apps/auto-editor-v1/data/flow-selectors.json
