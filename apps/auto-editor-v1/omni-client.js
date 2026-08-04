@@ -54,7 +54,7 @@ function readImagePart(imagePath) {
  * harus berasal dari gambar nyata, bukan dari imajinasi model; inilah satu
  * pengungkit terbesar untuk menjaga bentuk dan warna tetap konsisten.
  */
-function buildVideoRequest({ model, prompt, imagePath, seconds, previousInteractionId }) {
+function buildVideoRequest({ model, prompt, imagePath, seconds, previousInteractionId, extras }) {
   /*
    * Durasi yang tidak masuk akal jatuh ke satu detik, bukan ke batas atas.
    * Setiap detik dibayar, jadi kesalahan pemanggil harus berujung pada klip
@@ -65,15 +65,25 @@ function buildVideoRequest({ model, prompt, imagePath, seconds, previousInteract
   const durasi = Number.isFinite(diminta) && diminta > 0
     ? Math.max(1, Math.min(MAX_SECONDS_PER_CALL, Math.round(diminta)))
     : 1;
+  /*
+   * Permintaan sengaja dijaga seminimal mungkin: hanya `model` dan `input`.
+   * Menyertakan objek `config` ditolak API dengan "Unknown parameter 'config'",
+   * dan menebak nama pengganti berarti membayar satu panggilan per tebakan.
+   *
+   * Karena itu durasi disampaikan lewat teks prompt, yang bagaimanapun sudah
+   * kita kendalikan penuh. Rasio 9:16 sudah dibawa kontrak gaya dari
+   * shot-planner. Bila kelak nama parameter yang benar diketahui, `extras`
+   * menyalurkannya tanpa mengubah bentuk dasar.
+   */
   const parts = [];
   const image = readImagePart(imagePath);
   if (image) parts.push(image);
-  parts.push({ text: String(prompt || "").trim() });
+  parts.push({ text: `${String(prompt || "").trim()} Durasi klip sekitar ${durasi} detik.`.trim() });
 
   const body = {
     model,
     input: parts.length === 1 ? parts[0].text : parts,
-    config: { durationSeconds: durasi, aspectRatio: "9:16" }
+    ...(extras && typeof extras === "object" ? extras : {})
   };
   // Perantaian ke interaksi sebelumnya adalah cara menjaga produk, pencahayaan,
   // dan sudut kamera tetap sama antar klip.
@@ -150,8 +160,15 @@ function createOmniClient({
     if (!response.ok) {
       let body = "";
       try { body = await response.text(); } catch {}
-      const code = response.status === 404 ? "MODEL_NOT_FOUND" : response.status === 429 ? "RATE_LIMITED" : response.status >= 500 ? "SERVER_ERROR" : "REQUEST_FAILED";
-      throw omniError(code, `Permintaan video gagal (HTTP ${response.status}). ${body.slice(0, 400)}`);
+      // Parameter yang ditolak menunjuk ke bentuk permintaan, bukan ke isi
+      // prompt, jadi dibedakan agar perbaikannya langsung terarah.
+      const unknownParameter = /unknown (parameter|field)/i.exec(body);
+      const code = unknownParameter ? "BAD_REQUEST_SHAPE"
+        : response.status === 404 ? "MODEL_NOT_FOUND"
+        : response.status === 429 ? "RATE_LIMITED"
+        : response.status >= 500 ? "SERVER_ERROR" : "REQUEST_FAILED";
+      const petunjuk = unknownParameter ? " Sesuaikan buildVideoRequest() di omni-client.js." : "";
+      throw omniError(code, `Permintaan video gagal (HTTP ${response.status}). ${body.slice(0, 400)}${petunjuk}`);
     }
     return response.json();
   }

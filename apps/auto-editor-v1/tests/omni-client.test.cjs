@@ -16,13 +16,24 @@ assert.equal(denganFoto.model, "m");
 assert.ok(Array.isArray(denganFoto.input));
 assert.ok(denganFoto.input[0].inlineData.data.length > 0);
 assert.equal(denganFoto.input[0].inlineData.mimeType, "image/jpeg");
-assert.equal(denganFoto.input[1].text, "tangan memegang botol");
-assert.equal(denganFoto.config.durationSeconds, 6);
-assert.equal(denganFoto.config.aspectRatio, "9:16");
+assert.ok(denganFoto.input[1].text.startsWith("tangan memegang botol"));
+
+/*
+ * API menolak objek `config` dengan "Unknown parameter 'config'", dan menebak
+ * nama penggantinya berarti membayar satu panggilan per tebakan. Permintaan
+ * karena itu dijaga hanya berisi model dan input, dengan durasi disampaikan
+ * lewat teks prompt yang memang sudah kita kendalikan.
+ */
+assert.deepEqual(Object.keys(denganFoto).sort(), ["input", "model"]);
+assert.match(denganFoto.input[1].text, /Durasi klip sekitar 6 detik\./);
 
 // Batas sepuluh detik per panggilan ditegakkan di sisi klien.
-assert.equal(buildVideoRequest({ model: "m", prompt: "x", seconds: 30 }).config.durationSeconds, 10);
-assert.equal(buildVideoRequest({ model: "m", prompt: "x", seconds: 0 }).config.durationSeconds, 1);
+assert.match(buildVideoRequest({ model: "m", prompt: "x", seconds: 30 }).input, /sekitar 10 detik/);
+assert.match(buildVideoRequest({ model: "m", prompt: "x", seconds: 0 }).input, /sekitar 1 detik/);
+
+// Bila nama parameter yang benar kelak diketahui, extras menyalurkannya tanpa
+// mengubah bentuk dasar permintaan.
+assert.equal(buildVideoRequest({ model: "m", prompt: "x", extras: { response_format: { type: "video" } } }).response_format.type, "video");
 
 // Tanpa foto, input menyusut jadi teks biasa.
 assert.equal(typeof buildVideoRequest({ model: "m", prompt: "x" }).input, "string");
@@ -101,6 +112,14 @@ assert.equal(readInteractionId({ name: "interactions/xyz" }), "interactions/xyz"
 
   const kuota = createOmniClient({ apiKey: "k", fetchImpl: async () => ({ ok: false, status: 429, text: async () => "quota" }) });
   await assert.rejects(() => kuota.probe(), error => error.diagnostic.code === "RATE_LIMITED");
+
+  // Parameter yang ditolak menunjuk ke bentuk permintaan, bukan ke isi prompt.
+  const bentukSalah = createOmniClient({
+    apiKey: "k",
+    fetchImpl: async () => ({ ok: false, status: 400, text: async () => '{"error":{"message":"Unknown parameter \'config\'."}}' })
+  });
+  await assert.rejects(() => bentukSalah.probe(), error =>
+    error.diagnostic.code === "BAD_REQUEST_SHAPE" && /buildVideoRequest/.test(error.message));
 
   fs.rmSync(dir, { recursive: true, force: true });
   console.log("omni client tests passed");
