@@ -16,17 +16,26 @@
 
 const { VIDEO_MAX_SECONDS_PER_CALL } = require("./gemini-client");
 const { describeScene, pickScenes, scenesFor } = require("./scene-library");
+const { BEATS, directionForSpan } = require("./angle-direction");
 
 const DEFAULT_DURATION = 18;
 const DEFAULT_AI_SECONDS = 9;
 const MIN_SHOT_SECONDS = 2;
 
-// Urutan peran mengikuti struktur hook/benefit/cta yang sudah dipakai
-// creative-planner, sehingga script dan shot list tetap sejalan.
+/*
+ * Pembagian waktu mengikuti formula hook - agitate - solve - cta.
+ *
+ * Struktur lama hanya punya hook, benefit, cta. Bagian tengahnya berupa klaim
+ * datar tanpa tekanan, sehingga penonton tidak pernah diberi alasan untuk
+ * peduli sebelum produk ditawarkan. Beat agitate mengisi jarak itu.
+ *
+ * Hook mendapat porsi kecil dengan sengaja: tugasnya menghentikan jempol, dan
+ * itu selesai dalam hitungan detik.
+ */
 const ROLE_RATIOS = Object.freeze({
-  fast: Object.freeze([0.22, 0.48, 0.3]),
-  medium: Object.freeze([0.25, 0.5, 0.25]),
-  slow: Object.freeze([0.3, 0.5, 0.2])
+  fast: Object.freeze([0.15, 0.25, 0.35, 0.25]),
+  medium: Object.freeze([0.17, 0.28, 0.33, 0.22]),
+  slow: Object.freeze([0.2, 0.3, 0.32, 0.18])
 });
 
 /*
@@ -35,7 +44,7 @@ const ROLE_RATIOS = Object.freeze({
  * membuat orang menggulir lewat. CTA paling akhir mendapat prioritas terendah
  * karena di sana yang dibutuhkan justru ketajaman teks dan kemasan.
  */
-const AI_PRIORITY = Object.freeze(["hook", "benefit", "cta"]);
+const AI_PRIORITY = Object.freeze([...BEATS]);
 
 const round = value => Number((Number(value) || 0).toFixed(2));
 
@@ -93,7 +102,7 @@ function masterImageOptions({ product = {}, variant = {}, count = 2 } = {}) {
 
 function splitDurations(duration, pacing) {
   const ratios = ROLE_RATIOS[pacing] || ROLE_RATIOS.medium;
-  const roles = ["hook", "benefit", "cta"];
+  const roles = [...BEATS];
   let cursor = 0;
   return ratios.map((ratio, index) => {
     const start = cursor;
@@ -145,16 +154,35 @@ function dominantRole(segments, clip) {
   return best;
 }
 
-function aiPromptFor({ segment, variant, product, contract, index }) {
-  const beat = segment.role === "hook"
-    ? variant.visualHint || `Produk ${product.title || ""} diperlihatkan bergerak dari dekat`.trim()
-    : segment.role === "benefit"
-      ? `Produk sedang dipakai, memperlihatkan ${(product.benefits || [])[0] || "manfaat utamanya"}`
-      : `Produk ditampilkan utuh sebagai penutup`;
+/*
+ * Seluruh beat yang benar-benar ditaungi satu klip, bukan hanya yang dominan.
+ * Klip sembilan detik pada video delapan belas detik melewati dua beat, dan
+ * arahannya perlu memuat keduanya supaya klip punya perkembangan di dalamnya.
+ */
+function beatsInSpan(segments, clip, minOverlap = 1) {
+  return segments
+    .filter(segment => Math.min(segment.end, clip.end) - Math.max(segment.start, clip.start) >= minOverlap)
+    .map(segment => segment.role);
+}
+
+/*
+ * Arahan visual diambil dari sudut kreatif varian, bukan dari peran shot semata.
+ *
+ * Sebelumnya fungsi ini hanya membaca peran, sehingga problem_solution,
+ * value_reveal, dan before_after menghasilkan prompt gambar yang persis sama.
+ * Iklan yang copy-nya membuka dengan masalah tetap dibuka dengan close-up
+ * produk: penonton mendengar keluhan tetapi melihat katalog.
+ *
+ * Saran visual dari penulis naskah tetap didahulukan bila ada, karena ia sudah
+ * mempertimbangkan produk yang sebenarnya.
+ */
+function aiPromptFor({ beats, variant, product, contract, index }) {
+  const arahan = directionForSpan(variant.angle, beats);
+  const saran = index === 0 && variant.visualHint ? `${variant.visualHint}. ` : "";
   const chaining = index === 0
     ? "Ini shot pembuka."
     : "Lanjutkan dari shot sebelumnya: pertahankan produk, pencahayaan, latar, dan sudut kamera yang sama. Ubah hanya gerakan yang diminta.";
-  return `${beat}. ${chaining} ${contract}`;
+  return `${saran}${arahan}. ${chaining} ${contract}`;
 }
 
 function planShots(input = {}) {
@@ -178,14 +206,16 @@ function planShots(input = {}) {
   const shots = [];
   aiClips.forEach((clip, index) => {
     const role = dominantRole(segments, clip);
+    const beats = beatsInSpan(segments, clip);
     shots.push({
       id: `shot-${shots.length + 1}`,
       kind: "ai",
       role,
+      beats,
       start: clip.start,
       end: clip.end,
       duration: clip.duration,
-      prompt: aiPromptFor({ segment: { role }, variant, product, contract, index }),
+      prompt: aiPromptFor({ beats: beats.length ? beats : [role], variant, product, contract, index }),
       chainFrom: index === 0 ? null : `shot-${index}`
     });
   });
@@ -207,7 +237,7 @@ function planShots(input = {}) {
       // Gerakan tajam di foto menahan kesan slideshow. Ken burns yang lambat
       // justru membuat iklan terasa mati di feed.
       motion: segment.role === "cta" ? "hold" : photoPortion <= 3 ? "punch-in" : "slow-pan",
-      caption: segment.role === "hook" ? variant.hook : segment.role === "benefit" ? variant.benefit : variant.cta
+      caption: variant[segment.role] || variant.benefit || ""
     });
     photoIndex++;
   }
@@ -234,6 +264,7 @@ module.exports = {
   DEFAULT_DURATION,
   MIN_SHOT_SECONDS,
   ROLE_RATIOS,
+  beatsInSpan,
   dominantRole,
   planAiClips,
   aiPromptFor,

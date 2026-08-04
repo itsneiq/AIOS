@@ -2,15 +2,17 @@
 const assert = require("node:assert/strict");
 const { dominantRole, planAiClips, planShots, splitDurations, styleContract } = require("../shot-planner");
 
-const variant = { hook: "Ternyata gak perlu bayar mahal", benefit: "Bahannya adem", cta: "Cek keranjang", visualHint: "Tangan meregangkan kain kemeja" };
+const variant = { angle: "value_reveal", hook: "Ternyata gak perlu bayar mahal", agitate: "Cari kemeja yang adem itu susah", solve: "Bahannya adem", benefit: "Bahannya adem", cta: "Cek keranjang", visualHint: "Tangan meregangkan kain kemeja" };
 const product = { title: "Kemeja Oversize Katun", benefits: ["adem dipakai seharian"] };
 const photos = ["a.jpg", "b.jpg"];
 
 // Pembagian peran harus menutup seluruh durasi tanpa celah maupun tumpang tindih.
+// Empat beat: hook, agitate, solve, cta.
 const segments = splitDurations(18, "medium");
-assert.equal(segments.length, 3);
+assert.equal(segments.length, 4);
+assert.deepEqual(segments.map(item => item.role), ["hook", "agitate", "solve", "cta"]);
 assert.equal(segments[0].start, 0);
-assert.equal(segments[2].end, 18);
+assert.equal(segments[3].end, 18);
 for (let i = 1; i < segments.length; i++) assert.equal(segments[i].start, segments[i - 1].end);
 
 const plan = planShots({ variant, product, photos, duration: 18, aiSeconds: 9 });
@@ -28,9 +30,15 @@ for (const shot of plan.shots) {
 }
 assert.equal(cursor, 18);
 
-// Hook mendapat AI lebih dulu; tiga detik pertama menentukan segalanya.
-const shotHookPertama = plan.shots.find(shot => shot.role === "hook");
-assert.equal(shotHookPertama.kind, "ai", "hook harus dibuka dengan gerakan, bukan foto diam");
+/*
+ * Video harus dibuka dengan gerakan. Yang diuji shot pertamanya, bukan shot
+ * yang berlabel "hook": satu klip panjang menaungi beberapa beat sekaligus dan
+ * labelnya mengikuti beat dengan tumpang tindih terbesar, sehingga klip yang
+ * membuka video bisa saja berlabel agitate. Yang menentukan tetap posisinya.
+ */
+assert.equal(plan.shots[0].kind, "ai", "video harus dibuka dengan gerakan, bukan foto diam");
+assert.equal(plan.shots[0].start, 0);
+assert.ok(plan.shots[0].beats.includes("hook"), "klip pembuka wajib menaungi beat hook");
 
 // CTA paling akhir memakai foto agar teks dan kemasan tetap tajam.
 const cta = plan.shots.filter(shot => shot.role === "cta");
@@ -93,9 +101,18 @@ assert.deepEqual(planAiClips(18, 0), []);
 // tumpang tindih waktu terbesar.
 const segmen = splitDurations(18, "medium");
 assert.equal(dominantRole(segmen, { start: 0, end: 3 }), "hook");
-assert.equal(dominantRole(segmen, { start: 0, end: 9 }), "hook");
-assert.equal(dominantRole(segmen, { start: 5, end: 13 }), "benefit");
 assert.equal(dominantRole(segmen, { start: 14, end: 18 }), "cta");
+assert.ok(["agitate", "solve"].includes(dominantRole(segmen, { start: 5, end: 13 })));
+
+/*
+ * Klip panjang menaungi beberapa beat sekaligus, dan arahannya harus memuat
+ * semuanya supaya klip punya perkembangan di dalamnya, bukan satu pose statis.
+ */
+const { beatsInSpan } = require("../shot-planner");
+const beats = beatsInSpan(segmen, { start: 0, end: 9 });
+assert.ok(beats.length >= 2, `klip sembilan detik melewati lebih dari satu beat, dapat: ${beats.join(",")}`);
+assert.equal(beats[0], "hook");
+assert.deepEqual(beatsInSpan(segmen, { start: 0, end: 3 }), ["hook"]);
 
 // Tanpa foto sama sekali, perencana tetap menghasilkan rencana tetapi menandainya.
 const tanpaFoto = planShots({ variant, product, photos: [], duration: 18, aiSeconds: 9 });

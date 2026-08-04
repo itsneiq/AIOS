@@ -50,6 +50,7 @@ Opsi:
   --count <angka>    Jumlah varian yang dibuat sebelum memilih (default 12)
   --masters <angka>  Jumlah pilihan master image (default 2)
   --scene <id>       Paksa set visual tertentu, mis. rooftop-sore
+  --platform <nama>  meta | shopee | tiktok (default meta)
 
 Tidak ada biaya video yang keluar di tahap ini. Prompt yang dihasilkan
 ditempel ke Flow, lalu klipnya diunduh ke folder clips/ pada proyek.`);
@@ -68,7 +69,8 @@ const hasil = await planScripts({
   description: args.desc || "",
   count: Number(args.count) || undefined,
   duration,
-  aiSeconds
+  aiSeconds,
+  platform: args.platform || "meta"
 }, client);
 
 const pick = Math.max(1, Math.min(hasil.variants.length, Number(args.pick) || 1));
@@ -76,6 +78,18 @@ const variant = hasil.variants[pick - 1];
 
 if (!variant) {
   console.error("Tidak ada varian yang bisa dipakai.");
+  process.exit(1);
+}
+/*
+ * Ajakan yang tidak mungkin diikuti penontonnya tidak melanggar kebijakan apa
+ * pun, sehingga lolos saringan lain. Menyuruh penonton Meta menekan keranjang
+ * berarti meminta sesuatu yang tidak ada di layar.
+ */
+if (variant.ctaCheck && !variant.ctaCheck.valid) {
+  console.error(`Varian #${pick} memakai ajakan yang tidak ada di ${variant.ctaCheck.platform}: "${variant.ctaCheck.matched}"`);
+  console.error(`  ${variant.ctaCheck.reason}`);
+  console.error(`  Ganti dengan yang seperti: "${variant.ctaCheck.suggestion}"`);
+  console.error("Pilih varian lain dengan --pick.");
   process.exit(1);
 }
 if (variant.policy.blocking) {
@@ -92,8 +106,12 @@ const { paths } = createProject(root, { plan, variant, product: hasil.product, m
 
 console.log(`PRODUK    ${hasil.product.title}`);
 console.log(`KATEGORI  ${hasil.product.category}`);
+console.log(`PLATFORM  ${(args.platform || "meta")}`);
 console.log(`VARIAN    #${pick} skor ${variant.score} [${variant.angle}]`);
-console.log(`          ${variant.hook}\n`);
+console.log(`  hook    ${variant.hook}`);
+if (variant.agitate) console.log(`  agitate ${variant.agitate}`);
+if (variant.solve || variant.benefit) console.log(`  solve   ${variant.solve || variant.benefit}`);
+console.log(`  cta     ${variant.cta}\n`);
 
 console.log(`SET VISUAL  ${plan.scene.id} — ${plan.scene.world}`);
 console.log(`            ${plan.scene.lighting}\n`);

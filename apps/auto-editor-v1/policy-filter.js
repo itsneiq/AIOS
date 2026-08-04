@@ -60,9 +60,17 @@ const RULES = Object.freeze([
 
 const SEVERITY_WEIGHT = Object.freeze({ high: 40, medium: 15 });
 
+/*
+ * Seluruh beat diperiksa, bukan hanya hook dan penutup. Beat "agitate" justru
+ * yang paling rawan: tugasnya membuat masalah terasa, dan di situlah kalimat
+ * mudah tergelincir menyinggung kondisi pribadi penonton.
+ */
 function textOf(script) {
   if (typeof script === "string") return script;
-  return [script?.hook, script?.benefit, script?.cta].filter(Boolean).join(" ");
+  return [script?.hook, script?.agitate, script?.solve, script?.benefit, script?.cta]
+    .filter(Boolean)
+    .filter((value, index, all) => all.indexOf(value) === index)
+    .join(" ");
 }
 
 function checkPolicy(script) {

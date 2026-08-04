@@ -110,7 +110,9 @@ try {
 
   let voicePath = null;
   if (!args["no-voice"]) {
-    const teks = [variant.hook, variant.benefit, variant.cta].filter(Boolean).join(" ");
+    // Naskah dibaca sesuai urutan beat. Proyek lama tidak punya "agitate" dan
+    // menyimpan bagian tengahnya sebagai "benefit"; keduanya tetap terbaca.
+    const teks = [variant.hook, variant.agitate, variant.solve || variant.benefit, variant.cta].filter(Boolean).join(" ");
     voicePath = path.join(workDir, "voice.mp3");
     try {
       console.log("Membuat voiceover...");
@@ -123,7 +125,11 @@ try {
   }
 
   const subtitles = planSubtitles({
-    script: { hook: variant.hook, benefit: variant.benefit, cta: variant.cta },
+    script: {
+      hook: variant.hook,
+      benefit: [variant.agitate, variant.solve || variant.benefit].filter(Boolean).join(" "),
+      cta: variant.cta
+    },
     duration,
     platform: "meta"
   });

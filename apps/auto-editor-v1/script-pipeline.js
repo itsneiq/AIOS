@@ -14,6 +14,7 @@ const { planCreative } = require("./creative-planner");
 const { scoreHook } = require("./hook-optimizer");
 const { scoreAdHook } = require("./hook-quality");
 const { checkPolicy } = require("./policy-filter");
+const { checkCta } = require("./platform-profile");
 const { generateScriptVariants } = require("./script-generator");
 const { estimateVideoCost } = require("./gemini-client");
 
@@ -29,17 +30,27 @@ function round(value) {
  * Pelanggaran berat menekan varian ke dasar daftar karena iklan yang ditolak
  * tidak menghasilkan data apa pun, seburuk apa pun hook-nya.
  */
-function combineScore({ hookScore, policy }) {
+function combineScore({ hookScore, policy, ctaValid = true }) {
   const base = Math.max(0, hookScore - policy.penalty);
-  return round(policy.blocking ? Math.min(base, 20) : base);
+  // Ajakan yang mustahil diikuti membuat seluruh varian tak terpakai, seburuk
+  // apa pun atau sebagus apa pun hook-nya.
+  const afterCta = ctaValid ? base : Math.min(base, 30);
+  return round(policy.blocking ? Math.min(afterCta, 20) : afterCta);
 }
 
 function evaluateVariant(variant, { platform, product }) {
   const hook = scoreHook(variant.hook, { platform, productName: product.title, keywords: product.keywords });
   const ad = scoreAdHook(variant.hook, { baseScore: hook.score });
   const policy = checkPolicy(variant);
+  /*
+   * Ajakan yang tidak mungkin diikuti penontonnya tidak melanggar kebijakan
+   * apa pun, sehingga lolos dari seluruh saringan lain. "Cek keranjang" pada
+   * iklan Meta menyuruh menekan sesuatu yang tidak ada di layar.
+   */
+  const ctaCheck = checkCta(variant.cta, platform);
   return {
     ...variant,
+    ctaCheck,
     hookScore: hook.score,
     adScore: ad.score,
     wordCount: hook.wordCount,
@@ -48,7 +59,7 @@ function evaluateVariant(variant, { platform, product }) {
     weaknesses: ad.weaknesses,
     issues: hook.issues,
     policy,
-    score: combineScore({ hookScore: ad.score, policy })
+    score: combineScore({ hookScore: ad.score, policy, ctaValid: ctaCheck.valid })
   };
 }
 
@@ -67,6 +78,7 @@ function summarize(ranked) {
     usable: ranked.filter(item => !item.policy.blocking).length,
     blocked,
     flagged,
+    ctaMismatch: ranked.filter(item => item.ctaCheck && !item.ctaCheck.valid).length,
     bestScore: ranked[0]?.score || 0,
     angles: [...new Set(ranked.map(item => item.angle))].sort()
   };

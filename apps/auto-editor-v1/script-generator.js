@@ -5,8 +5,10 @@
  *
  * `script-engine.js` memilih kalimat dari kumpulan template tetap sehingga
  * hasilnya berulang antar produk. Modul ini menggantinya dengan copy yang
- * ditulis model, namun tetap mengembalikan bentuk { hook, benefit, cta, angle }
- * yang sama supaya seluruh tahap setelahnya tidak perlu berubah.
+ * ditulis model dengan struktur hook - agitate - solve - cta.
+ *
+ * Bagian "solve" tetap disalin ke "benefit" sebagai alias, karena proyek yang
+ * sudah tersimpan memakai nama lama dan harus tetap bisa dirakit.
  *
  * Bila Gemini tidak tersedia, modul jatuh kembali ke template lama agar alat
  * tetap bisa dipakai tanpa API key.
@@ -16,6 +18,7 @@ const { PLATFORM_LIMITS } = require("./hook-optimizer");
 const { generateScriptSet } = require("./script-engine");
 const { policyPromptRules } = require("./policy-filter");
 const { qualityPromptRules } = require("./hook-quality");
+const { ctaPromptRules, profileFor } = require("./platform-profile");
 
 const ANGLE_BRIEFS = Object.freeze({
   before_after: "Tunjukkan kondisi sebelum dan sesudah pemakaian. Kontraskan keduanya secara jujur tanpa menjanjikan hasil pasti.",
@@ -47,7 +50,10 @@ function clampCount(value) {
 }
 
 function limitsFor(platform) {
-  return PLATFORM_LIMITS[platform] || PLATFORM_LIMITS.default;
+  // Profil platform yang memegang batas panjang hook; PLATFORM_LIMITS lama
+  // tetap dipakai sebagai cadangan untuk platform yang belum berprofil.
+  const profile = profileFor(platform);
+  return profile.hook ? { min: profile.hook.minWords, max: profile.hook.maxWords } : (PLATFORM_LIMITS[platform] || PLATFORM_LIMITS.default);
 }
 
 function buildScriptPrompt({ product = {}, platform = "tiktok", count = DEFAULT_COUNT, duration = 18, angles = [], extraNotes = "" } = {}) {
@@ -62,7 +68,7 @@ function buildScriptPrompt({ product = {}, platform = "tiktok", count = DEFAULT_
     ? `\nUntuk kategori ${product.category}, sudut ${priority.join(" dan ")} terbukti paling kuat. Beri porsi lebih besar ke sudut tersebut, tapi tetap sertakan sudut lain sebagai pembanding.`
     : "";
 
-  return `Kamu penulis copy iklan affiliate berbahasa Indonesia untuk Meta Ads (Reels dan Feed).
+  return `Kamu penulis copy iklan affiliate berbahasa Indonesia untuk ${profileFor(platform).label}.
 
 PRODUK
 - Nama: ${product.title || "Produk"}
@@ -74,8 +80,16 @@ PRODUK
 - Kata kunci: ${(product.keywords || []).join(", ") || "-"}
 
 FORMAT VIDEO
-- Durasi total ${duration} detik, dibagi tiga bagian: hook, benefit, CTA.
+- Durasi total ${duration} detik, dibagi empat bagian berurutan: hook, agitate, solve, CTA.
 - Ditonton sambil scroll, sering tanpa suara, jadi hook harus berdiri sendiri.
+
+STRUKTUR EMPAT BAGIAN
+- hook: hentikan jempol. Satu kalimat, tanpa pengantar, tanpa menyebut merek di depan.
+- agitate: buat masalahnya terasa. Sebutkan usaha yang sudah dicoba tapi belum berhasil, atau kerepotan yang sudah dianggap biasa. Bagian inilah yang membuat penonton merasa dibicarakan.
+- solve: baru di sini produk masuk sebagai jalan keluar. Sebutkan satu alasan konkret kenapa berbeda.
+- cta: satu ajakan pendek, sesuai mekanisme platform di bawah.
+
+Tanpa agitate, iklan berubah jadi katalog: penonton diberi tahu produknya bagus tetapi tidak pernah diberi alasan untuk peduli.
 
 ATURAN HOOK
 - Panjang ${limits.min}-${limits.max} kata. Ini batas keras.
@@ -86,7 +100,10 @@ ATURAN HOOK
 YANG MEMBUAT HOOK BERHENTI DIGULIR
 ${qualityPromptRules()}
 
-ATURAN KEBIJAKAN META (wajib dipatuhi)
+PLATFORM DAN AJAKAN BERTINDAK
+${ctaPromptRules(platform)}
+
+ATURAN KEBIJAKAN (wajib dipatuhi)
 ${policyPromptRules()}
 
 SUDUT PANDANG YANG TERSEDIA
@@ -99,9 +116,10 @@ Balas HANYA dengan JSON array, tanpa penjelasan apa pun, dengan bentuk persis:
 [
   {
     "angle": "<salah satu id sudut pandang di atas>",
-    "hook": "<kalimat hook>",
-    "benefit": "<satu sampai dua kalimat manfaat konkret>",
-    "cta": "<ajakan singkat untuk cek produk>",
+    "hook": "<satu kalimat pembuka>",
+    "agitate": "<satu kalimat yang membuat masalahnya terasa>",
+    "solve": "<satu sampai dua kalimat: produk sebagai jalan keluar>",
+    "cta": "<ajakan singkat sesuai mekanisme platform>",
     "visualHint": "<satu kalimat: visual apa yang paling pas untuk bagian hook>"
   }
 ]`;
@@ -121,10 +139,16 @@ function normalizeVariants(raw, { count = DEFAULT_COUNT, fallbackAngle = "balanc
     const key = hook.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
+    const solve = cleanLine(item?.solve || item?.benefit);
     variants.push({
       angle: ANGLE_BRIEFS[item?.angle] ? item.angle : fallbackAngle,
       hook,
-      benefit: cleanLine(item?.benefit),
+      agitate: cleanLine(item?.agitate),
+      solve,
+      // Proyek lama menyimpan bagian ini sebagai "benefit". Nama itu
+      // dipertahankan sebagai alias supaya berkas proyek yang sudah ada tetap
+      // bisa dirakit tanpa perlu dibuat ulang.
+      benefit: solve,
       cta: cleanLine(item?.cta, { maxLength: 120 }),
       visualHint: cleanLine(item?.visualHint, { maxLength: 200 }),
       source: "gemini"
@@ -140,7 +164,7 @@ function normalizeVariants(raw, { count = DEFAULT_COUNT, fallbackAngle = "balanc
  */
 function fallbackVariants({ product, count = DEFAULT_COUNT, angle = "balanced" } = {}) {
   return generateScriptSet({ count: Math.min(5, clampCount(count)), angle, product, seed: product?.title || "aios" })
-    .map(script => ({ ...script, visualHint: "", source: "template" }));
+    .map(script => ({ ...script, agitate: "", solve: script.benefit, visualHint: "", source: "template" }));
 }
 
 async function generateScriptVariants(options = {}, client) {
