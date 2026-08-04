@@ -32,6 +32,19 @@ function parseArgs(argv) {
 
 const args = parseArgs(process.argv.slice(2));
 
+if (args["list-models"]) {
+  const key = process.env.GEMINI_API_KEY || "";
+  if (!key) {
+    console.error("GEMINI_API_KEY belum diset.");
+    process.exit(1);
+  }
+  const models = await createGeminiClient({ apiKey: key }).listModels();
+  console.log(`Model yang tersedia untuk API key ini (${models.length}):\n`);
+  for (const name of models) console.log(`  ${name}`);
+  console.log(`\nPakai salah satu dengan:  $env:GEMINI_TEXT_MODEL = "<nama model>"`);
+  process.exit(0);
+}
+
 if (args.help || !args.title) {
   console.log(`Pemakaian:
   node scripts/generate-script.mjs --title "<nama produk>" [opsi]
@@ -45,8 +58,10 @@ Opsi:
   --ai <detik>       Porsi yang di-generate AI (default 9)
   --platform <nama>  meta | tiktok | shopee | youtube (default meta)
   --json             Cetak hasil mentah sebagai JSON
+  --list-models      Tampilkan model yang tersedia untuk API key ini, lalu keluar
 
-Butuh GEMINI_API_KEY. Tanpa key, alat tetap jalan memakai template lama.`);
+Butuh GEMINI_API_KEY. Tanpa key, alat tetap jalan memakai template lama.
+Nama model bisa diganti lewat GEMINI_TEXT_MODEL bila default sudah pensiun.`);
   process.exit(args.title ? 0 : 1);
 }
 

@@ -7,8 +7,14 @@
  */
 
 const DEFAULT_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta";
-const DEFAULT_TEXT_MODEL = "gemini-2.5-flash";
+const DEFAULT_TEXT_MODEL = "gemini-3.6-flash";
 const DEFAULT_TIMEOUT_MS = 30000;
+
+// Nama model Gemini berubah cukup sering. Bila default di atas ikut pensiun,
+// `--list-models` pada CLI menampilkan model yang benar-benar tersedia untuk
+// key yang sedang dipakai, tanpa perlu menebak dari dokumentasi.
+const DEFAULT_MAX_RETRIES = 2;
+const RETRYABLE_CODES = Object.freeze(["RATE_LIMITED", "SERVER_ERROR", "NETWORK"]);
 
 // Harga video Gemini Omni Flash dipakai untuk estimasi biaya sebelum generate.
 const VIDEO_MODEL = "gemini-omni-flash-preview";
@@ -79,16 +85,60 @@ function createGeminiClient({
   model = DEFAULT_TEXT_MODEL,
   endpoint = DEFAULT_ENDPOINT,
   timeoutMs = DEFAULT_TIMEOUT_MS,
-  fetchImpl
+  maxRetries = DEFAULT_MAX_RETRIES,
+  fetchImpl,
+  sleepImpl
 } = {}) {
   const doFetch = fetchImpl || globalThis.fetch;
+  const sleep = sleepImpl || (ms => new Promise(resolve => setTimeout(resolve, ms)));
 
-  async function generateJSON(prompt, { temperature = 1, maxOutputTokens = 4096, signal } = {}) {
-    if (!apiKey) {
-      const error = new Error("API key Gemini belum diisi. Set GEMINI_API_KEY atau isi lewat pengaturan aplikasi.");
-      error.diagnostic = { code: "NO_API_KEY", message: error.message };
-      throw error;
+  function requireKey() {
+    if (apiKey) return;
+    const error = new Error("API key Gemini belum diisi. Set GEMINI_API_KEY atau isi lewat pengaturan aplikasi.");
+    error.diagnostic = { code: "NO_API_KEY", message: error.message };
+    throw error;
+  }
+
+  /*
+   * Hanya kegagalan sementara yang diulang. Model salah atau key ditolak tidak
+   * akan membaik dengan menunggu, jadi langsung dilempar ke pemanggil.
+   */
+  async function withRetry(attempt) {
+    let lastError;
+    for (let tries = 0; tries <= maxRetries; tries++) {
+      try {
+        return await attempt();
+      } catch (error) {
+        lastError = error;
+        if (!RETRYABLE_CODES.includes(error.diagnostic?.code) || tries === maxRetries) throw error;
+        await sleep(1000 * 2 ** tries);
+      }
     }
+    throw lastError;
+  }
+
+  async function listModels() {
+    requireKey();
+    const response = await doFetch(`${endpoint}/models`, { headers: { "x-goog-api-key": apiKey } });
+    if (!response.ok) {
+      let body = "";
+      try { body = await response.text(); } catch {}
+      throw geminiError({ status: response.status, body });
+    }
+    const payload = await response.json();
+    return (payload?.models || [])
+      .filter(item => (item.supportedGenerationMethods || []).includes("generateContent"))
+      .map(item => String(item.name || "").replace(/^models\//, ""))
+      .filter(Boolean)
+      .sort();
+  }
+
+  async function generateJSON(prompt, options = {}) {
+    return withRetry(() => generateJSONOnce(prompt, options));
+  }
+
+  async function generateJSONOnce(prompt, { temperature = 1, maxOutputTokens = 4096, signal } = {}) {
+    requireKey();
     if (typeof doFetch !== "function") {
       const error = new Error("fetch tidak tersedia. Jalankan dengan Node.js 20 atau lebih baru.");
       error.diagnostic = { code: "NO_FETCH", message: error.message };
@@ -135,13 +185,15 @@ function createGeminiClient({
     return { data: extractJSON(firstTextPart(payload)), usage: payload?.usageMetadata || null, model };
   }
 
-  return { model, endpoint, generateJSON };
+  return { model, endpoint, generateJSON, listModels };
 }
 
 module.exports = {
   DEFAULT_ENDPOINT,
+  DEFAULT_MAX_RETRIES,
   DEFAULT_TEXT_MODEL,
   DEFAULT_TIMEOUT_MS,
+  RETRYABLE_CODES,
   VIDEO_MAX_SECONDS_PER_CALL,
   VIDEO_MODEL,
   VIDEO_USD_PER_SECOND,

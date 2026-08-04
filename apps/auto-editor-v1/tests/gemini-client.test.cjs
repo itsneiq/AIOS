@@ -43,8 +43,52 @@ assert.equal(estimateVideoCost(11).calls, 2, "lebih dari 10 detik harus dipecah 
   assert.equal(captured.init.headers["x-goog-api-key"], "test-key", "API key harus lewat header, bukan query string");
   assert.equal(JSON.parse(captured.init.body).generationConfig.responseMimeType, "application/json");
 
-  const failing = createGeminiClient({ apiKey: "k", fetchImpl: async () => ({ ok: false, status: 429, text: async () => "quota" }) });
+  // Kegagalan sementara diulang dengan jeda; jeda disuntik agar tes tidak menunggu.
+  let percobaan = 0;
+  const jeda = [];
+  const sempatGagal = createGeminiClient({
+    apiKey: "k",
+    sleepImpl: async ms => { jeda.push(ms); },
+    fetchImpl: async () => {
+      percobaan++;
+      if (percobaan < 3) return { ok: false, status: 503, text: async () => "sibuk" };
+      return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: '[{"hook":"akhirnya"}]' }] } }] }) };
+    }
+  });
+  assert.deepEqual((await sempatGagal.generateJSON("x")).data, [{ hook: "akhirnya" }]);
+  assert.equal(percobaan, 3);
+  assert.deepEqual(jeda, [1000, 2000], "jeda harus naik secara eksponensial");
+
+  let dicoba = 0;
+  const failing = createGeminiClient({
+    apiKey: "k",
+    sleepImpl: async () => {},
+    fetchImpl: async () => { dicoba++; return { ok: false, status: 429, text: async () => "quota" }; }
+  });
   await assert.rejects(() => failing.generateJSON("x"), error => error.diagnostic.code === "RATE_LIMITED");
+  assert.equal(dicoba, 3, "satu percobaan awal ditambah dua ulangan");
+
+  // Model salah tidak akan membaik dengan menunggu, jadi tidak boleh diulang.
+  let modelDicoba = 0;
+  const modelSalah = createGeminiClient({
+    apiKey: "k",
+    sleepImpl: async () => {},
+    fetchImpl: async () => { modelDicoba++; return { ok: false, status: 404, text: async () => "not found" }; }
+  });
+  await assert.rejects(() => modelSalah.generateJSON("x"), error => error.diagnostic.code === "MODEL_NOT_FOUND");
+  assert.equal(modelDicoba, 1, "kesalahan permanen langsung dilempar tanpa diulang");
+
+  // listModels hanya menampilkan model yang benar-benar bisa generateContent.
+  const daftar = createGeminiClient({
+    apiKey: "k",
+    fetchImpl: async () => ({ ok: true, status: 200, json: async () => ({ models: [
+      { name: "models/gemini-3.6-flash", supportedGenerationMethods: ["generateContent"] },
+      { name: "models/text-embedding-004", supportedGenerationMethods: ["embedContent"] },
+      { name: "models/gemini-3.5-flash-lite", supportedGenerationMethods: ["generateContent"] }
+    ] }) })
+  });
+  assert.deepEqual(await daftar.listModels(), ["gemini-3.5-flash-lite", "gemini-3.6-flash"]);
+  await assert.rejects(() => createGeminiClient({ apiKey: "" }).listModels(), /API key Gemini belum diisi/);
 
   const blocked = createGeminiClient({ apiKey: "k", fetchImpl: async () => ({ ok: true, status: 200, json: async () => ({ promptFeedback: { blockReason: "SAFETY" } }) }) });
   await assert.rejects(() => blocked.generateJSON("x"), error => error.diagnostic.code === "BLOCKED");
