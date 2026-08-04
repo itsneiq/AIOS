@@ -15,13 +15,25 @@
 const { PLATFORM_LIMITS } = require("./hook-optimizer");
 const { generateScriptSet } = require("./script-engine");
 const { policyPromptRules } = require("./policy-filter");
+const { qualityPromptRules } = require("./hook-quality");
 
 const ANGLE_BRIEFS = Object.freeze({
+  before_after: "Tunjukkan kondisi sebelum dan sesudah pemakaian. Kontraskan keduanya secara jujur tanpa menjanjikan hasil pasti.",
   demo: "Tunjukkan produk sedang dipakai dan hasilnya langsung terlihat.",
   problem_solution: "Buka dengan masalah harian yang relatable, lalu posisikan produk sebagai jalan keluarnya.",
   detail_reveal: "Bangun rasa penasaran pada satu detail produk yang tidak langsung terlihat.",
   lifestyle: "Tempatkan produk di dalam momen sehari-hari yang ingin ditiru penonton.",
   urgency: "Tekankan momentum: promo, stok, atau alasan untuk cek sekarang, tanpa menakut-nakuti."
+});
+
+// Kategori tertentu punya format yang terbukti lebih kuat. Sudut ini didorong
+// lebih sering muncul, bukan dipaksakan menjadi satu-satunya.
+const CATEGORY_PRIORITY_ANGLES = Object.freeze({
+  beauty: ["before_after", "problem_solution"],
+  fashion: ["lifestyle", "before_after"],
+  kitchen: ["demo", "problem_solution"],
+  home: ["demo", "lifestyle"],
+  gadget: ["detail_reveal", "demo"]
 });
 
 const DEFAULT_COUNT = 12;
@@ -43,6 +55,10 @@ function buildScriptPrompt({ product = {}, platform = "tiktok", count = DEFAULT_
     .filter(angle => ANGLE_BRIEFS[angle])
     .map(angle => `- ${angle}: ${ANGLE_BRIEFS[angle]}`)
     .join("\n");
+  const priority = CATEGORY_PRIORITY_ANGLES[product.category] || [];
+  const priorityNote = priority.length
+    ? `\nUntuk kategori ${product.category}, sudut ${priority.join(" dan ")} terbukti paling kuat. Beri porsi lebih besar ke sudut tersebut, tapi tetap sertakan sudut lain sebagai pembanding.`
+    : "";
 
   return `Kamu penulis copy iklan affiliate berbahasa Indonesia untuk Meta Ads (Reels dan Feed).
 
@@ -65,11 +81,14 @@ ATURAN HOOK
 - Gunakan bahasa Indonesia sehari-hari yang wajar diucapkan, bukan bahasa iklan formal.
 - Boleh spesifik dengan angka bila masuk akal untuk produk ini.
 
+YANG MEMBUAT HOOK BERHENTI DIGULIR
+${qualityPromptRules()}
+
 ATURAN KEBIJAKAN META (wajib dipatuhi)
 ${policyPromptRules()}
 
 SUDUT PANDANG YANG TERSEDIA
-${angleList}
+${angleList}${priorityNote}
 
 TUGAS
 Tulis ${total} varian yang benar-benar berbeda satu sama lain, tersebar merata ke beberapa sudut pandang di atas. Varian yang hanya berbeda susunan kata dianggap gagal.
@@ -149,6 +168,7 @@ async function generateScriptVariants(options = {}, client) {
 
 module.exports = {
   ANGLE_BRIEFS,
+  CATEGORY_PRIORITY_ANGLES,
   DEFAULT_COUNT,
   MAX_COUNT,
   buildScriptPrompt,

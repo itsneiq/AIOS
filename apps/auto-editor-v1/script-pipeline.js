@@ -12,6 +12,7 @@
 const { analyzeProduct } = require("./product-analyzer");
 const { planCreative } = require("./creative-planner");
 const { scoreHook } = require("./hook-optimizer");
+const { scoreAdHook } = require("./hook-quality");
 const { checkPolicy } = require("./policy-filter");
 const { generateScriptVariants } = require("./script-generator");
 const { estimateVideoCost } = require("./gemini-client");
@@ -35,15 +36,19 @@ function combineScore({ hookScore, policy }) {
 
 function evaluateVariant(variant, { platform, product }) {
   const hook = scoreHook(variant.hook, { platform, productName: product.title, keywords: product.keywords });
+  const ad = scoreAdHook(variant.hook, { baseScore: hook.score });
   const policy = checkPolicy(variant);
   return {
     ...variant,
     hookScore: hook.score,
+    adScore: ad.score,
     wordCount: hook.wordCount,
     signals: hook.signals,
+    strengths: ad.strengths,
+    weaknesses: ad.weaknesses,
     issues: hook.issues,
     policy,
-    score: combineScore({ hookScore: hook.score, policy })
+    score: combineScore({ hookScore: ad.score, policy })
   };
 }
 
