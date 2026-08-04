@@ -80,6 +80,15 @@ function estimateVideoCost(seconds, { usdPerSecond = VIDEO_USD_PER_SECOND, usdTo
   };
 }
 
+/*
+ * "gemini-3.6-flash" -> 3.6, dipakai untuk memilih model terbaru saat nama
+ * yang dikonfigurasi sudah pensiun. Nama tanpa angka dianggap paling tua.
+ */
+function versionOf(name) {
+  const match = /(\d+(?:\.\d+)?)/.exec(String(name || ""));
+  return match ? Number(match[1]) : 0;
+}
+
 function createGeminiClient({
   apiKey,
   model = DEFAULT_TEXT_MODEL,
@@ -90,6 +99,7 @@ function createGeminiClient({
   sleepImpl
 } = {}) {
   const doFetch = fetchImpl || globalThis.fetch;
+  let resolved = false;
   const sleep = sleepImpl || (ms => new Promise(resolve => setTimeout(resolve, ms)));
 
   function requireKey() {
@@ -133,8 +143,40 @@ function createGeminiClient({
       .sort();
   }
 
+  /*
+   * Nama model Gemini pensiun cukup sering, dan ketika itu terjadi setiap
+   * permintaan gagal dengan 404 lalu pipeline diam-diam memakai template lama.
+   * Kegagalan itu mudah terlewat karena keluarannya tetap terlihat wajar.
+   *
+   * Maka model yang tidak ditemukan tidak dianggap kesalahan pengguna:
+   * klien menanyakan daftar model yang tersedia untuk API key ini, memilih
+   * yang paling sesuai, lalu mencoba sekali lagi.
+   */
+  async function resolveModel() {
+    const available = await listModels();
+    if (!available.length) return null;
+    const preferred = available
+      .filter(name => /flash/i.test(name) && !/lite|embed|vision|image|video|tts|audio/i.test(name))
+      .sort((a, b) => versionOf(b) - versionOf(a));
+    return preferred[0] || available.find(name => !/embed|image|video|tts|audio/i.test(name)) || null;
+  }
+
   async function generateJSON(prompt, options = {}) {
-    return withRetry(() => generateJSONOnce(prompt, options));
+    try {
+      return await withRetry(() => generateJSONOnce(prompt, options));
+    } catch (error) {
+      if (error.diagnostic?.code !== "MODEL_NOT_FOUND" || resolved) throw error;
+      // Bila pencarian pengganti ikut gagal, kesalahan asli yang dilaporkan.
+      // Kegagalan daftar model hanya membingungkan: yang perlu diperbaiki
+      // pengguna tetap nama model, bukan endpoint daftarnya.
+      let replacement = null;
+      try { replacement = await resolveModel(); } catch { throw error; }
+      if (!replacement || replacement === model) throw error;
+      resolved = true;
+      model = replacement;
+      const result = await withRetry(() => generateJSONOnce(prompt, options));
+      return { ...result, modelAutoResolved: replacement };
+    }
   }
 
   async function generateJSONOnce(prompt, { temperature = 1, maxOutputTokens = 4096, signal } = {}) {
@@ -185,7 +227,9 @@ function createGeminiClient({
     return { data: extractJSON(firstTextPart(payload)), usage: payload?.usageMetadata || null, model };
   }
 
-  return { model, endpoint, generateJSON, listModels };
+  // `model` diekspos sebagai getter karena bisa berubah saat model yang
+  // dikonfigurasi ternyata sudah pensiun dan diganti otomatis.
+  return { get model() { return model; }, endpoint, generateJSON, listModels, resolveModel };
 }
 
 module.exports = {

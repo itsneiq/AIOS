@@ -76,7 +76,10 @@ assert.equal(estimateVideoCost(11).calls, 2, "lebih dari 10 detik harus dipecah 
     fetchImpl: async () => { modelDicoba++; return { ok: false, status: 404, text: async () => "not found" }; }
   });
   await assert.rejects(() => modelSalah.generateJSON("x"), error => error.diagnostic.code === "MODEL_NOT_FOUND");
-  assert.equal(modelDicoba, 1, "kesalahan permanen langsung dilempar tanpa diulang");
+  // Satu panggilan generateContent, lalu satu upaya mencari model pengganti.
+  // Yang penting: generateContent tidak diulang-ulang, karena menunggu tidak
+  // akan menghidupkan kembali model yang sudah pensiun.
+  assert.equal(modelDicoba, 2, "kesalahan permanen tidak diulang, hanya dicarikan pengganti sekali");
 
   // listModels hanya menampilkan model yang benar-benar bisa generateContent.
   const daftar = createGeminiClient({
@@ -92,6 +95,59 @@ assert.equal(estimateVideoCost(11).calls, 2, "lebih dari 10 detik harus dipecah 
 
   const blocked = createGeminiClient({ apiKey: "k", fetchImpl: async () => ({ ok: true, status: 200, json: async () => ({ promptFeedback: { blockReason: "SAFETY" } }) }) });
   await assert.rejects(() => blocked.generateJSON("x"), error => error.diagnostic.code === "BLOCKED");
+
+  /*
+   * Model pensiun adalah kegagalan paling mudah terlewat: pipeline diam-diam
+   * memakai template dan keluarannya tetap terlihat wajar. Klien harus mencari
+   * pengganti sendiri, bukan menyerah dan menyalahkan pengguna.
+   */
+  const daftarModel = { models: [
+    { name: "models/gemini-3.6-flash", supportedGenerationMethods: ["generateContent"] },
+    { name: "models/gemini-3.5-flash-lite", supportedGenerationMethods: ["generateContent"] },
+    { name: "models/gemini-3.1-flash", supportedGenerationMethods: ["generateContent"] },
+    { name: "models/text-embedding-004", supportedGenerationMethods: ["embedContent"] }
+  ] };
+  const dipanggil = [];
+  const pensiun = createGeminiClient({
+    apiKey: "k",
+    model: "gemini-1.0-sudah-pensiun",
+    sleepImpl: async () => {},
+    fetchImpl: async url => {
+      dipanggil.push(url);
+      if (url.endsWith("/models")) return { ok: true, status: 200, json: async () => daftarModel };
+      if (url.includes("sudah-pensiun")) return { ok: false, status: 404, text: async () => "not found" };
+      return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: '[{"hook":"jalan"}]' }] } }] }) };
+    }
+  });
+  const pulih = await pensiun.generateJSON("x");
+  assert.deepEqual(pulih.data, [{ hook: "jalan" }]);
+  assert.equal(pulih.modelAutoResolved, "gemini-3.6-flash", "harus memilih flash versi tertinggi");
+  assert.equal(pensiun.model, "gemini-3.6-flash", "model aktif ikut berubah");
+  assert.ok(dipanggil.some(url => url.endsWith("/models")), "daftar model harus ditanyakan");
+
+  // Varian lite dihindari selama masih ada flash penuh, karena kualitas copy
+  // lebih menentukan daripada kecepatan di tahap ini.
+  const hanyaLite = createGeminiClient({
+    apiKey: "k", model: "gemini-lama",
+    sleepImpl: async () => {},
+    fetchImpl: async url => url.endsWith("/models")
+      ? { ok: true, status: 200, json: async () => ({ models: [{ name: "models/gemini-3.5-flash-lite", supportedGenerationMethods: ["generateContent"] }] }) }
+      : url.includes("gemini-lama")
+        ? { ok: false, status: 404, text: async () => "nope" }
+        : { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: "[]" }] } }] }) }
+  });
+  await hanyaLite.generateJSON("x");
+  assert.equal(hanyaLite.model, "gemini-3.5-flash-lite", "lite tetap dipakai bila tidak ada pilihan lain");
+
+  // Bila daftar model juga kosong, kesalahan asli yang dilempar.
+  const buntu = createGeminiClient({
+    apiKey: "k", model: "gemini-lama",
+    sleepImpl: async () => {},
+    fetchImpl: async url => url.endsWith("/models")
+      ? { ok: true, status: 200, json: async () => ({ models: [] }) }
+      : { ok: false, status: 404, text: async () => "nope" }
+  });
+  await assert.rejects(() => buntu.generateJSON("x"), error => error.diagnostic.code === "MODEL_NOT_FOUND");
 
   console.log("gemini client tests passed");
 })();

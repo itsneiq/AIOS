@@ -95,7 +95,22 @@ console.log(`TARGET    ${product.targetAudience}`);
 if (product.attributes.length) console.log(`ATRIBUT   ${product.attributes.join(" | ")}`);
 console.log("");
 
-if (result.degraded) console.log(`MODE TURUN  ${result.reason}\n`);
+/*
+ * Peringatan ini sengaja dibuat mencolok. Keluaran template tetap terlihat
+ * wajar sekilas, sehingga mudah dikira hasil Gemini padahal isinya hanya lima
+ * kalimat tetap yang diputar ulang.
+ */
+if (result.degraded) {
+  const garis = "=".repeat(72);
+  console.log(garis);
+  console.log("  INI BUKAN HASIL GEMINI — memakai template lama");
+  console.log(`  Sebab: ${result.reason}`);
+  console.log("  Varian akan terasa berulang dan tidak menyebut detail produk.");
+  console.log("  Jalankan: node scripts/generate-script.mjs --list-models");
+  console.log(`${garis}\n`);
+} else if (result.model) {
+  console.log(`MODEL     ${result.model}\n`);
+}
 
 for (const variant of variants) {
   const tanda = variant.policy.blocking ? "DITOLAK " : variant.policy.safe ? "        " : "PERIKSA ";

@@ -119,6 +119,7 @@ async function planScripts(input = {}, client) {
     },
     degraded: generated.degraded,
     reason: generated.reason,
+    model: generated.model || null,
     usage: generated.usage || null
   };
 }
