@@ -16,7 +16,7 @@ import path from "node:path";
 
 const require = createRequire(import.meta.url);
 const { resolveAssets } = require("../video-project.js");
-const { buildConcatArgs, buildFinalArgs, buildSrt, concatListContent, planAssembly } = require("../video-assembler.js");
+const { buildConcatArgs, buildFinalArgs, buildSrt, concatListContent, finalWorkDir, planAssembly } = require("../video-assembler.js");
 const { planSubtitles } = require("../subtitle-planner.js");
 const { synthesizeVoice } = require("../voice-engine.js");
 
@@ -51,9 +51,9 @@ Opsi:
 
 const ffmpeg = args.ffmpeg || process.env.FFMPEG_PATH || "ffmpeg";
 
-function run(command, commandArgs, label) {
+function run(command, commandArgs, label, options = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, commandArgs, { windowsHide: true });
+    const child = spawn(command, commandArgs, { windowsHide: true, ...options });
     let stderr = "";
     child.stderr.on("data", chunk => { stderr += chunk; });
     child.on("error", error => reject(
@@ -139,7 +139,7 @@ try {
     srtPath,
     output: outputPath,
     quality: args.quality || "balanced"
-  }), "Render akhir");
+  }), "Render akhir", { cwd: finalWorkDir({ srtPath }) });
 
   const ukuran = fs.statSync(outputPath).size;
   console.log(`\nSELESAI  ${outputPath}`);

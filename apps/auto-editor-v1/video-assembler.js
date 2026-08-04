@@ -37,6 +37,12 @@ const MOTION_PRESETS = Object.freeze({
 });
 
 const escapePath = value => String(value).replace(/\\/g, "/").replace(/'/g, "'\\''");
+
+// path.basename bergantung platform: di Linux ia tidak mengenali "\" sebagai
+// pemisah, sehingga jalur Windows lolos utuh. Pemisahan manual berlaku di mana
+// pun, dan itu penting karena jalur yang lolos ke rantai filter justru
+// kegagalan yang ingin dicegah.
+const baseName = value => String(value).split(/[\\/]/).pop();
 const round = value => Number((Number(value) || 0).toFixed(3));
 
 function qualityArgs(quality) {
@@ -125,7 +131,24 @@ function buildSrt(cues = []) {
  * ditambahkan; pada iklan yang ditonton sambil menggulir, narasi yang tenggelam
  * sama saja dengan tidak ada narasi.
  */
+// Direktori kerja yang harus dipakai saat menjalankan perintah dari
+// buildFinalArgs, agar rujukan nama berkas subtitle dapat ditemukan.
+function finalWorkDir({ srtPath } = {}) {
+  return srtPath ? path.dirname(srtPath) : undefined;
+}
+
 function buildFinalArgs({ videoPath, voicePath, musicPath, srtPath, output, quality = "balanced", musicVolume = 0.18, subtitleStyle } = {}) {
+  /*
+   * Berkas subtitle dirujuk hanya dengan nama berkasnya, dan proses dijalankan
+   * dari direktori tempat berkas itu berada.
+   *
+   * Di dalam filter_complex, titik dua memisahkan opsi. Jalur Windows seperti
+   * "C:/Users/..." karena itu terbaca sebagai nama berkas "C" diikuti opsi
+   * "/Users/...", dan FFmpeg gagal dengan keluhan yang menyesatkan tentang
+   * ukuran gambar. Melolosi titik dua bisa saja, tetapi aturan pelolosan
+   * berlapis pada filter FFmpeg mudah salah; nama berkas polos tidak
+   * mengandung satu pun karakter yang perlu dilolosi.
+   */
   const args = ["-y", "-i", videoPath];
   if (voicePath) args.push("-i", voicePath);
   if (musicPath) args.push("-i", musicPath);
@@ -136,7 +159,7 @@ function buildFinalArgs({ videoPath, voicePath, musicPath, srtPath, output, qual
 
   if (srtPath) {
     const style = subtitleStyle || "FontSize=16,Outline=2,Shadow=0,Alignment=2,MarginV=90";
-    filters.push(`[0:v]subtitles='${escapePath(srtPath)}':force_style='${style}'[v]`);
+    filters.push(`[0:v]subtitles=${baseName(srtPath)}:force_style='${style}'[v]`);
   }
 
   let audioLabel = null;
@@ -185,7 +208,9 @@ module.exports = {
   MOTION_PRESETS,
   QUALITY_ARGS,
   buildConcatArgs,
+  baseName,
   buildFinalArgs,
+  finalWorkDir,
   buildSegmentArgs,
   buildSrt,
   clipFilter,

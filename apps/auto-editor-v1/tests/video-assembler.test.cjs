@@ -1,8 +1,8 @@
 "use strict";
 const assert = require("node:assert/strict");
 const {
-  buildConcatArgs, buildFinalArgs, buildSegmentArgs, buildSrt,
-  clipFilter, concatListContent, photoFilter, planAssembly, srtTimestamp
+  baseName, buildConcatArgs, buildFinalArgs, buildSegmentArgs, buildSrt,
+  clipFilter, concatListContent, finalWorkDir, photoFilter, planAssembly, srtTimestamp
 } = require("../video-assembler");
 
 const klip = { id: "shot-1", kind: "ai", duration: 4.5, sourcePath: "/p/clips/shot-1.mp4" };
@@ -76,6 +76,30 @@ const rantai = penuh[penuh.indexOf("-filter_complex") + 1];
 assert.ok(rantai.includes("volume=0.18"), "musik diturunkan di bawah narasi");
 assert.ok(rantai.includes("normalize=0"), "amix tanpa normalize agar narasi tidak ikut turun");
 assert.ok(rantai.includes("subtitles="));
+
+/*
+ * Di dalam filter_complex, titik dua memisahkan opsi. Jalur Windows seperti
+ * "C:/Users/..." terbaca sebagai berkas "C" diikuti opsi "/Users/...", dan
+ * FFmpeg gagal dengan keluhan menyesatkan tentang ukuran gambar. Karena itu
+ * subtitle dirujuk hanya dengan nama berkasnya.
+ */
+for (const srt of ["C:\\Users\\Neiq\\AppData\\Local\\Temp\\aios-rakit-x\\subtitle.srt", "/tmp/aios/subtitle.srt", "F:/Projects/sub folder/subtitle.srt"]) {
+  const args = buildFinalArgs({ videoPath: "v.mp4", srtPath: srt, output: "o.mp4" });
+  const chain = args[args.indexOf("-filter_complex") + 1];
+  const rujukan = chain.split("subtitles=")[1].split(":force_style")[0];
+  assert.equal(rujukan, "subtitle.srt", `jalur bocor ke rantai filter: ${rujukan}`);
+  assert.ok(!/[A-Za-z]:/.test(rujukan), "huruf drive tidak boleh masuk rantai filter");
+}
+
+// path.basename bergantung platform dan meloloskan jalur Windows saat berjalan
+// di Linux, sehingga pemisahan harus mengenali kedua pemisah.
+assert.equal(baseName("C:\\a\\b\\subtitle.srt"), "subtitle.srt");
+assert.equal(baseName("/tmp/a/subtitle.srt"), "subtitle.srt");
+assert.equal(baseName("subtitle.srt"), "subtitle.srt");
+
+// Direktori kerja harus menunjuk tempat berkas subtitle berada.
+assert.ok(finalWorkDir({ srtPath: "/tmp/aios/subtitle.srt" }).endsWith("aios"));
+assert.equal(finalWorkDir({}), undefined, "tanpa subtitle tidak perlu memindah direktori kerja");
 assert.ok(penuh.includes("[v]") && penuh.includes("[a]"));
 
 // Setiap gabungan sumber suara harus menghasilkan perintah yang sah.
