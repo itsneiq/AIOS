@@ -104,23 +104,45 @@ function splitDurations(duration, pacing) {
 }
 
 /*
- * Membagi jatah detik AI ke setiap segmen menurut prioritas peran. Sisa yang
- * tidak terpakai jatuh ke foto, bukan dipaksakan menjadi klip pendek yang
- * terlalu singkat untuk terbaca sebagai gerakan.
+ * Membagi jatah detik AI menjadi sesedikit mungkin klip.
+ *
+ * Versi sebelumnya membagi jatah menurut segmen peran, sehingga sembilan detik
+ * pecah menjadi dua klip 4,5 detik. Itu keliru karena dua alasan. Flow
+ * menghitung kredit per generate, bukan per detik, jadi memecah durasi yang
+ * sama menjadi dua klip berarti membayar dua kali. Dan setiap sambungan antar
+ * klip adalah titik di mana produk, pencahayaan, atau sudut kamera bisa
+ * melompat — satu klip panjang tidak punya sambungan sama sekali.
+ *
+ * Klip hanya dipecah ketika jatahnya melewati batas keras sepuluh detik per
+ * panggilan, dan pecahannya dibuat serata mungkin.
  */
-function allocateAiSeconds(segments, aiBudget) {
-  const budget = Math.max(0, Number(aiBudget) || 0);
-  const allocation = new Map(segments.map(segment => [segment.role, 0]));
-  let remaining = budget;
-  for (const role of AI_PRIORITY) {
-    const segment = segments.find(item => item.role === role);
-    if (!segment || remaining < MIN_SHOT_SECONDS) continue;
-    const take = Math.min(segment.duration, remaining, VIDEO_MAX_SECONDS_PER_CALL);
-    if (take < MIN_SHOT_SECONDS) continue;
-    allocation.set(role, round(take));
-    remaining = round(remaining - take);
+function planAiClips(totalDuration, aiBudget) {
+  const budget = Math.max(0, Math.min(Number(aiBudget) || 0, totalDuration));
+  if (budget < MIN_SHOT_SECONDS) return [];
+  const count = Math.ceil(budget / VIDEO_MAX_SECONDS_PER_CALL);
+  const per = round(budget / count);
+  const clips = [];
+  let cursor = 0;
+  for (let index = 0; index < count; index++) {
+    const duration = index === count - 1 ? round(budget - cursor) : per;
+    if (duration < MIN_SHOT_SECONDS) break;
+    clips.push({ start: round(cursor), end: round(cursor + duration), duration });
+    cursor = round(cursor + duration);
   }
-  return { allocation, unused: round(remaining) };
+  return clips;
+}
+
+// Peran dipakai untuk menyusun kalimat prompt. Satu klip panjang bisa menaungi
+// beberapa peran sekaligus, dan yang diambil adalah peran dengan tumpang tindih
+// waktu terbesar.
+function dominantRole(segments, clip) {
+  let best = segments[0]?.role || "hook";
+  let bestOverlap = -1;
+  for (const segment of segments) {
+    const overlap = Math.min(segment.end, clip.end) - Math.max(segment.start, clip.start);
+    if (overlap > bestOverlap) { bestOverlap = overlap; best = segment.role; }
+  }
+  return best;
 }
 
 function aiPromptFor({ segment, variant, product, contract, index }) {
@@ -149,47 +171,45 @@ function planShots(input = {}) {
 
   const total = Math.max(MIN_SHOT_SECONDS, Number(duration) || DEFAULT_DURATION);
   const segments = splitDurations(total, pacing);
-  const { allocation, unused } = allocateAiSeconds(segments, Math.min(aiSeconds, total));
+  const aiClips = planAiClips(total, aiSeconds);
   const activeScene = resolveScene({ product, scene, sceneId });
   const contract = styleContract({ product, scene: activeScene });
 
   const shots = [];
-  let aiIndex = 0;
+  aiClips.forEach((clip, index) => {
+    const role = dominantRole(segments, clip);
+    shots.push({
+      id: `shot-${shots.length + 1}`,
+      kind: "ai",
+      role,
+      start: clip.start,
+      end: clip.end,
+      duration: clip.duration,
+      prompt: aiPromptFor({ segment: { role }, variant, product, contract, index }),
+      chainFrom: index === 0 ? null : `shot-${index}`
+    });
+  });
+
+  const aiEnd = aiClips.length ? aiClips[aiClips.length - 1].end : 0;
+  let photoIndex = 0;
   for (const segment of segments) {
-    const aiPortion = allocation.get(segment.role) || 0;
-    let cursor = segment.start;
-
-    if (aiPortion >= MIN_SHOT_SECONDS) {
-      shots.push({
-        id: `shot-${shots.length + 1}`,
-        kind: "ai",
-        role: segment.role,
-        start: round(cursor),
-        end: round(cursor + aiPortion),
-        duration: round(aiPortion),
-        prompt: aiPromptFor({ segment, variant, product, contract, index: aiIndex }),
-        chainFrom: aiIndex === 0 ? null : shots.filter(item => item.kind === "ai").slice(-1)[0].id
-      });
-      cursor = round(cursor + aiPortion);
-      aiIndex++;
-    }
-
-    const photoPortion = round(segment.end - cursor);
-    if (photoPortion > 0) {
-      shots.push({
-        id: `shot-${shots.length + 1}`,
-        kind: "photo",
-        role: segment.role,
-        start: round(cursor),
-        end: round(segment.end),
-        duration: photoPortion,
-        photo: photos.length ? photos[shots.filter(item => item.kind === "photo").length % photos.length] : null,
-        // Gerakan tajam di foto menahan kesan slideshow. Ken burns yang lambat
-        // justru membuat iklan terasa mati di feed.
-        motion: segment.role === "cta" ? "hold" : photoPortion <= 3 ? "punch-in" : "slow-pan",
-        caption: segment.role === "hook" ? variant.hook : segment.role === "benefit" ? variant.benefit : variant.cta
-      });
-    }
+    const start = Math.max(segment.start, aiEnd);
+    const photoPortion = round(segment.end - start);
+    if (photoPortion <= 0) continue;
+    shots.push({
+      id: `shot-${shots.length + 1}`,
+      kind: "photo",
+      role: segment.role,
+      start: round(start),
+      end: round(segment.end),
+      duration: photoPortion,
+      photo: photos.length ? photos[photoIndex % photos.length] : null,
+      // Gerakan tajam di foto menahan kesan slideshow. Ken burns yang lambat
+      // justru membuat iklan terasa mati di feed.
+      motion: segment.role === "cta" ? "hold" : photoPortion <= 3 ? "punch-in" : "slow-pan",
+      caption: segment.role === "hook" ? variant.hook : segment.role === "benefit" ? variant.benefit : variant.cta
+    });
+    photoIndex++;
   }
 
   const aiTotal = round(shots.filter(shot => shot.kind === "ai").reduce((sum, shot) => sum + shot.duration, 0));
@@ -201,7 +221,6 @@ function planShots(input = {}) {
     aiSeconds: aiTotal,
     photoSeconds: round(total - aiTotal),
     aiCalls: shots.filter(shot => shot.kind === "ai").length,
-    unusedAiBudget: unused,
     missingPhotos: shots.some(shot => shot.kind === "photo" && !shot.photo)
   };
 }
@@ -215,7 +234,8 @@ module.exports = {
   DEFAULT_DURATION,
   MIN_SHOT_SECONDS,
   ROLE_RATIOS,
-  allocateAiSeconds,
+  dominantRole,
+  planAiClips,
   aiPromptFor,
   planShots,
   splitDurations,

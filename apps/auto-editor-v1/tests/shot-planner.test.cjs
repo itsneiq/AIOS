@@ -1,6 +1,6 @@
 "use strict";
 const assert = require("node:assert/strict");
-const { allocateAiSeconds, planShots, splitDurations, styleContract } = require("../shot-planner");
+const { dominantRole, planAiClips, planShots, splitDurations, styleContract } = require("../shot-planner");
 
 const variant = { hook: "Ternyata gak perlu bayar mahal", benefit: "Bahannya adem", cta: "Cek keranjang", visualHint: "Tangan meregangkan kain kemeja" };
 const product = { title: "Kemeja Oversize Katun", benefits: ["adem dipakai seharian"] };
@@ -64,10 +64,38 @@ assert.equal(tanpaAi.aiSeconds, 0);
 assert.equal(tanpaAi.photoSeconds, 18);
 assert.ok(tanpaAi.shots.every(shot => shot.kind === "photo"));
 
-// Sisa jatah yang terlalu kecil untuk terbaca sebagai gerakan tidak dipaksakan.
-const { allocation, unused } = allocateAiSeconds(splitDurations(18, "medium"), 1);
-assert.equal([...allocation.values()].reduce((a, b) => a + b, 0), 0);
-assert.equal(unused, 1);
+/*
+ * Jatah AI harus dipecah sesedikit mungkin. Flow menghitung kredit per generate,
+ * bukan per detik, jadi sembilan detik yang pecah menjadi dua klip berarti
+ * membayar dua kali untuk durasi yang sama — sekaligus menambah satu sambungan
+ * tempat produk dan pencahayaan bisa melompat.
+ */
+assert.equal(planShots({ variant, product, photos, duration: 18, aiSeconds: 9 }).aiCalls, 1, "sembilan detik cukup satu klip");
+assert.equal(planShots({ variant, product, photos, duration: 18, aiSeconds: 10 }).aiCalls, 1, "sepuluh detik masih satu klip");
+assert.equal(planShots({ variant, product, photos, duration: 20, aiSeconds: 16 }).aiCalls, 2, "di atas batas baru dipecah");
+assert.equal(planShots({ variant, product, photos, duration: 24, aiSeconds: 24 }).aiCalls, 3);
+
+// Pecahan dibuat serata mungkin dan tidak ada yang melewati batas keras.
+for (const budget of [11, 16, 19, 24, 25, 30]) {
+  const klip = planAiClips(30, budget);
+  assert.ok(klip.every(item => item.duration <= 10), `jatah ${budget} melewati batas per panggilan`);
+  assert.ok(klip.every(item => item.duration >= 2));
+  const selisih = Math.max(...klip.map(i => i.duration)) - Math.min(...klip.map(i => i.duration));
+  assert.ok(selisih <= 0.1, `jatah ${budget} terbagi tidak rata (selisih ${selisih})`);
+  assert.equal(Number(klip.reduce((sum, i) => sum + i.duration, 0).toFixed(1)), budget);
+}
+
+// Jatah yang terlalu kecil untuk terbaca sebagai gerakan tidak dipaksakan.
+assert.deepEqual(planAiClips(18, 1), []);
+assert.deepEqual(planAiClips(18, 0), []);
+
+// Satu klip panjang bisa menaungi beberapa peran; yang diambil peran dengan
+// tumpang tindih waktu terbesar.
+const segmen = splitDurations(18, "medium");
+assert.equal(dominantRole(segmen, { start: 0, end: 3 }), "hook");
+assert.equal(dominantRole(segmen, { start: 0, end: 9 }), "hook");
+assert.equal(dominantRole(segmen, { start: 5, end: 13 }), "benefit");
+assert.equal(dominantRole(segmen, { start: 14, end: 18 }), "cta");
 
 // Tanpa foto sama sekali, perencana tetap menghasilkan rencana tetapi menandainya.
 const tanpaFoto = planShots({ variant, product, photos: [], duration: 18, aiSeconds: 9 });
