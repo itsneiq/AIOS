@@ -167,3 +167,66 @@ assert.equal(new Set(pilihan.map(item => item.scene.world)).size, 3, "latar keti
 assert.ok(pilihan.every(item => item.prompt.includes("Serum Glow")));
 
 console.log("shot planner scene tests passed");
+
+/*
+ * Suara dan teks di layar. Keduanya keluar dari generate yang sama, tetapi
+ * keandalannya jauh berbeda: suara dibuat bersama gambarnya sehingga sinkron,
+ * sedangkan teks digambar dan kerap salah eja tanpa bisa dihapus setelahnya.
+ */
+const { audioBlockFor, fitSpeech, TEXT_BAN } = require("../shot-planner");
+
+// Larangan teks wajib menempel di setiap prompt AI, ada dialog maupun tidak.
+for (const rencana of [plan, panjang, rencanaBerset]) {
+  for (const shot of rencana.shots.filter(item => item.kind === "ai")) {
+    assert.ok(shot.prompt.includes(TEXT_BAN), `shot ${shot.id} tidak memuat larangan teks`);
+  }
+}
+
+/*
+ * Tanda kutip memperlihatkan kalimat sebagai teks tertulis, dan teks tertulis
+ * persis yang cenderung ikut digambar model ke layar. Bentuk "berkata:" tanpa
+ * kutip adalah pencegahan paling murah untuk subtitle rusak.
+ */
+const satuKlip = planShots({ variant, product, photos, duration: 10, aiSeconds: 10 });
+const klipTunggal = satuKlip.shots.find(shot => shot.kind === "ai");
+assert.equal(satuKlip.aiCalls, 1);
+assert.ok(/berkata: /.test(klipTunggal.prompt), "dialog harus memakai bentuk berkata:");
+assert.ok(!/berkata:\s*["'“]/.test(klipTunggal.prompt), "dialog tidak boleh dibungkus tanda kutip");
+assert.ok(/berbahasa Indonesia/.test(klipTunggal.prompt), "bahasa harus disebut eksplisit");
+assert.ok(/Tanpa musik latar/.test(klipTunggal.prompt), "musik ditempel di editor, bukan di Flow");
+
+/*
+ * Dua klip yang masing-masing berdialog bisa keluar dengan warna suara berbeda,
+ * dan pergantian suara di tengah iklan terdengar seperti dua video yang
+ * disambung paksa. Karena itu video berklip banyak dibuat tanpa dialog.
+ */
+const banyakKlip = planShots({ variant, product, photos, duration: 24, aiSeconds: 24 });
+assert.ok(banyakKlip.aiCalls > 1);
+for (const shot of banyakKlip.shots.filter(item => item.kind === "ai")) {
+  assert.ok(/Tanpa dialog/.test(shot.prompt), `shot ${shot.id} tidak boleh berdialog di video berklip banyak`);
+  assert.ok(!/berkata:/.test(shot.prompt));
+}
+
+// Ambience ikut diminta meskipun dialognya ditangani editor — suara ruangan
+// yang cocok membuat klip terasa nyata dan tidak menambah biaya apa pun.
+for (const shot of banyakKlip.shots.filter(item => item.kind === "ai")) {
+  assert.ok(/Ambience: /.test(shot.prompt));
+}
+assert.ok(banyakKlip.shots.find(shot => shot.kind === "ai").prompt.includes(banyakKlip.scene.ambience));
+
+// Naskah dipotong di batas kata, tidak pernah di tengah kata.
+assert.equal(fitSpeech("satu dua tiga empat lima", 100), "satu dua tiga empat lima");
+assert.equal(fitSpeech("satu dua tiga empat lima enam", 2), "satu dua tiga empat lima.");
+assert.equal(fitSpeech("", 5), "");
+for (const detik of [2, 4, 8, 10]) {
+  const hasil = fitSpeech("satu dua tiga empat lima enam tujuh delapan sembilan sepuluh sebelas dua belas tiga belas", detik);
+  assert.ok(hasil.split(/\s+/).length <= Math.floor(detik * 2.5), `naskah ${detik} detik kepanjangan`);
+  assert.ok(!/\s$/.test(hasil));
+}
+
+// Tanpa naskah sama sekali, blok suara tetap sah dan tidak menyisakan "berkata:" kosong.
+const tanpaNaskah = audioBlockFor({ variant: {}, beats: ["hook"], scene: { ambience: "ruang senyap" }, duration: 8, clipCount: 1 });
+assert.ok(!/berkata:/.test(tanpaNaskah));
+assert.ok(/Ambience: ruang senyap/.test(tanpaNaskah));
+
+console.log("shot planner audio tests passed");

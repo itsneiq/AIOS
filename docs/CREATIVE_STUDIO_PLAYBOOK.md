@@ -40,8 +40,6 @@ merasa bermasalah, karena agitate-nya akan terasa mengada-ada.
 
 ## 2. Empat beat
 
-Struktur dasar untuk video 15–20 detik:
-
 | Beat | Porsi | Tugas |
 |---|---|---|
 | hook | ~17% | Menghentikan jempol. Satu kalimat, tanpa pengantar, tanpa merek di depan |
@@ -49,7 +47,17 @@ Struktur dasar untuk video 15–20 detik:
 | solve | ~33% | Produk masuk sebagai jalan keluar, dengan satu alasan konkret |
 | cta | ~22% | Satu ajakan pendek sesuai mekanisme platform |
 
-Untuk 18 detik: 3 / 5 / 6 / 4 detik.
+**Durasi bukan angka tetap.** Yang menentukan panjangnya adalah berapa banyak
+yang harus dijelaskan sebelum penonton paham, bukan patokan bulat.
+
+| Panjang | Kapan dipakai | Pembagian |
+|---|---|---|
+| 8–10 detik | Produk yang manfaatnya langsung terlihat: fashion, aksesori. Cukup satu klip Flow | 2 / 2 / 4 / 2 |
+| 15–18 detik | Standar. Produk yang perlu satu alasan dijelaskan | 3 / 4 / 7 / 4 |
+| 20–30 detik | Skincare dan produk yang butuh before-after atau demo langkah | 4 / 7 / 13 / 6 |
+
+Meta dan Shopee sama-sama nyaman di 15–30 detik. Yang di bawah 8 detik jarang
+sempat membangun agitate; yang di atas 30 mulai kehilangan penonton sebelum CTA.
 
 **Tanpa agitate, iklan berubah jadi katalog.** Penonton diberi tahu produknya
 bagus tetapi tidak pernah diberi alasan untuk peduli. Ini kesalahan paling
@@ -207,6 +215,14 @@ susun set baru mengikuti pola yang sama: latar, cahaya, kamera, wardrobe, aksi.
 | gadget | meja-kerja (laptop, buku catatan) · genggam-dekat (latar gelap, cahaya tepi) |
 | general | netral-terang (permukaan polos) · meja-hangat (meja kayu, cahaya samping) |
 
+### Setiap set punya suaranya sendiri
+
+Set bukan cuma tampilan. Kafe punya obrolan samar dan denting cangkir, rooftop
+punya angin dan kota di kejauhan, meja marmer nyaris senyap kecuali gesekan
+jari. Ambience ini masuk ke blok AUDIO prompt video (bagian 10) dan tidak
+menambah biaya apa pun — klip dengan suara ruangan yang cocok terasa direkam,
+klip yang senyap total terasa dibuat.
+
 ---
 
 ## 7. Arah visual per sudut
@@ -299,24 +315,42 @@ tumpukan botol"* bisa dieksekusi model video; *"tampilkan kesan praktis"* tidak.
 
 ## 8. Rencana shot
 
-```
-Video 18 detik, jatah AI 9 detik:
+**Satu-satunya batas keras: 10 detik per generate.** Semua pembagian shot
+turun dari situ, bukan dari kemampuan alat perakit.
 
-  0–9    klip AI      → clips/shot-1.mp4
-  9–13.5 foto         slow-pan
- 13.5–18 foto CTA     hold
+```
+10 detik  →  1 klip                       paling murah, paling menyambung
+18 detik  →  1 klip 10 detik + 1 klip 8 detik
+30 detik  →  3 klip
 ```
 
 **Aturan pembagian:**
 
 - **Sesedikit mungkin klip.** Flow menghitung kredit per generate, bukan per
-  detik — sembilan detik yang pecah jadi dua klip berarti bayar dua kali.
-  Pecah hanya bila melewati batas 10 detik per generate.
+  detik — sembilan detik yang pecah jadi dua klip berarti bayar dua kali,
+  sekaligus menambah satu sambungan tempat produk dan cahaya bisa melompat.
 - **Buka dengan gerakan.** Foto diam di tiga detik pertama paling sering
   membuat orang menggulir lewat.
-- **Tutup dengan foto asli.** Di detik terakhir penonton memutuskan mau klik
-  atau tidak; di situ ia harus melihat barang yang benar-benar akan datang,
-  bukan versi cantiknya.
+- **Potong di batas beat, bukan di tengah kalimat.** Kalau 18 detik dipecah
+  jadi 10 + 8, potongnya di akhir *agitate* — bukan di detik ke-10 apa adanya.
+  Sambungan yang jatuh di jeda napas hampir tidak terasa.
+
+### Segmen foto — pilihan, bukan keharusan
+
+Dulu porsi foto dipakai untuk menghemat detik AI. Sekarang itu bukan alasan
+lagi: Flow menagih per generate, jadi klip 10 detik dan klip 4 detik sama
+harganya. Foto tetap dipakai kalau ada alasan isinya:
+
+| Pakai foto ketika | Sebabnya |
+|---|---|
+| Kemasan, tulisan, atau label harus terbaca | Model video kerap mengarang ulang tulisan kemasan |
+| Detik terakhir sebelum CTA | Penonton harus melihat barang yang benar-benar akan datang, bukan versi cantiknya |
+| Punya foto asli produk yang bagus | Foto asli lebih meyakinkan daripada rekaan mana pun |
+| Jatah kredit bulan itu menipis | Foto bermotion tidak memakai kredit sama sekali |
+
+Kalau tidak ada satu pun alasan di atas, buat seluruhnya klip AI. Video yang
+utuh gerakan lebih enak ditonton daripada video yang berhenti jadi foto di
+tengah.
 
 ---
 
@@ -358,10 +392,18 @@ diiklankan.
 Ini shot pembuka.
 Subjek utama: <nama produk>, tampil identik dengan gambar referensi.
 Latar: <world>. Pencahayaan: <lighting>. Kamera: <camera>. Aksi: <action>.
-Tidak ada tulisan, logo, atau watermark tambahan.
 Kamera stabil, gerakan halus, tanpa perpindahan gaya di tengah shot.
 Rasio 9:16 vertikal. Durasi klip sekitar <n> detik.
+
+AUDIO
+<blok suara — lihat bagian 10>
+
+LARANGAN
+Tanpa subtitle. Tanpa caption. Tanpa teks apa pun di layar.
+Tanpa tulisan tambahan, logo, atau watermark.
 ```
+
+Blok **LARANGAN** ikut di setiap prompt tanpa kecuali, alasannya di bagian 10.
 
 Untuk klip kedua dan seterusnya, ganti *"Ini shot pembuka"* menjadi:
 
@@ -370,7 +412,106 @@ Untuk klip kedua dan seterusnya, ganti *"Ini shot pembuka"* menjadi:
 
 ---
 
-## 10. Alur kerja
+## 10. Voiceover dan caption di Flow
+
+Keduanya terdengar seperti satu fitur yang sama, padahal jauh berbeda
+keandalannya. Yang satu dipakai, yang satu dihindari.
+
+| | Dari Flow | Sebabnya |
+|---|---|---|
+| **Voiceover** | **Ya** | Veo membuat audio bersama gambarnya, jadi bibir dan suara sinkron |
+| **Caption** | **Tidak** | Teks digambar, bukan diketik. Hasilnya sering salah eja dan tidak bisa dihapus |
+
+### 10.1 Voiceover — sintaksnya yang menentukan
+
+Cara menulis dialog lebih berpengaruh daripada isinya.
+
+**Pakai bentuk `berkata:` tanpa tanda kutip.**
+
+```
+BENAR   Perempuan itu menghadap kamera dan berkata: kaosnya adem banget
+        dipakai seharian.
+
+SALAH   Perempuan itu berkata "kaosnya adem banget dipakai seharian."
+```
+
+Tanda kutip memperlihatkan kalimat itu sebagai **teks tertulis**, dan teks
+tertulis persis yang cenderung digambar model ke layar. Ini pemicu tunggal
+paling sering dari caption gibberish.
+
+**Blok AUDIO yang dipakai:**
+
+```
+AUDIO
+Suara <perempuan / laki-laki> muda Indonesia, nada <santai / meyakinkan>,
+tempo sedang, artikulasi jelas, berbahasa Indonesia.
+<Subjek> berkata: <satu kalimat naskah>
+Ambience: <suara latar sesuai set, mis. keramaian kafe pelan>.
+Tanpa musik latar.
+```
+
+Yang perlu dipatuhi:
+
+- **Satu kalimat per klip.** Dialog yang lebih panjang dari sekitar 8 detik
+  mulai kehilangan sinkron.
+- **~2,5 kata per detik** untuk bahasa Indonesia percakapan. Klip 10 detik
+  memuat sekitar 22–25 kata — cukup untuk hook + agitate, tidak cukup untuk
+  empat beat sekaligus.
+- **Sebut "berbahasa Indonesia" secara eksplisit.** Tanpa itu logatnya bisa
+  meleset.
+- **"Tanpa musik latar"** supaya musik bisa ditempel sendiri belakangan tanpa
+  bertabrakan.
+- **Minta ambience meskipun VO-nya dari editor.** Suara ruangan yang cocok
+  membuat klip terasa nyata, dan itu gratis.
+
+**Kapan VO diambil dari Flow, kapan dari editor:**
+
+| Keadaan | VO dari |
+|---|---|
+| Ada orang di frame yang mulutnya bergerak | **Flow.** VO dari editor tidak akan pernah sinkron dengan bibir |
+| Video cukup satu klip (≤10 detik) | **Flow.** Satu suara, satu generate, tidak ada risiko sambungan |
+| Video lebih dari satu klip, tidak ada orang bicara di frame | **Editor.** Suara Flow tidak dijamin sama persis antar generate |
+| Lebih dari satu klip dan ada yang bicara | Flow untuk klip yang ada bicaranya, sisanya diam |
+
+Jebakannya di baris ketiga: dua klip yang masing-masing punya VO Flow bisa
+keluar dengan warna suara berbeda, dan pergantian suara di tengah iklan terdengar
+seperti dua video yang disambung paksa.
+
+### 10.2 Caption — jangan dari Flow
+
+Veo mengasosiasikan ucapan dengan tulisan di layar, jadi begitu ia mendeteksi
+ada yang bicara ia "membantu" dengan menggambar subtitle. Masalahnya ia
+**menggambar**, bukan **mengetik** — hasilnya kerap salah eja, terulang, atau
+sama sekali tidak berbentuk kata. Laporan yang beredar menyebut sampai sekitar
+40% klip berdialog keluar dengan subtitle rusak.
+
+Tiga hal yang membuat ini tidak bisa ditawar:
+
+1. **Tidak ada lapisan caption.** Teksnya menyatu ke piksel. Tidak ada tombol
+   mati, tidak ada berkas SRT yang bisa dibuang.
+2. **Satu-satunya perbaikan adalah generate ulang** — dan itu memakan kredit.
+3. **Bahasa Indonesia lebih rawan** daripada Inggris, karena porsinya jauh lebih
+   kecil di data latih untuk perenderan teks.
+
+Karena itu: blok **LARANGAN** masuk ke setiap prompt, dan caption ditempel di
+editor tempat ejaannya pasti benar dan posisinya bisa diatur.
+
+**Blok larangan yang dipakai apa adanya:**
+
+```
+LARANGAN
+Tanpa subtitle. Tanpa caption. Tanpa teks apa pun di layar.
+Tanpa tulisan tambahan, logo, atau watermark.
+```
+
+**Blok ini menurunkan kemungkinan, bukan menghilangkannya.** Periksa setiap
+klip yang keluar. Kalau ada tulisan muncul, generate ulang — jangan diakali
+dengan memotong bagian bawah frame, karena itu merusak rasio 9:16 dan justru
+memakan area tempat caption sungguhan akan diletakkan.
+
+---
+
+## 11. Alur kerja
 
 ```
 1. Kirim ke chat:  judul produk + deskripsi + platform tujuan
@@ -379,18 +520,37 @@ Untuk klip kedua dan seterusnya, ganti *"Ini shot pembuka"* menjadi:
 2. Terima:         creative brief   — pembeli, masalah, kerangka, sudut, alasan
                    script 4 beat    — hook, agitate, solve, cta
                    prompt master    — 2 pilihan set
-                   prompt video     — sesuai sudut yang dipilih
+                   prompt video     — sesuai sudut, lengkap dengan blok
+                                      AUDIO dan LARANGAN
 
 3. Di Flow:        unggah foto produk → generate master image → pilih satu
                    pakai master itu sebagai referensi → generate klip
 
-4. Rakit:          node scripts/make-video.mjs --project "<folder>"
-                   (atau rakit manual)
+4. Periksa klip:   ada tulisan nyasar di layar?  → generate ulang
+                   suara sinkron dengan bibir?
+                   produk masih sama dengan foto aslinya?
+
+5. Di editor:      sambung klip → tempel caption → musik → ekspor
 ```
+
+### Yang wajib ditangani editor
+
+Bagian ini keluar dari tanggung jawab Flow, jadi harus ada penanganannya di
+tahap perakitan — dengan alat apa pun yang dipakai.
+
+| Hal | Ketentuan |
+|---|---|
+| **Caption** | Diketik sendiri, bukan dari Flow. Potong di batas frasa, bukan di hitungan kata — "merawat kulit kusam agar tampak" lalu "lebih cerah" terbaca patah |
+| **Safe area** | Beri jarak dari bawah, jangan dipatok satu angka. Meta, Shopee, dan TikTok menaruh UI di ketinggian berbeda, dan caption yang tertutup tombol sama saja dengan tidak ada |
+| **VO sambungan** | Kalau VO dari editor, satu rekaman untuk seluruh video — bukan per klip |
+| **Musik** | Volume di bawah VO. Kalau VO dari Flow, musik ditempel di editor karena promptnya sudah minta tanpa musik |
+| **Durasi akhir** | Sesuai rencana. Video yang terpotong di detik terakhir kehilangan justru CTA-nya |
 
 ---
 
-## 11. Yang wajib diperiksa sebelum menyerahkan hasil
+## 12. Yang wajib diperiksa sebelum menyerahkan hasil
+
+**Naskah dan prompt:**
 
 - [ ] Hook memuat minimal satu sinyal penguat, tidak dibuka bernada artikel
 - [ ] Beat agitate ada dan tidak menyinggung atribut pribadi
@@ -401,9 +561,18 @@ Untuk klip kedua dan seterusnya, ganti *"Ini shot pembuka"* menjadi:
 - [ ] Set berbeda dari produk sebelumnya
 - [ ] Jumlah klip sesedikit mungkin
 
+**Audio dan teks:**
+
+- [ ] Dialog ditulis dengan `berkata:` **tanpa tanda kutip**
+- [ ] Blok AUDIO menyebut bahasa Indonesia dan "tanpa musik latar"
+- [ ] Blok LARANGAN ada di setiap prompt video
+- [ ] Naskah per klip di bawah ~25 kata
+- [ ] Sumber VO sudah diputuskan sadar: Flow bila ada yang bicara di frame,
+      editor bila lebih dari satu klip tanpa orang bicara
+
 ---
 
-## 12. Catatan jujur
+## 13. Catatan jujur
 
 **Yang belum ada:** catatan hasil. Tanpa mencatat varian mana yang menang di
 platform, seluruh keputusan di dokumen ini tetap tebakan berpengalaman —
@@ -414,17 +583,17 @@ minggu berjalan.
 pemakaian nyata. Kalau ternyata melompat, rancangan dua klip perlu ditinjau
 ulang — mungkin jadi satu klip panjang dengan porsi foto lebih besar.
 
-**Bug yang belum diperbaiki di `make-video.mjs`:**
+**Yang perlu diuji juga:** kualitas VO Indonesia dari Flow. Sinkron bibirnya
+memang jalan, tetapi apakah logat dan intonasinya terdengar wajar untuk telinga
+Indonesia belum diuji pada produk nyata. Kalau ternyata kaku, pindahkan VO ke
+editor dan pakai Flow hanya untuk gambar dan ambience — semua panduan di bagian
+10.2 tetap berlaku, karena larangan subtitle tetap perlu meskipun tidak ada
+dialog.
 
-- Margin caption dihitung per platform lalu dibuang; nilainya dipatok 90 dari
-  bawah, sehingga caption bisa menutupi nama produk. Perbaikannya menyambungkan
-  `subtitles.preset` ke `buildFinalArgs`.
-- Pemotongan caption murni berdasarkan hitungan kata dan karakter, tanpa
-  memperhatikan batas frasa. Hasilnya terbaca patah-patah: "merawat kulit kusam
-  agar tampak" lalu "lebih cerah dan segar setiap" lalu "hari".
-
-Keduanya urusan perakitan, bukan konten. Sampai diperbaiki, periksa hasil
-akhirnya secara manual.
+**Angka 40% subtitle rusak** berasal dari laporan pemakai dan liputan media,
+bukan dari pengukuran sendiri. Perlakukan sebagai peringatan, bukan angka pasti
+— yang penting bukan besarannya, melainkan bahwa kerusakannya tidak bisa
+diperbaiki setelah klip jadi.
 
 **Kapan kembali ke alat:** pada 15–30 video per bulan, pengulangan cukup tinggi
 untuk dikodekan dan percakapan mulai terasa lambat. Kode dan pengetahuan di

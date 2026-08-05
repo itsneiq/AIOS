@@ -46,7 +46,7 @@ Opsi:
   --pick <angka>     Varian ke berapa yang dipakai (default 1, yang skornya tertinggi)
   --out <folder>     Folder induk proyek (default ./projects)
   --duration <detik> Durasi video (default 18)
-  --ai <detik>       Porsi yang dibuat AI (default 9)
+  --ai <detik>       Porsi yang dibuat AI (default: seluruh durasi)
   --count <angka>    Jumlah varian yang dibuat sebelum memilih (default 12)
   --masters <angka>  Jumlah pilihan master image (default 2)
   --scene <id>       Paksa set visual tertentu, mis. rooftop-sore
@@ -62,7 +62,17 @@ const client = apiKey ? createGeminiClient({ apiKey, model: process.env.GEMINI_T
 if (!client) console.warn("PERINGATAN GEMINI_API_KEY belum diset — varian memakai template lama.\n");
 
 const duration = Number(args.duration) || 18;
-const aiSeconds = args.ai === undefined ? 9 : Number(args.ai);
+/*
+ * Seluruh durasi dibuat AI kecuali diminta lain.
+ *
+ * Jatah AI dulu dibatasi setengah durasi untuk menghemat, karena API video
+ * menagih per detik. Flow menagih per generate, jadi klip sepuluh detik dan
+ * klip empat detik sama harganya dan penghematan itu tidak ada lagi. Porsi foto
+ * sekarang dipakai karena alasan isinya — kemasan yang harus terbaca, atau foto
+ * asli yang lebih meyakinkan — bukan karena biaya, dan itu keputusan pemakai
+ * lewat --ai.
+ */
+const aiSeconds = args.ai === undefined ? duration : Number(args.ai);
 
 const hasil = await planScripts({
   title: args.title,
@@ -133,5 +143,12 @@ console.log(`  3. TAHAP 1 — generate ${masters.length} pilihan master image, p
 console.log(`     Simpan sebagai          ${path.join(paths.master, "master.jpg")}`);
 console.log(`  4. TAHAP 2 — pakai master itu sebagai referensi, generate klip video`);
 console.log(`     Beri nama shot-1.mp4, taruh di ${paths.clips}`);
-console.log(`  5. Rakit dengan            node scripts/make-video.mjs --project "${paths.root}"`);
-console.log("\nTidak ada biaya API video yang keluar di tahap ini.");
+console.log(`  5. Periksa tiap klip: kalau ada tulisan nyasar di layar, generate ulang`);
+console.log(`  6. Sambung, tempel caption, dan tambah musik di editor`);
+/*
+ * Caption sengaja tidak diminta ke Flow. Teksnya digambar, bukan diketik, dan
+ * begitu jadi ia menyatu ke piksel — tidak ada lapisan yang bisa dimatikan,
+ * sehingga salah eja hanya bisa diperbaiki dengan generate ulang.
+ */
+console.log("\nCaption ditempel di editor, bukan diminta ke Flow.");
+console.log("Tidak ada biaya API video yang keluar di tahap ini.");

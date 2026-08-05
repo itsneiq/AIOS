@@ -23,6 +23,28 @@ const DEFAULT_AI_SECONDS = 9;
 const MIN_SHOT_SECONDS = 2;
 
 /*
+ * Bahasa Indonesia percakapan berjalan sekitar dua setengah kata per detik.
+ * Dipakai untuk memangkas naskah yang tidak akan selesai diucapkan dalam durasi
+ * klipnya — dialog yang kepanjangan bukan cuma terpotong, sinkron bibirnya ikut
+ * berantakan sampai ke bagian yang sempat terucap.
+ */
+const WORDS_PER_SECOND = 2.5;
+
+/*
+ * Larangan teks masuk ke setiap prompt tanpa kecuali.
+ *
+ * Model video mengasosiasikan ucapan dengan tulisan di layar, jadi begitu ada
+ * dialog ia cenderung "membantu" dengan menggambar subtitle sendiri. Yang
+ * digambar bukan diketik: ejaannya kerap salah, dan bahasa Indonesia lebih
+ * rawan lagi karena porsinya kecil di data latih perenderan teks.
+ *
+ * Yang membuat ini tidak bisa ditawar bukan seberapa seringnya, melainkan
+ * bahwa teksnya menyatu ke piksel. Tidak ada lapisan yang bisa dimatikan, dan
+ * satu-satunya perbaikan adalah generate ulang — yang memakan kredit.
+ */
+const TEXT_BAN = "Tanpa subtitle. Tanpa caption. Tanpa teks apa pun di layar. Tanpa tulisan tambahan, logo, atau watermark.";
+
+/*
  * Pembagian waktu mengikuti formula hook - agitate - solve - cta.
  *
  * Struktur lama hanya punya hook, benefit, cta. Bagian tengahnya berupa klaim
@@ -176,13 +198,65 @@ function beatsInSpan(segments, clip, minOverlap = 1) {
  * Saran visual dari penulis naskah tetap didahulukan bila ada, karena ia sudah
  * mempertimbangkan produk yang sebenarnya.
  */
-function aiPromptFor({ beats, variant, product, contract, index }) {
+function aiPromptFor({ beats, variant, product, contract, index, audio }) {
   const arahan = directionForSpan(variant.angle, beats);
   const saran = index === 0 && variant.visualHint ? `${variant.visualHint}. ` : "";
   const chaining = index === 0
     ? "Ini shot pembuka."
     : "Lanjutkan dari shot sebelumnya: pertahankan produk, pencahayaan, latar, dan sudut kamera yang sama. Ubah hanya gerakan yang diminta.";
-  return `${saran}${arahan}. ${chaining} ${contract}`;
+  const bagian = [`${saran}${arahan}. ${chaining} ${contract}`];
+  if (audio) bagian.push(`\n\nAUDIO\n${audio}`);
+  bagian.push(`\n\nLARANGAN\n${TEXT_BAN}`);
+  return bagian.join("");
+}
+
+/*
+ * Naskah dipotong di batas kata sesuai durasi yang tersedia. Memotong di tengah
+ * kata menghasilkan dialog yang tidak pernah selesai, dan itu terdengar lebih
+ * buruk daripada kalimat pendek yang utuh.
+ */
+function fitSpeech(text, seconds) {
+  const kata = String(text || "").trim().split(/\s+/).filter(Boolean);
+  if (!kata.length) return "";
+  const muat = Math.max(1, Math.floor(seconds * WORDS_PER_SECOND));
+  if (kata.length <= muat) return kata.join(" ");
+  return `${kata.slice(0, muat).join(" ").replace(/[,.!?]+$/, "")}.`;
+}
+
+/*
+ * Blok suara untuk satu klip.
+ *
+ * Dialog ditulis dengan bentuk "berkata:" tanpa tanda kutip. Tanda kutip
+ * memperlihatkan kalimatnya sebagai teks tertulis, dan teks tertulis persis
+ * yang cenderung ikut digambar model ke layar — pemicu tunggal paling sering
+ * dari subtitle rusak.
+ *
+ * Dialog hanya dititipkan ke Flow ketika videonya cukup satu klip. Dua klip
+ * yang masing-masing punya dialog bisa keluar dengan warna suara berbeda, dan
+ * pergantian suara di tengah iklan terdengar seperti dua video yang disambung
+ * paksa. Untuk video berklip banyak, klip dibuat tanpa dialog dan voiceover
+ * disambung sekali jalan di editor.
+ */
+function audioBlockFor({ variant = {}, beats = [], scene, duration, clipCount = 1 } = {}) {
+  const ambience = scene && scene.ambience ? scene.ambience : "suara ruangan yang wajar sesuai latar";
+  const dasar = [`Ambience: ${ambience}, pelan.`, "Tanpa musik latar."];
+
+  if (clipCount !== 1) {
+    return ["Tanpa dialog, tanpa narasi.", ...dasar, "Voiceover ditambahkan di editor supaya suaranya sama di seluruh video."].join(" ");
+  }
+
+  const naskah = beats
+    .map(beat => (beat === "solve" ? variant.solve || variant.benefit : variant[beat]))
+    .filter(Boolean)
+    .join(" ");
+  const ucapan = fitSpeech(naskah, duration);
+  if (!ucapan) return [...dasar].join(" ");
+
+  return [
+    "Suara perempuan muda Indonesia, nada santai, tempo sedang, artikulasi jelas, berbahasa Indonesia.",
+    `Ia menghadap kamera dan berkata: ${ucapan}`,
+    ...dasar
+  ].join(" ");
 }
 
 function planShots(input = {}) {
@@ -215,7 +289,20 @@ function planShots(input = {}) {
       start: clip.start,
       end: clip.end,
       duration: clip.duration,
-      prompt: aiPromptFor({ beats: beats.length ? beats : [role], variant, product, contract, index }),
+      prompt: aiPromptFor({
+        beats: beats.length ? beats : [role],
+        variant,
+        product,
+        contract,
+        index,
+        audio: audioBlockFor({
+          variant,
+          beats: beats.length ? beats : [role],
+          scene: activeScene,
+          duration: clip.duration,
+          clipCount: aiClips.length
+        })
+      }),
       chainFrom: index === 0 ? null : `shot-${index}`
     });
   });
@@ -264,11 +351,15 @@ module.exports = {
   DEFAULT_DURATION,
   MIN_SHOT_SECONDS,
   ROLE_RATIOS,
+  audioBlockFor,
   beatsInSpan,
   dominantRole,
+  fitSpeech,
   planAiClips,
   aiPromptFor,
   planShots,
   splitDurations,
-  styleContract
+  styleContract,
+  TEXT_BAN,
+  WORDS_PER_SECOND
 };
