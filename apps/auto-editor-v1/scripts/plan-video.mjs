@@ -51,9 +51,11 @@ Opsi:
   --masters <angka>  Jumlah pilihan master image (default 2)
   --scene <id>       Paksa set visual tertentu, mis. rooftop-sore
   --platform <nama>  meta | shopee | tiktok (default meta)
-  --voice flow       Minta dialog langsung dari Flow. Hanya untuk klip yang
-                     ada orang bicara di depan kamera; selain itu voiceover
-                     ditempel di editor
+  --voice <mode>     editor | silent | flow (default editor)
+                     editor — tanpa orang bicara, voiceover ditempel belakangan
+                     silent — orang tampil dan berekspresi tetapi tidak bicara,
+                              sehingga voiceover editor tidak terbaca dubbing
+                     flow   — dialog dari Flow, hanya untuk video satu klip
 
 Tidak ada biaya video yang keluar di tahap ini. Prompt yang dihasilkan
 ditempel ke Flow, lalu klipnya diunduh ke folder clips/ pada proyek.`);
@@ -119,7 +121,7 @@ const plan = planShots({
   duration,
   aiSeconds,
   sceneId: args.scene || undefined,
-  voice: args.voice === "flow" ? "flow" : "editor"
+  voice: ["flow", "silent"].includes(args.voice) ? args.voice : "editor"
 });
 const masters = masterImageOptions({ product: hasil.product, variant, count: Number(args.masters) || 2 });
 const root = path.resolve(args.out || "projects", slug(hasil.product.title));
@@ -161,8 +163,11 @@ console.log(`  6. Sambung, tempel caption, dan tambah musik di editor`);
  * begitu jadi ia menyatu ke piksel — tidak ada lapisan yang bisa dimatikan,
  * sehingga salah eja hanya bisa diperbaiki dengan generate ulang.
  */
-console.log(`\nSUARA     ${args.voice === "flow"
-  ? "dialog diminta ke Flow — hanya cocok bila ada orang bicara di depan kamera"
-  : "klip dibuat tanpa dialog, voiceover ditempel di editor"}`);
+const SUARA = {
+  flow: "dialog diminta ke Flow — hanya cocok bila ada orang bicara di depan kamera",
+  silent: "orang tampil tetapi tidak bicara, voiceover ditempel di editor",
+  editor: "klip dibuat tanpa dialog, voiceover ditempel di editor"
+};
+console.log(`\nSUARA     ${SUARA[args.voice] || SUARA.editor}`);
 console.log("Caption ditempel di editor, bukan diminta ke Flow.");
 console.log("Tidak ada biaya API video yang keluar di tahap ini.");

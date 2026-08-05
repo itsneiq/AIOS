@@ -45,6 +45,20 @@ const WORDS_PER_SECOND = 2.5;
 const TEXT_BAN = "Tanpa subtitle. Tanpa caption. Tanpa teks apa pun di layar. Tanpa tulisan tambahan, logo, atau watermark.";
 
 /*
+ * Ruang untuk caption disiapkan saat generate, bukan saat mengedit.
+ *
+ * Ini beda dari safe area, dan bedanya menentukan. Safe area mengatur seberapa
+ * jauh caption dari tepi supaya tidak tertutup tombol platform — itu urusan
+ * editor. Tetapi kalau produk sudah terlanjur ditaruh model di seperempat bawah
+ * frame, caption ditaruh di mana pun akan menutupinya, dan editor tidak punya
+ * cara memperbaikinya selain generate ulang.
+ *
+ * Kalimat penutupnya sengaja ada: menyisakan ruang tidak boleh sampai membuat
+ * produk kecil atau komposisinya janggal. Yang dijual tetap produknya.
+ */
+const NEGATIVE_SPACE = "Sisakan ruang kosong di sepertiga atas dan seperempat bawah frame untuk teks yang ditambahkan belakangan; jangan menaruh produk atau wajah di area itu, kecuali bila menyisakannya membuat produk jadi kecil atau komposisi jadi janggal.";
+
+/*
  * Pembagian waktu mengikuti formula hook - agitate - solve - cta.
  *
  * Struktur lama hanya punya hook, benefit, cta. Bagian tengahnya berupa klaim
@@ -90,6 +104,7 @@ function styleContract({ product = {}, scene, sceneId } = {}) {
     describeScene(dipakai),
     "Tidak ada tulisan, logo, atau watermark tambahan di dalam gambar.",
     "Kamera stabil, gerakan halus, tanpa perpindahan gaya di tengah shot.",
+    NEGATIVE_SPACE,
     "Rasio 9:16 vertikal."
   ].join(" ");
 }
@@ -112,6 +127,7 @@ function buildMasterImagePrompt({ product = {}, scene, sceneId, variant = {} } =
       variant.visualHint ? `Nuansa yang diinginkan: ${variant.visualHint}` : "",
       "Kualitas foto komersial, fokus tajam pada produk, latar sedikit kabur.",
       "Tidak ada tulisan, logo, atau watermark tambahan di dalam gambar.",
+      NEGATIVE_SPACE,
       "Rasio 9:16 vertikal."
     ].filter(Boolean).join(" ")
   };
@@ -226,7 +242,20 @@ function fitSpeech(text, seconds) {
 /*
  * Blok suara untuk satu klip.
  *
- * Bawaannya klip dibuat tanpa dialog dan voiceover disambung di editor. Tiga
+ * Ada tiga pilihan, bukan dua, dan yang ketiga paling sering terlewat:
+ *
+ *   voice: "editor"  — tanpa orang bicara, VO ditempel belakangan
+ *   voice: "silent"  — orang tampil dan berekspresi tetapi tidak bicara
+ *   voice: "flow"    — dialog dari model, sinkron bibir
+ *
+ * Pilihan tengah menghapus pertukaran yang tampaknya tidak bisa dihindari.
+ * Selama ini kelihatannya harus memilih antara wajah manusia dengan suara yang
+ * berubah tiap generate, atau suara konsisten tanpa wajah sama sekali. Padahal
+ * cukup meminta modelnya tidak bicara: voiceover editor di atas orang yang
+ * memang tidak menggerakkan bibir tidak terbaca sebagai dubbing, karena tidak
+ * ada bibir yang perlu disamai.
+ *
+ * Bawaannya tetap tanpa dialog dan voiceover disambung di editor. Tiga
  * sebabnya, berurut dari yang paling menentukan:
  *
  *   Model menggambar subtitle karena ia mendeteksi ada yang bicara. Klip tanpa
@@ -260,6 +289,13 @@ function audioBlockFor({ variant = {}, beats = [], scene, duration, clipCount = 
   const dasar = [`Ambience: ${ambience}, pelan.`, "Tanpa musik latar."];
   const tanpaDialog = ["Tanpa dialog, tanpa narasi, tanpa suara orang bicara.", ...dasar];
 
+  if (voice === "silent") {
+    return [
+      "Model tampil di frame dan berekspresi wajar, tetapi tidak berbicara. Tanpa gerakan bibir, tanpa lip-sync.",
+      ...tanpaDialog,
+      "Voiceover ditambahkan di editor."
+    ].join(" ");
+  }
   if (voice !== "flow") {
     return [...tanpaDialog, "Voiceover ditambahkan di editor."].join(" ");
   }
@@ -384,6 +420,7 @@ module.exports = {
   planShots,
   splitDurations,
   styleContract,
+  NEGATIVE_SPACE,
   TEXT_BAN,
   WORDS_PER_SECOND
 };

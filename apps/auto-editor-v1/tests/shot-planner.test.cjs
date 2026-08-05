@@ -240,6 +240,32 @@ for (const detik of [2, 4, 8, 10]) {
   assert.ok(!/\s$/.test(hasil));
 }
 
+/*
+ * Pilihan ketiga: orang tampil tetapi tidak bicara. Ini yang menghapus
+ * pertukaran antara wajah manusia dan suara yang konsisten — voiceover editor
+ * di atas bibir yang tidak bergerak tidak terbaca sebagai dubbing.
+ */
+const bisu = planShots({ variant, product, photos, duration: 10, aiSeconds: 10, voice: "silent" });
+for (const shot of bisu.shots.filter(item => item.kind === "ai")) {
+  assert.ok(/tidak berbicara/.test(shot.prompt), "model harus diminta tidak bicara");
+  assert.ok(/tanpa lip-sync/i.test(shot.prompt), "lip-sync harus ditolak eksplisit");
+  assert.ok(!/berkata:/.test(shot.prompt));
+  assert.ok(/Voiceover ditambahkan di editor/.test(shot.prompt));
+}
+
+/*
+ * Ruang untuk caption disiapkan saat generate. Kalau produk terlanjur ditaruh
+ * di seperempat bawah frame, caption ditaruh di mana pun akan menutupinya dan
+ * editor tidak punya cara memperbaikinya selain generate ulang.
+ */
+const { NEGATIVE_SPACE } = require("../shot-planner");
+for (const shot of plan.shots.filter(item => item.kind === "ai")) {
+  assert.ok(shot.prompt.includes(NEGATIVE_SPACE), `shot ${shot.id} tidak meminta ruang kosong`);
+}
+assert.ok(master.prompt.includes(NEGATIVE_SPACE), "master image juga harus menyisakan ruang");
+// Menyisakan ruang tidak boleh mengalahkan produk; itu yang dijual.
+assert.ok(/produk jadi kecil|komposisi jadi janggal/.test(NEGATIVE_SPACE), "pengecualian demi produk harus tertulis");
+
 // Tanpa naskah sama sekali, blok suara tetap sah dan tidak menyisakan "berkata:" kosong.
 const tanpaNaskah = audioBlockFor({ variant: {}, beats: ["hook"], scene: { ambience: "ruang senyap" }, duration: 8, clipCount: 1, voice: "flow" });
 assert.ok(!/berkata:/.test(tanpaNaskah));

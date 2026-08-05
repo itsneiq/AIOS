@@ -10,14 +10,45 @@ hambar, ajakan yang tidak nyambung platform, dan set visual yang berulang.
 Setiap aturan di sini punya sebab, dan sebabnya ikut ditulis — supaya bisa
 dilanggar dengan sadar ketika memang perlu.
 
+Sebagian aturan diambil dari spesifikasi Creative Studio, yang sampai pada
+kesimpulan yang sama lewat bukti produksi. Kalau ada yang bertentangan, yang
+menang adalah yang punya bukti — bukan yang lebih baru.
+
 ---
 
-## 1. Cara memutuskan, bukan daftar pilihan
+## 1. Satu creative, satu pembeli
 
-Kesalahan paling mahal bukan memilih sudut yang lemah, melainkan memilih
-kerangka yang salah untuk tingkat kesadaran pembelinya.
+Keputusan pertama bukan sudut, bukan kerangka, bukan hook. **Satu pembeli.**
 
-**Tentukan dulu: pembeli sudah sadar apa?**
+Iklan yang mencoba bicara ke semua orang tidak bicara ke siapa pun. Dan tiga
+varian yang pembelinya sama akan berbeda kata-katanya saja — terasa banyak
+pilihan, padahal cuma satu iklan ditulis ulang tiga kali.
+
+Untuk setiap creative, tentukan satu-satu — bukan daftar:
+
+| Yang ditentukan | Contoh untuk kemeja oversize katun |
+|---|---|
+| **Pembeli** | Pekerja kantoran yang komuternya panjang |
+| **Keinginan** | Terlihat rapi sampai sore tanpa gerah |
+| **Hambatan** | Kemeja katun biasanya kusut dan lengket setelah dua jam |
+| **Pemicu beli** | Ketemu bahan yang adem tapi tetap terlihat rapi |
+| **Momen pakai** | Pagi berangkat, siang meeting, sore pulang |
+| **Emosi** | Lega, tidak perlu memikirkan penampilan sepanjang hari |
+
+Varian kedua dan ketiga **ganti pembelinya**, bukan ganti kalimatnya. Mahasiswa
+yang mau terlihat rapi dengan anggaran terbatas adalah iklan yang berbeda —
+hambatannya beda, buktinya beda, bahasanya beda.
+
+Kalau tidak ada informasi cukup untuk menentukan pembeli, sebut itu terang-terangan
+sebagai asumsi. Jangan mengarang ketepatan yang tidak ada.
+
+---
+
+## 2. Kerangka mengikuti kesadaran pembeli
+
+Setelah pembelinya jelas, baru pilih kerangka. Kesalahan paling mahal bukan
+memilih sudut yang lemah, melainkan memilih kerangka yang salah untuk tingkat
+kesadaran pembelinya.
 
 | Kesadaran pembeli | Kerangka | Bentuknya |
 |---|---|---|
@@ -38,7 +69,64 @@ merasa bermasalah, karena agitate-nya akan terasa mengada-ada.
 
 ---
 
-## 2. Empat beat
+## 3. Keberatan — yang sebenarnya menahan orang checkout
+
+Bagian ini paling sering hilang, dan hilangnya paling mahal.
+
+Naskah iklan biasanya menjawab *kenapa produk ini bagus*. Yang menahan orang
+menekan beli hampir tidak pernah itu. Yang menahan adalah pertanyaan yang tidak
+sempat terjawab: **"bahannya tipis gak ya"**, **"muat gak ya"**, **"keliatan
+murahan gak"**, **"beda gak sama yang lima puluh ribu"**.
+
+Penonton yang sampai ke detik kesepuluh sudah tertarik. Yang dia butuhkan bukan
+manfaat tambahan, tapi satu keraguan yang dijawab.
+
+**Untuk setiap creative, tulis satu keberatan utama dan pasangkan dengan
+jawaban.** Jawabannya harus salah satu dari empat ini, tidak boleh yang lain:
+
+| Jenis jawaban | Bentuknya | Contoh |
+|---|---|---|
+| **Bukti yang terlihat** | Ditunjukkan di layar | Kain diregangkan lalu kembali, tanpa bekas |
+| **Fakta dari deskripsi** | Dikutip apa adanya | "Katun 100%, 180 gram" |
+| **Jawaban kreatif yang aman** | Tidak mengklaim, memindahkan bingkai | Diperlihatkan dipakai seharian, bukan dijanjikan awet |
+| **Risiko yang diakui** | Disebut terus terang | Ukurannya memang besar; itu bagian dari potongannya |
+
+Yang **tidak boleh**: menjawab keberatan dengan klaim yang tidak bisa dibuktikan.
+*"Dijamin gak tipis"* bukan jawaban — itu klaim mutlak, dan Meta menolaknya.
+
+Keberatan biasanya paling pas ditaruh di beat **solve**, tepat setelah produk
+masuk. Untuk fashion dan kecantikan, tiga keberatan yang paling sering:
+
+- **Fashion** → bahan (tipis/panas), ukuran (muat/kebesaran), tampilan (murahan)
+- **Kecantikan** → hasil (kelihatan gak), keamanan (cocok gak di kulit saya), nilai (beda gak sama yang murah)
+
+---
+
+## 4. Bukti harus bisa difilmkan
+
+Alasan yang tidak bisa ditunjukkan bukan alasan — itu klaim, dan klaim adalah
+yang paling tidak dipercaya di iklan affiliate.
+
+Sebelum satu manfaat masuk ke naskah, cek empat hal:
+
+1. **Aksi apa yang terlihat?** — Kain diregangkan. Air ditumpahkan lalu menggelinding.
+2. **Keadaan produk seperti apa?** — Baru dibuka, sudah dipakai, dibandingkan.
+3. **Hasil apa yang terlihat?** — Kembali ke bentuk semula. Permukaan tetap kering.
+4. **Apa batasnya?** — Yang tidak terbukti jangan diklaim.
+
+Kalau nomor 1 atau 3 tidak terjawab, manfaat itu tidak bisa jadi bukti. Boleh
+tetap disebut, tapi jangan diandalkan sebagai alasan utama.
+
+```
+BUKTI    "Tangan meregangkan kain, lalu dilepas — kembali rapi tanpa bekas"
+KLAIM    "Bahannya berkualitas tinggi dan tahan lama"
+```
+
+Yang kedua tidak salah. Cuma tidak ada yang percaya.
+
+---
+
+## 5. Empat beat
 
 | Beat | Porsi | Tugas |
 |---|---|---|
@@ -65,7 +153,7 @@ sering dan paling tidak terlihat.
 
 ---
 
-## 3. Yang membuat hook berhenti digulir
+## 6. Yang membuat hook berhenti digulir
 
 Bobot ini dikalibrasi terhadap dua belas hook nyata. Dua hook bisa terlihat
 sama kuat secara tata bahasa namun berbeda jauh sebagai iklan.
@@ -100,7 +188,7 @@ Yang kedua menang karena satu kata: **padahal**.
 
 ---
 
-## 4. Platform
+## 7. Platform
 
 Perbedaan yang menyangkut isi. Margin, safe area, dan rasio bukan urusan di
 sini — itu tahap perakitan.
@@ -139,7 +227,7 @@ sini — itu tahap perakitan.
 
 ---
 
-## 5. Kebijakan — yang membuat iklan ditolak
+## 8. Kebijakan — yang membuat iklan ditolak
 
 Iklan yang ditolak lebih merugikan daripada iklan yang lemah, karena tidak
 menghasilkan data apa pun.
@@ -170,7 +258,7 @@ memang membuat masalah terasa. Periksa beat ini paling teliti.
 
 ---
 
-## 6. Set visual — seragam di dalam, beragam antar
+## 9. Set visual — seragam di dalam, beragam antar
 
 Dua hal yang mirip tetapi berlawanan akibatnya:
 
@@ -219,13 +307,13 @@ susun set baru mengikuti pola yang sama: latar, cahaya, kamera, wardrobe, aksi.
 
 Set bukan cuma tampilan. Kafe punya obrolan samar dan denting cangkir, rooftop
 punya angin dan kota di kejauhan, meja marmer nyaris senyap kecuali gesekan
-jari. Ambience ini masuk ke blok AUDIO prompt video (bagian 10) dan tidak
+jari. Ambience ini masuk ke blok AUDIO prompt video (bagian 13) dan tidak
 menambah biaya apa pun — klip dengan suara ruangan yang cocok terasa direkam,
 klip yang senyap total terasa dibuat.
 
 ---
 
-## 7. Arah visual per sudut
+## 10. Arah visual per sudut
 
 **Ini jembatan yang paling sering putus.** Sudut kreatif hanya hidup di teks,
 lalu gambarnya tetap close-up produk. Penonton mendengar keluhan tetapi melihat
@@ -313,7 +401,7 @@ tumpukan botol"* bisa dieksekusi model video; *"tampilkan kesan praktis"* tidak.
 
 ---
 
-## 8. Rencana shot
+## 11. Rencana shot
 
 **Satu-satunya batas keras: 10 detik per generate.** Semua pembagian shot
 turun dari situ, bukan dari kemampuan alat perakit.
@@ -354,7 +442,7 @@ tengah.
 
 ---
 
-## 9. Master image dulu, video kemudian
+## 12. Master image dulu, video kemudian
 
 Foto produk marketplace biasanya berlatar putih polos. Kalau langsung diberikan
 ke Flow, model harus mengarang seluruh dunianya — dan di situlah perbedaan
@@ -377,6 +465,8 @@ referensi yang diunggah. Jangan mengubah tulisan pada kemasan.
 Latar: <world>. Pencahayaan: <lighting>. Kamera: <camera>.
 Wardrobe pendukung: <wardrobe>. Aksi: <action>.
 Kualitas foto komersial, fokus tajam pada produk, latar sedikit kabur.
+Sisakan ruang kosong di sepertiga atas dan seperempat bawah frame; jangan
+menaruh produk atau wajah di area itu.
 Tidak ada tulisan, logo, atau watermark tambahan di dalam gambar.
 Rasio 9:16 vertikal.
 ```
@@ -388,31 +478,49 @@ diiklankan.
 ### Bentuk prompt video
 
 ```
-<arah visual sesuai sudut, lihat bagian 7>.
+<arah visual sesuai sudut, lihat bagian 10>.
 Ini shot pembuka.
 Subjek utama: <nama produk>, tampil identik dengan gambar referensi.
 Latar: <world>. Pencahayaan: <lighting>. Kamera: <camera>. Aksi: <action>.
 Kamera stabil, gerakan halus, tanpa perpindahan gaya di tengah shot.
+Sisakan ruang kosong di sepertiga atas dan seperempat bawah frame.
 Rasio 9:16 vertikal. Durasi klip sekitar <n> detik.
 
 AUDIO
-<blok suara — lihat bagian 10>
+<blok suara — lihat bagian 13>
 
 LARANGAN
 Tanpa subtitle. Tanpa caption. Tanpa teks apa pun di layar.
 Tanpa tulisan tambahan, logo, atau watermark.
 ```
 
-Blok **LARANGAN** ikut di setiap prompt tanpa kecuali, alasannya di bagian 10.
+Blok **LARANGAN** ikut di setiap prompt tanpa kecuali, alasannya di bagian 13.
 
 Untuk klip kedua dan seterusnya, ganti *"Ini shot pembuka"* menjadi:
 
 > *Lanjutkan dari shot sebelumnya: pertahankan produk, pencahayaan, latar, dan
 > sudut kamera yang sama. Ubah hanya gerakan yang diminta.*
 
----
+### Ruang kosong disiapkan saat generate, bukan saat mengedit
 
-## 10. Voiceover dan caption di Flow
+Ini beda dari safe area, dan bedanya penting.
+
+Safe area adalah urusan editor: seberapa jauh caption dari bawah supaya tidak
+tertutup tombol platform. Tapi kalau produk sudah terlanjur ditaruh model di
+seperempat bawah frame, **caption mau ditaruh di mana pun akan menutupi
+produknya.** Editor tidak bisa memperbaiki itu; yang bisa cuma generate ulang.
+
+| Area | Disisakan untuk | Porsi |
+|---|---|---|
+| Atas | Teks hook | ~sepertiga |
+| Bawah | Caption dan CTA | ~seperempat |
+| Kanan bawah | Grafis keranjang marketplace | dibiarkan bersih |
+
+Satu hal yang tidak boleh dikorbankan: **produk tetap yang paling terlihat.**
+Kalau menyisakan ruang berarti produknya jadi kecil atau komposisinya jadi
+aneh, produk yang menang — ruangnya dikurangi.
+
+## 13. Voiceover dan caption di Flow
 
 Keduanya terdengar seperti satu fitur yang sama, padahal jauh berbeda
 keandalannya. Yang satu dipakai, yang satu dihindari.
@@ -430,17 +538,32 @@ Ada keuntungan yang tidak langsung kelihatan dari klip tanpa dialog: **model
 menggambar subtitle karena ia mendeteksi ada yang bicara.** Klip bisu menutup
 masalah caption rusak dari akarnya, bukan sekadar menahannya lewat larangan.
 
-### 10.1 Voiceover — kapan dari Flow, kapan dari editor
+### 13.1 Voiceover — kapan dari Flow, kapan dari editor
 
-| Keadaan | VO dari | Sebabnya |
+Ada tiga pilihan, bukan dua. Yang ketiga paling sering terlewat dan biasanya
+paling bagus.
+
+| Pilihan | Bentuknya | Kapan dipakai |
 |---|---|---|
-| Ada orang di frame yang mulutnya bergerak | **Flow** | VO editor di atas bibir yang bergerak adalah dubbing, dan terlihat sebagai dubbing |
-| Semua keadaan lain | **Editor** | Suara sama di seluruh iklan, revisi gratis, naskah persis, timing bisa dipas |
+| **Tanpa orang** | Produk, tangan, atau lingkungan saja. VO dari editor | Bawaan. Paling sedikit yang bisa meleset |
+| **Orang main tanpa bicara** | Orang di frame, ekspresif, tapi mulutnya tidak bergerak. VO dari editor | Ketika butuh wajah manusia tapi ingin suara yang konsisten |
+| **Orang bicara** | Dialog dari Flow, sinkron bibir | Testimoni gaya UGC, hanya untuk video satu klip |
 
-Format orang bicara ke kamera bukan pinggiran — testimoni termasuk yang paling
-laku di kategori kecantikan. Jadi jangan ditutup permanen; cukup jangan dipilih
-tanpa sadar. Mulai dari klip tanpa dialog selagi alurnya masih diuji, lalu coba
-satu varian talking-head setelah sisanya terbukti.
+**Pilihan kedua itu yang menghilangkan pertukaran.** Selama ini kelihatannya
+harus memilih: wajah manusia dengan suara yang berubah-ubah, atau suara
+konsisten tanpa wajah. Padahal tinggal minta modelnya tidak bicara:
+
+```
+Model tampil di frame dan berekspresi wajar, tetapi tidak berbicara.
+Tanpa gerakan bibir, tanpa lip-sync.
+```
+
+Voiceover ditempel di editor di atasnya, dan tidak terlihat sebagai dubbing
+karena memang tidak ada bibir yang perlu disamai.
+
+Format orang bicara ke kamera tetap bukan pinggiran — testimoni termasuk yang
+paling laku di kategori kecantikan. Jadi jangan ditutup permanen; cukup jangan
+dipilih tanpa sadar. Mulai dari dua pilihan pertama selagi alurnya masih diuji.
 
 Bagian di bawah ini berlaku ketika VO memang diambil dari Flow. Cara menulis
 dialog di situ lebih berpengaruh daripada isinya.
@@ -497,7 +620,7 @@ Ambience: <suara latar sesuai set>, pelan.
 Tanpa musik latar.
 ```
 
-### 10.2 Caption — jangan dari Flow
+### 13.2 Caption — jangan dari Flow
 
 Veo mengasosiasikan ucapan dengan tulisan di layar, jadi begitu ia mendeteksi
 ada yang bicara ia "membantu" dengan menggambar subtitle. Masalahnya ia
@@ -531,17 +654,21 @@ memakan area tempat caption sungguhan akan diletakkan.
 
 ---
 
-## 11. Alur kerja
+## 14. Alur kerja
 
 ```
 1. Kirim ke chat:  judul produk + deskripsi + platform tujuan
                    (salin apa adanya dari marketplace)
 
-2. Terima:         creative brief   — pembeli, masalah, kerangka, sudut, alasan
+2. Terima:         creative brief   — pembeli, keinginan, hambatan, kerangka,
+                                      sudut, dan alasan memilihnya
+                   keberatan        — satu keberatan utama + jenis jawabannya
+                   bukti            — aksi yang terlihat dan hasil yang terlihat
                    script 4 beat    — hook, agitate, solve, cta
                    prompt master    — 2 pilihan set
                    prompt video     — sesuai sudut, lengkap dengan blok
                                       AUDIO dan LARANGAN
+                   gerbang komersial— empat pertanyaan, dijawab kalimat
 
 3. Di Flow:        unggah foto produk → generate master image → pilih satu
                    pakai master itu sebagai referensi → generate klip
@@ -561,23 +688,47 @@ tahap perakitan — dengan alat apa pun yang dipakai.
 | Hal | Ketentuan |
 |---|---|
 | **Caption** | Diketik sendiri, bukan dari Flow. Potong di batas frasa, bukan di hitungan kata — "merawat kulit kusam agar tampak" lalu "lebih cerah" terbaca patah |
-| **Safe area** | Beri jarak dari bawah, jangan dipatok satu angka. Meta, Shopee, dan TikTok menaruh UI di ketinggian berbeda, dan caption yang tertutup tombol sama saja dengan tidak ada |
+| **Safe area** | Beri jarak dari bawah, jangan dipatok satu angka. Meta, Shopee, dan TikTok menaruh UI di ketinggian berbeda, dan caption yang tertutup tombol sama saja dengan tidak ada. Ruang untuk menaruhnya sudah disiapkan sejak prompt — lihat bagian 12 |
 | **VO sambungan** | Kalau VO dari editor, satu rekaman untuk seluruh video — bukan per klip |
 | **Musik** | Volume di bawah VO. Kalau VO dari Flow, musik ditempel di editor karena promptnya sudah minta tanpa musik |
 | **Durasi akhir** | Sesuai rencana. Video yang terpotong di detik terakhir kehilangan justru CTA-nya |
 
 ---
 
-## 12. Yang wajib diperiksa sebelum menyerahkan hasil
+## 15. Gerbang komersial — empat pertanyaan
+
+Sebelum apa pun diserahkan, creative harus bisa menjawab empat ini. Kalau ada
+satu saja yang tidak terjawab, iklannya belum siap — seberapa pun bagus
+tampilannya.
+
+| # | Pertanyaan | Dijawab oleh | Kalau kosong |
+|---|---|---|---|
+| 1 | Kenapa penonton **berhenti**? | hook | Iklannya tidak pernah ditonton |
+| 2 | Kenapa dia **lanjut nonton**? | agitate | Ditonton tiga detik lalu digulir |
+| 3 | Kenapa dia **percaya**? | solve + bukti + keberatan terjawab | Ditonton habis, tidak diklik |
+| 4 | Kenapa dia **bertindak**? | cta | Diklik nanti, artinya tidak pernah |
+
+Jawablah dengan kalimat, bukan dengan "ada kok". Kalau jawaban nomor 3 berupa
+klaim dan bukan sesuatu yang terlihat di layar, itu belum terjawab.
+
+**Video yang bagus dipandang tidak lulus gerbang ini.** Ini kegagalan paling
+sering pada creative buatan AI: enak dilihat, komposisinya rapi, cahayanya bagus
+— dan tidak satu pun dari empat pertanyaan ini terjawab.
+
+### Daftar periksa teknis
 
 **Naskah dan prompt:**
 
+- [ ] Satu pembeli disebut jelas, dan varian lain memakai pembeli berbeda
+- [ ] Satu keberatan utama ditulis, dan jawabannya salah satu dari empat jenis
+- [ ] Alasan utamanya bisa difilmkan, bukan klaim
 - [ ] Hook memuat minimal satu sinyal penguat, tidak dibuka bernada artikel
 - [ ] Beat agitate ada dan tidak menyinggung atribut pribadi
 - [ ] CTA sesuai mekanisme platform — keranjang untuk marketplace, tautan untuk Meta
 - [ ] Tidak ada klaim medis, mutlak, atau janji berjangka waktu
 - [ ] Arah visual mengikuti sudut, bukan close-up produk generik
 - [ ] Prompt master memuat kalimat pengunci produk
+- [ ] Prompt meminta ruang kosong atas dan bawah disisakan
 - [ ] Set berbeda dari produk sebelumnya
 - [ ] Jumlah klip sesedikit mungkin
 
@@ -586,12 +737,13 @@ tahap perakitan — dengan alat apa pun yang dipakai.
 - [ ] Blok LARANGAN ada di setiap prompt video
 - [ ] Blok AUDIO menyebut ambience set dan "tanpa musik latar"
 - [ ] Klip dibuat tanpa dialog, kecuali memang ada yang bicara di depan kamera
+- [ ] Kalau ada orang di frame tanpa dialog: prompt menyebut tanpa gerakan bibir
 - [ ] Kalau ada dialog: ditulis `berkata:` **tanpa tanda kutip**, menyebut
       bahasa Indonesia, di bawah ~25 kata, dan videonya cukup satu klip
 
 ---
 
-## 13. Catatan jujur
+## 16. Catatan jujur
 
 **Yang belum ada:** catatan hasil. Tanpa mencatat varian mana yang menang di
 platform, seluruh keputusan di dokumen ini tetap tebakan berpengalaman —
@@ -607,6 +759,13 @@ memang jalan, tetapi apakah logat dan intonasinya terdengar wajar untuk telinga
 Indonesia belum diuji pada produk nyata. Selama belum, bawaannya klip dibuat
 tanpa dialog — dan itu sekaligus jawaban paling aman untuk masalah caption.
 Uji satu varian talking-head setelah sisanya terbukti, bukan sebelumnya.
+
+**Skor bukan ramalan.** Angka pada hook dan varian dipakai untuk membandingkan
+dan mengurutkan, bukan untuk memperkirakan CTR, watch time, atau konversi. Skor
+99 berarti "paling kuat dari yang ada di meja", bukan "akan menang". Tanpa data
+kampanye sungguhan, yang boleh dikatakan cuma: paling cocok secara komersial,
+potensi hook paling kuat, mekanisme buktinya paling jelas, paling mudah
+diproduksi, atau risikonya paling besar.
 
 **Angka 40% subtitle rusak** berasal dari laporan pemakai dan liputan media,
 bukan dari pengukuran sendiri. Perlakukan sebagai peringatan, bukan angka pasti
