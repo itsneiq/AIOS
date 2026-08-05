@@ -130,7 +130,23 @@ const { paths } = createProject(root, { plan, variant, product: hasil.product, m
 console.log(`PRODUK    ${hasil.product.title}`);
 console.log(`KATEGORI  ${hasil.product.category}`);
 console.log(`PLATFORM  ${(args.platform || "meta")}`);
-console.log(`VARIAN    #${pick} skor ${variant.score} [${variant.angle}]`);
+/*
+ * Skor dipakai untuk mengurutkan, bukan meramal. Angka 92 berarti "paling kuat
+ * dari yang ada di meja", bukan "akan menang" — tanpa data kampanye sungguhan
+ * tidak ada dasar untuk memperkirakan CTR maupun konversi.
+ */
+console.log(`VARIAN    #${pick} skor ${variant.score} (urutan, bukan ramalan) [${variant.angle}]`);
+/*
+ * Pembeli, keberatan, dan bukti ditampilkan bersama naskahnya karena di situlah
+ * varian sebenarnya dibedakan. Dua varian dengan pembeli sama adalah satu iklan
+ * yang ditulis ulang, dan itu hanya terlihat kalau pembelinya ikut tercetak.
+ */
+if (variant.buyer) console.log(`  pembeli ${variant.buyer}`);
+if (variant.objection) {
+  console.log(`  ragu    ${variant.objection}`);
+  if (variant.objectionAnswer) console.log(`  jawab   ${variant.objectionAnswer}`);
+}
+if (variant.proof) console.log(`  bukti   ${variant.proof}`);
 console.log(`  hook    ${variant.hook}`);
 if (variant.agitate) console.log(`  agitate ${variant.agitate}`);
 if (variant.solve || variant.benefit) console.log(`  solve   ${variant.solve || variant.benefit}`);

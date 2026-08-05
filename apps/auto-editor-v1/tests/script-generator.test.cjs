@@ -14,6 +14,38 @@ assert.ok(prompt.includes("problem_solution"));
 assert.equal(buildScriptPrompt({ product, platform: "tiktok" }).includes("4-12 kata"), true);
 assert.ok(buildScriptPrompt({ product, count: 999 }).includes("20 varian"), "jumlah varian dibatasi");
 
+/*
+ * Tiga hal yang menentukan apakah iklannya menjual, dan ketiganya paling mudah
+ * hilang tanpa terlihat karena naskahnya tetap terbaca rapi tanpa mereka.
+ *
+ * Pembeli: varian yang pembelinya sama cuma satu iklan ditulis ulang.
+ * Keberatan: yang menahan orang checkout bukan kurangnya manfaat, melainkan
+ *   satu keraguan yang tidak terjawab.
+ * Bukti: alasan yang tidak bisa difilmkan hanyalah klaim.
+ */
+for (const wajib of ["SATU VARIAN, SATU PEMBELI", "KEBERATAN", "BUKTI HARUS BISA DIFILMKAN"]) {
+  assert.ok(prompt.includes(wajib), `prompt kehilangan bagian ${wajib}`);
+}
+for (const field of ["\"buyer\"", "\"objection\"", "\"objectionAnswer\"", "\"proof\""]) {
+  assert.ok(prompt.includes(field), `skema balasan kehilangan ${field}`);
+}
+// Empat cara menjawab keberatan disebut lengkap; tanpa batas itu model akan
+// menjawab dengan klaim, dan klaim justru yang ditolak kebijakan.
+assert.ok(prompt.includes("bukti yang terlihat di layar"));
+assert.ok(prompt.includes("risiko yang diakui terus terang"));
+
+// Bidang baru terbawa ke varian, dan varian model lama yang belum mengisinya
+// tetap sah supaya proyek yang sudah tersimpan tidak rusak.
+const lengkap = normalizeVariants([{
+  angle: "demo", hook: "Kainnya jatuh rapi", buyer: "mahasiswa komuter",
+  objection: "takut kelihatan pendek", objectionAnswer: "diperlihatkan dipakai orang bertubuh mungil",
+  proof: "berjalan menyamping, kain mengayun tanpa menumpuk di mata kaki"
+}]);
+assert.equal(lengkap[0].buyer, "mahasiswa komuter");
+assert.equal(lengkap[0].objection, "takut kelihatan pendek");
+assert.ok(lengkap[0].proof.includes("mengayun"));
+assert.equal(normalizeVariants([{ hook: "Tanpa bidang baru" }])[0].buyer, "");
+
 // Hook duplikat tidak boleh memakan jatah varian.
 const normalized = normalizeVariants([
   { angle: "demo", hook: "Lihat hasilnya dulu", benefit: "b", cta: "c", visualHint: "v" },

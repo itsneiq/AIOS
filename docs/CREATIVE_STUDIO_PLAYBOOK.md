@@ -724,7 +724,7 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
 ### Urutannya
 
 ```
-1. Kirim ke chat:  judul produk + deskripsi + platform tujuan
+1. Kirim ke chat:  judul + deskripsi + foto produk
                    (salin apa adanya dari marketplace)
 
 2. Terima:         creative brief   — pembeli, keinginan, hambatan, kerangka,

@@ -86,10 +86,30 @@ FORMAT VIDEO
 STRUKTUR EMPAT BAGIAN
 - hook: hentikan jempol. Satu kalimat, tanpa pengantar, tanpa menyebut merek di depan.
 - agitate: buat masalahnya terasa. Sebutkan usaha yang sudah dicoba tapi belum berhasil, atau kerepotan yang sudah dianggap biasa. Bagian inilah yang membuat penonton merasa dibicarakan.
-- solve: baru di sini produk masuk sebagai jalan keluar. Sebutkan satu alasan konkret kenapa berbeda.
+- solve: baru di sini produk masuk sebagai jalan keluar. Sebutkan satu alasan konkret kenapa berbeda, dan jawab keberatan utamanya di sini.
 - cta: satu ajakan pendek, sesuai mekanisme platform di bawah.
 
 Tanpa agitate, iklan berubah jadi katalog: penonton diberi tahu produknya bagus tetapi tidak pernah diberi alasan untuk peduli.
+
+SATU VARIAN, SATU PEMBELI
+Setiap varian ditujukan ke satu pembeli, bukan ke semua orang. Varian yang berbeda wajib berbeda pembelinya — bukan cuma berbeda susunan kata untuk pembeli yang sama. Pembeli yang berbeda punya hambatan berbeda, keberatan berbeda, dan bahasa berbeda.
+
+KEBERATAN
+Yang menahan orang menekan beli hampir tidak pernah kurangnya manfaat, melainkan satu keraguan yang tidak sempat terjawab: bahannya tipis atau tidak, muat atau tidak, hasilnya kelihatan atau tidak, beda atau tidak dari yang lebih murah.
+
+Sebutkan satu keberatan utama per varian, lalu jawab dengan salah satu dari empat cara ini saja:
+- bukti yang terlihat di layar;
+- fakta yang memang ada di deskripsi produk;
+- jawaban kreatif yang tidak mengklaim apa pun;
+- risiko yang diakui terus terang.
+
+Menjawab keberatan dengan klaim yang tidak bisa dibuktikan dianggap gagal, dan biasanya juga melanggar kebijakan di bawah.
+
+BUKTI HARUS BISA DIFILMKAN
+Alasan yang tidak bisa ditunjukkan bukan alasan, melainkan klaim — dan klaim adalah yang paling tidak dipercaya di iklan affiliate. Untuk setiap varian, sebutkan aksi yang terlihat dan hasil yang terlihat.
+
+Contoh yang benar: "tangan meregangkan kain, lalu dilepas, kembali rapi tanpa bekas".
+Contoh yang gagal: "bahannya berkualitas tinggi dan tahan lama".
 
 ATURAN HOOK
 - Panjang ${limits.min}-${limits.max} kata. Ini batas keras.
@@ -110,15 +130,19 @@ SUDUT PANDANG YANG TERSEDIA
 ${angleList}${priorityNote}
 
 TUGAS
-Tulis ${total} varian yang benar-benar berbeda satu sama lain, tersebar merata ke beberapa sudut pandang di atas. Varian yang hanya berbeda susunan kata dianggap gagal.
+Tulis ${total} varian yang benar-benar berbeda satu sama lain, tersebar merata ke beberapa sudut pandang di atas, dan sebisa mungkin berbeda pembelinya. Varian yang hanya berbeda susunan kata dianggap gagal.
 ${extraNotes ? `\nCATATAN TAMBAHAN\n${extraNotes}\n` : ""}
 Balas HANYA dengan JSON array, tanpa penjelasan apa pun, dengan bentuk persis:
 [
   {
     "angle": "<salah satu id sudut pandang di atas>",
+    "buyer": "<satu pembeli spesifik, mis. mahasiswa yang komuternya jauh>",
+    "objection": "<satu keraguan yang paling menahan pembeli itu>",
+    "objectionAnswer": "<jawabannya, memakai salah satu dari empat cara di atas>",
+    "proof": "<aksi yang terlihat dan hasil yang terlihat, dalam satu kalimat>",
     "hook": "<satu kalimat pembuka>",
     "agitate": "<satu kalimat yang membuat masalahnya terasa>",
-    "solve": "<satu sampai dua kalimat: produk sebagai jalan keluar>",
+    "solve": "<satu sampai dua kalimat: produk sebagai jalan keluar, memuat jawaban keberatan>",
     "cta": "<ajakan singkat sesuai mekanisme platform>",
     "visualHint": "<satu kalimat: visual apa yang paling pas untuk bagian hook>"
   }
@@ -142,6 +166,17 @@ function normalizeVariants(raw, { count = DEFAULT_COUNT, fallbackAngle = "balanc
     const solve = cleanLine(item?.solve || item?.benefit);
     variants.push({
       angle: ANGLE_BRIEFS[item?.angle] ? item.angle : fallbackAngle,
+      /*
+       * Pembeli, keberatan, dan bukti tidak dipakai menyusun kalimat iklan —
+       * itu sudah selesai di naskah. Ketiganya ikut disimpan supaya keputusan
+       * di balik varian bisa dibaca ulang saat memilih, dan supaya varian yang
+       * pembelinya sama ketahuan sebagai pengulangan. Model lama tidak
+       * mengisinya, jadi kosong tetap sah.
+       */
+      buyer: cleanLine(item?.buyer, { maxLength: 160 }),
+      objection: cleanLine(item?.objection, { maxLength: 160 }),
+      objectionAnswer: cleanLine(item?.objectionAnswer, { maxLength: 240 }),
+      proof: cleanLine(item?.proof, { maxLength: 240 }),
       hook,
       agitate: cleanLine(item?.agitate),
       solve,
