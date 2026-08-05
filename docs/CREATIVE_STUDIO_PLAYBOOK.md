@@ -16,7 +16,84 @@ menang adalah yang punya bukti — bukan yang lebih baru.
 
 ---
 
-## 1. Satu creative, satu pembeli
+## 1. Yang sebenarnya dibeli: pengunjung Shopee selama tujuh hari
+
+Sebelum satu pun keputusan kreatif, model bisnisnya harus jelas — karena model
+ini membalik beberapa aturan yang biasanya benar.
+
+```
+Meta Traffic  →  klik  →  Shopee  →  cookie 7 hari, komisi penuh
+```
+
+Yang dibayar bukan penjualan satu produk. Yang dibayar adalah **satu pengunjung
+Shopee, dan apa pun yang ia beli selama tujuh hari berikutnya.**
+
+Tiga akibat yang mengubah pekerjaan:
+
+### 1.1 Hook adalah tuas keuntungan, bukan sekadar tuas perhatian
+
+```
+pendapatan per klik  ≈  rata-rata belanja 7 hari × komisi × peluang belanja
+```
+
+Ketiganya hampir tidak bisa digeser oleh video. Orang belanja di Shopee sebanyak
+yang memang ia mau belanja. **Kalau pendapatan per klik praktis tetap, satu-satunya
+yang tersisa adalah menurunkan biaya per klik** — dan itu ditentukan oleh seberapa
+kuat video menghentikan jempol.
+
+Setiap rupiah CPC yang turun langsung jadi margin. Bagian 7 tentang sinyal hook
+karena itu bukan soal estetika; itu bagian yang paling menentukan untung-rugi.
+
+### 1.2 Produk adalah umpan, bukan tujuan
+
+Kriteria memilih produk berubah total:
+
+| Kriteria | Bobot | Kenapa |
+|---|---|---|
+| Bikin berhenti scroll | **Tertinggi** | Ini yang menentukan CPC, dan CPC yang menentukan untung |
+| Harga rendah | Tinggi | Gesekan untuk klik dan telusur lebih kecil. Murah justru lebih baik |
+| Menarik untuk banyak orang | Tinggi | Menyempitkan sasaran menaikkan CPC tanpa menaikkan nilai per klik |
+| Halaman listing meyakinkan | Sedang | Video cuma mengantar; halamannya yang menahan |
+| **Persen komisi** | **Hampir tidak relevan** | Yang dibayar belanja tujuh harinya, bukan produk yang diklik |
+
+Ini kebalikan dari nasihat affiliate pada umumnya. Mencari produk komisi
+lima belas persen tidak ada gunanya kalau produk itu tidak membuat orang berhenti.
+
+### 1.3 Creative sempit, sasaran lebar
+
+Dua hal yang mudah tertukar dan akibatnya berlawanan:
+
+- **Creative tetap bicara ke satu pembeli** (bagian 2). Iklan yang bicara ke
+  semua orang tidak menghentikan siapa pun.
+- **Sasaran di Meta dibiarkan lebar.** Yang dibutuhkan bukan orang yang mau
+  produk ini, melainkan orang yang belanja di Shopee. Menyempitkan minat
+  menaikkan CPC untuk nilai per klik yang sama.
+
+Videonya spesifik, penayangannya luas. Bukan sebaliknya.
+
+### 1.4 Tanggal jadi tuas yang jarang dipakai
+
+Jendela tujuh hari berarti satu klik menutupi seminggu penuh. Peluang orang
+belanja di dalam minggu itu tidak rata sepanjang bulan.
+
+| Waktu | Kenapa berbeda |
+|---|---|
+| Menjelang tanggal kembar — 9.9, 10.10, 11.11, 12.12 | Klik yang dibeli beberapa hari sebelumnya menutupi seluruh hari kampanye |
+| Sekitar tanggal gajian | Peluang belanja di dalam jendela naik tajam |
+| Tengah bulan, tanpa kampanye | Klik yang sama, nilai lebih rendah |
+
+Klik dengan CPC sama bisa bernilai berkali lipat berbeda tergantung kapan
+dibelinya. Ini satu-satunya tuas di dokumen ini yang tidak menyentuh creative
+sama sekali, dan mungkin yang paling murah dijalankan.
+
+**Yang perlu diingat:** atribusi last-click. Cookie bisa tertimpa kalau
+penonton mengeklik tautan affiliate orang lain sebelum checkout. Itu kebocoran
+yang tidak muncul di laporan mana pun, dan tidak ada yang bisa dilakukan
+selain menyadarinya saat angkanya terasa lebih rendah dari perhitungan.
+
+---
+
+## 2. Satu creative, satu pembeli
 
 Keputusan pertama bukan sudut, bukan kerangka, bukan hook. **Satu pembeli.**
 
@@ -44,7 +121,7 @@ sebagai asumsi. Jangan mengarang ketepatan yang tidak ada.
 
 ---
 
-## 2. Kerangka mengikuti kesadaran pembeli
+## 3. Kerangka mengikuti kesadaran pembeli
 
 Setelah pembelinya jelas, baru pilih kerangka. Kesalahan paling mahal bukan
 memilih sudut yang lemah, melainkan memilih kerangka yang salah untuk tingkat
@@ -69,7 +146,7 @@ merasa bermasalah, karena agitate-nya akan terasa mengada-ada.
 
 ---
 
-## 3. Keberatan — yang sebenarnya menahan orang checkout
+## 4. Keberatan — yang sebenarnya menahan orang checkout
 
 Bagian ini paling sering hilang, dan hilangnya paling mahal.
 
@@ -102,7 +179,7 @@ masuk. Untuk fashion dan kecantikan, tiga keberatan yang paling sering:
 
 ---
 
-## 4. Bukti harus bisa difilmkan
+## 5. Bukti harus bisa difilmkan
 
 Alasan yang tidak bisa ditunjukkan bukan alasan — itu klaim, dan klaim adalah
 yang paling tidak dipercaya di iklan affiliate.
@@ -126,7 +203,7 @@ Yang kedua tidak salah. Cuma tidak ada yang percaya.
 
 ---
 
-## 5. Empat beat
+## 6. Empat beat
 
 | Beat | Porsi | Tugas |
 |---|---|---|
@@ -153,7 +230,7 @@ sering dan paling tidak terlihat.
 
 ---
 
-## 6. Yang membuat hook berhenti digulir
+## 7. Yang membuat hook berhenti digulir
 
 Bobot ini dikalibrasi terhadap dua belas hook nyata. Dua hook bisa terlihat
 sama kuat secara tata bahasa namun berbeda jauh sebagai iklan.
@@ -188,7 +265,7 @@ Yang kedua menang karena satu kata: **padahal**.
 
 ---
 
-## 7. Platform
+## 8. Platform
 
 Perbedaan yang menyangkut isi. Margin, safe area, dan rasio bukan urusan di
 sini — itu tahap perakitan.
@@ -227,7 +304,7 @@ sini — itu tahap perakitan.
 
 ---
 
-## 8. Kebijakan — yang membuat iklan ditolak
+## 9. Kebijakan — yang membuat iklan ditolak
 
 Iklan yang ditolak lebih merugikan daripada iklan yang lemah, karena tidak
 menghasilkan data apa pun.
@@ -258,7 +335,7 @@ memang membuat masalah terasa. Periksa beat ini paling teliti.
 
 ---
 
-## 9. Set visual — seragam di dalam, beragam antar
+## 10. Set visual — seragam di dalam, beragam antar
 
 Dua hal yang mirip tetapi berlawanan akibatnya:
 
@@ -307,13 +384,13 @@ susun set baru mengikuti pola yang sama: latar, cahaya, kamera, wardrobe, aksi.
 
 Set bukan cuma tampilan. Kafe punya obrolan samar dan denting cangkir, rooftop
 punya angin dan kota di kejauhan, meja marmer nyaris senyap kecuali gesekan
-jari. Ambience ini masuk ke blok AUDIO prompt video (bagian 13) dan tidak
+jari. Ambience ini masuk ke blok AUDIO prompt video (bagian 14) dan tidak
 menambah biaya apa pun — klip dengan suara ruangan yang cocok terasa direkam,
 klip yang senyap total terasa dibuat.
 
 ---
 
-## 10. Arah visual per sudut
+## 11. Arah visual per sudut
 
 **Ini jembatan yang paling sering putus.** Sudut kreatif hanya hidup di teks,
 lalu gambarnya tetap close-up produk. Penonton mendengar keluhan tetapi melihat
@@ -401,7 +478,7 @@ tumpukan botol"* bisa dieksekusi model video; *"tampilkan kesan praktis"* tidak.
 
 ---
 
-## 11. Rencana shot
+## 12. Rencana shot
 
 **Satu-satunya batas keras: 10 detik per generate.** Semua pembagian shot
 turun dari situ, bukan dari kemampuan alat perakit.
@@ -442,7 +519,7 @@ tengah.
 
 ---
 
-## 12. Master image dulu, video kemudian
+## 13. Master image dulu, video kemudian
 
 Foto produk marketplace biasanya berlatar putih polos. Kalau langsung diberikan
 ke Flow, model harus mengarang seluruh dunianya — dan di situlah perbedaan
@@ -478,7 +555,7 @@ diiklankan.
 ### Bentuk prompt video
 
 ```
-<arah visual sesuai sudut, lihat bagian 10>.
+<arah visual sesuai sudut, lihat bagian 11>.
 Ini shot pembuka.
 Subjek utama: <nama produk>, tampil identik dengan gambar referensi.
 Latar: <world>. Pencahayaan: <lighting>. Kamera: <camera>. Aksi: <action>.
@@ -487,14 +564,14 @@ Sisakan ruang kosong di sepertiga atas dan seperempat bawah frame.
 Rasio 9:16 vertikal. Durasi klip sekitar <n> detik.
 
 AUDIO
-<blok suara — lihat bagian 13>
+<blok suara — lihat bagian 14>
 
 LARANGAN
 Tanpa subtitle. Tanpa caption. Tanpa teks apa pun di layar.
 Tanpa tulisan tambahan, logo, atau watermark.
 ```
 
-Blok **LARANGAN** ikut di setiap prompt tanpa kecuali, alasannya di bagian 13.
+Blok **LARANGAN** ikut di setiap prompt tanpa kecuali, alasannya di bagian 14.
 
 Untuk klip kedua dan seterusnya, ganti *"Ini shot pembuka"* menjadi:
 
@@ -520,7 +597,7 @@ Satu hal yang tidak boleh dikorbankan: **produk tetap yang paling terlihat.**
 Kalau menyisakan ruang berarti produknya jadi kecil atau komposisinya jadi
 aneh, produk yang menang — ruangnya dikurangi.
 
-## 13. Voiceover dan caption di Flow
+## 14. Voiceover dan caption di Flow
 
 Keduanya terdengar seperti satu fitur yang sama, padahal jauh berbeda
 keandalannya. Yang satu dipakai, yang satu dihindari.
@@ -538,7 +615,7 @@ Ada keuntungan yang tidak langsung kelihatan dari klip tanpa dialog: **model
 menggambar subtitle karena ia mendeteksi ada yang bicara.** Klip bisu menutup
 masalah caption rusak dari akarnya, bukan sekadar menahannya lewat larangan.
 
-### 13.1 Voiceover — kapan dari Flow, kapan dari editor
+### 14.1 Voiceover — kapan dari Flow, kapan dari editor
 
 Ada tiga pilihan, bukan dua. Yang ketiga paling sering terlewat dan biasanya
 paling bagus.
@@ -620,7 +697,7 @@ Ambience: <suara latar sesuai set>, pelan.
 Tanpa musik latar.
 ```
 
-### 13.2 Caption — jangan dari Flow
+### 14.2 Caption — jangan dari Flow
 
 Veo mengasosiasikan ucapan dengan tulisan di layar, jadi begitu ia mendeteksi
 ada yang bicara ia "membantu" dengan menggambar subtitle. Masalahnya ia
@@ -654,7 +731,7 @@ memakan area tempat caption sungguhan akan diletakkan.
 
 ---
 
-## 14. Alur kerja
+## 15. Alur kerja
 
 ### Yang dikirim
 
@@ -755,14 +832,14 @@ tahap perakitan — dengan alat apa pun yang dipakai.
 | Hal | Ketentuan |
 |---|---|
 | **Caption** | Diketik sendiri, bukan dari Flow. Potong di batas frasa, bukan di hitungan kata — "merawat kulit kusam agar tampak" lalu "lebih cerah" terbaca patah |
-| **Safe area** | Beri jarak dari bawah, jangan dipatok satu angka. Meta, Shopee, dan TikTok menaruh UI di ketinggian berbeda, dan caption yang tertutup tombol sama saja dengan tidak ada. Ruang untuk menaruhnya sudah disiapkan sejak prompt — lihat bagian 12 |
+| **Safe area** | Beri jarak dari bawah, jangan dipatok satu angka. Meta, Shopee, dan TikTok menaruh UI di ketinggian berbeda, dan caption yang tertutup tombol sama saja dengan tidak ada. Ruang untuk menaruhnya sudah disiapkan sejak prompt — lihat bagian 13 |
 | **VO sambungan** | Kalau VO dari editor, satu rekaman untuk seluruh video — bukan per klip |
 | **Musik** | Volume di bawah VO. Kalau VO dari Flow, musik ditempel di editor karena promptnya sudah minta tanpa musik |
 | **Durasi akhir** | Sesuai rencana. Video yang terpotong di detik terakhir kehilangan justru CTA-nya |
 
 ---
 
-## 15. Gerbang komersial — empat pertanyaan
+## 16. Gerbang komersial — empat pertanyaan
 
 Sebelum apa pun diserahkan, creative harus bisa menjawab empat ini. Kalau ada
 satu saja yang tidak terjawab, iklannya belum siap — seberapa pun bagus
@@ -812,12 +889,33 @@ sering pada creative buatan AI: enak dilihat, komposisinya rapi, cahayanya bagus
 
 ---
 
-## 16. Catatan jujur
+## 17. Catatan jujur
 
-**Yang belum ada:** catatan hasil. Tanpa mencatat varian mana yang menang di
-platform, seluruh keputusan di dokumen ini tetap tebakan berpengalaman —
-bukan tebakan yang belajar dari pasar sendiri. Mulai catat setelah beberapa
-minggu berjalan.
+**Yang belum ada:** catatan hasil. Tanpa mencatat varian mana yang menang,
+seluruh keputusan di dokumen ini tetap tebakan berpengalaman — bukan tebakan
+yang belajar dari pasar sendiri.
+
+Dan pada model traffic + cookie, ini lebih dari sekadar kerapian. **Angka yang
+menentukan untung-rugi ada di dua tempat yang tidak pernah bertemu:**
+
+```
+Meta             →  spend, klik, CPC
+Dashboard Shopee →  order, komisi
+```
+
+Meta tidak pernah tahu ada yang membeli, karena tidak ada pixel di halaman
+Shopee. Dashboard Shopee tidak pernah tahu kliknya dibayar berapa. Yang
+menyambungkan cuma pencatatan sendiri, dan tanpa itu yang terlihat hanya
+*mana yang banyak diklik* — bukan *mana yang menghasilkan*.
+
+Bentuk paling sederhana yang sudah cukup:
+
+```
+tanggal | produk | varian | pembeli | spend | klik | CPC | order | komisi
+```
+
+Yang dicari dari tabel itu satu angka: **komisi ÷ spend.** Di atas satu berarti
+untung. Sisanya penjelasan.
 
 **Yang perlu diuji:** konsistensi klip Flow antar shot belum terbukti di
 pemakaian nyata. Kalau ternyata melompat, rancangan dua klip perlu ditinjau
