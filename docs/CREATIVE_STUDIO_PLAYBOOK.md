@@ -119,6 +119,61 @@ hambatannya beda, buktinya beda, bahasanya beda.
 Kalau tidak ada informasi cukup untuk menentukan pembeli, sebut itu terang-terangan
 sebagai asumsi. Jangan mengarang ketepatan yang tidak ada.
 
+### Berapa varian, dan apa yang dibedakan
+
+Bawaannya **tiga**. Bukan dua belas.
+
+Dua belas itu jumlah yang ditulis untuk **dipilih**, bukan untuk dijalankan.
+Budget kecil dibagi dua belas berarti tidak satu pun mengumpulkan data yang
+cukup untuk disimpulkan — yang terlihat cuma dua belas angka kebetulan.
+
+Yang wajib berbeda antar varian, berurut dari yang paling menentukan:
+
+| Yang dibedakan | Wajib? | Kenapa |
+|---|---|---|
+| Pembeli | **Wajib** | Ini sumber semua perbedaan lain |
+| Keberatan | **Wajib** | Ikut berubah kalau pembelinya berubah |
+| Hook | **Wajib** | Di sinilah CPC ditentukan, dan CPC yang menentukan untung |
+| Sudut | Sebaiknya | Boleh sama kalau pembelinya cukup jauh berbeda |
+| Set visual | Tidak | Justru lebih baik sama — lihat di bawah |
+
+### Dua tingkat pengujian
+
+Yang dipakai bareng menentukan biaya kredit. Pilih tingkatnya sesuai apa yang
+sedang diuji.
+
+**Tingkat 1 — menguji kata-kata. Satu generate untuk tiga varian.**
+
+```
+sama    : master image, set visual, klip video
+berbeda : pembeli, keberatan, hook, naskah, caption, voiceover
+```
+
+Footage-nya satu, dipakai tiga kali. Yang berbeda cuma caption dan voiceover —
+dan pada kampanye traffic itu bukan perbedaan kecil, karena kalimat hook
+adalah bagian terbesar dari apa yang menentukan orang berhenti atau tidak.
+
+Mulai dari sini. Paling murah, dan jawabannya paling cepat datang.
+
+**Tingkat 2 — menguji visual. Tiga generate.**
+
+```
+sama    : master image, set visual
+berbeda : klip pembuka, dan semua yang di tingkat 1
+```
+
+Dipakai setelah tahu kalimat mana yang menang, untuk mencari tahu apakah
+visualnya bisa menaikkan lagi.
+
+**Jujurnya tingkat 1:** kalau footage-nya sama, gambarnya tidak ikut bicara ke
+pembeli yang berbeda. Itu kompromi, bukan kesetaraan. Sah ketika yang diuji
+kata-kata; tidak sah ketika yang diuji sudut kreatif — dua sudut yang berbeda
+tapi gambarnya sama bukan dua sudut, cuma dua caption.
+
+**Set visual sengaja disamakan antar varian satu produk.** Keragaman berlaku
+antar produk, bukan di dalam satu pengujian. Kalau setnya ikut berubah, tidak
+akan ketahuan apakah yang menang itu kalimatnya atau latarnya.
+
 ---
 
 ## 3. Kerangka mengikuti kesadaran pembeli
@@ -777,7 +832,7 @@ iklan yang menjual barang berbeda dari yang datang.
 | Platform | Meta |
 | Durasi | 15–18 detik |
 | Suara | Tanpa dialog, voiceover di editor |
-| Jumlah varian | 3, masing-masing pembeli berbeda |
+| Jumlah varian | 3, pembeli berbeda, berbagi satu klip |
 | Bahasa | Indonesia |
 | Kategori | Ditebak dari judul dan deskripsi |
 
@@ -804,25 +859,35 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
 1. Kirim ke chat:  judul + deskripsi + foto produk
                    (salin apa adanya dari marketplace)
 
-2. Terima:         creative brief   — pembeli, keinginan, hambatan, kerangka,
+2. Terima — sekali, dipakai ketiganya:
+
+                   prompt master    — 2 pilihan set, pilih satu
+                   prompt video     — lengkap dengan blok AUDIO dan LARANGAN
+                   rencana shot     — berapa klip, potong di mana
+
+   Terima — tiga kali, satu per varian:
+
+                   creative brief   — pembeli, keinginan, hambatan, kerangka,
                                       sudut, dan alasan memilihnya
                    keberatan        — satu keberatan utama + jenis jawabannya
                    bukti            — aksi yang terlihat dan hasil yang terlihat
                    script 4 beat    — hook, agitate, solve, cta
-                   prompt master    — 2 pilihan set
-                   prompt video     — sesuai sudut, lengkap dengan blok
-                                      AUDIO dan LARANGAN
                    gerbang komersial— empat pertanyaan, dijawab kalimat
 
 3. Di Flow:        unggah foto produk → generate master image → pilih satu
                    pakai master itu sebagai referensi → generate klip
+                   (satu klip untuk ketiga varian — lihat bagian 2)
 
 4. Periksa klip:   ada tulisan nyasar di layar?  → generate ulang
                    suara sinkron dengan bibir?
                    produk masih sama dengan foto aslinya?
 
-5. Di editor:      sambung klip → tempel caption → musik → ekspor
+5. Di editor:      footage yang sama → tiga kali caption dan voiceover berbeda
+                   → tiga video, tiga nama berkas
 ```
+
+Ketiganya berangkat dari satu klip. Yang lo bayar ke Flow satu generate, yang
+lo dapat tiga iklan yang bisa dibandingkan.
 
 ### Yang wajib ditangani editor
 
@@ -866,6 +931,8 @@ sering pada creative buatan AI: enak dilihat, komposisinya rapi, cahayanya bagus
 - [ ] Warna dan potongan di prompt cocok dengan foto yang dikirim, bukan
       dengan judul listing
 - [ ] Satu pembeli disebut jelas, dan varian lain memakai pembeli berbeda
+- [ ] Ketiga varian berbagi satu set visual, supaya yang menang ketahuan
+      kalimatnya — bukan latarnya
 - [ ] Satu keberatan utama ditulis, dan jawabannya salah satu dari empat jenis
 - [ ] Alasan utamanya bisa difilmkan, bukan klaim
 - [ ] Hook memuat minimal satu sinyal penguat, tidak dibuka bernada artikel
