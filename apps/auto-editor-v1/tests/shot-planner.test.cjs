@@ -183,11 +183,26 @@ for (const rencana of [plan, panjang, rencanaBerset]) {
 }
 
 /*
+ * Bawaannya klip dibuat tanpa dialog. Model menggambar subtitle karena ia
+ * mendeteksi ada yang bicara, jadi klip bisu menutup masalah caption rusak dari
+ * akarnya — bukan sekadar menahannya lewat larangan di prompt.
+ */
+const bawaan = planShots({ variant, product, photos, duration: 10, aiSeconds: 10 });
+assert.equal(bawaan.aiCalls, 1);
+for (const shot of bawaan.shots.filter(item => item.kind === "ai")) {
+  assert.ok(/Tanpa dialog/.test(shot.prompt), "bawaannya klip dibuat tanpa dialog");
+  assert.ok(!/berkata:/.test(shot.prompt));
+}
+
+/*
+ * Dialog tetap bisa diminta, dan wajib ketika ada orang di frame yang mulutnya
+ * bergerak — voiceover editor di atas bibir yang bergerak adalah dubbing.
+ *
  * Tanda kutip memperlihatkan kalimat sebagai teks tertulis, dan teks tertulis
  * persis yang cenderung ikut digambar model ke layar. Bentuk "berkata:" tanpa
  * kutip adalah pencegahan paling murah untuk subtitle rusak.
  */
-const satuKlip = planShots({ variant, product, photos, duration: 10, aiSeconds: 10 });
+const satuKlip = planShots({ variant, product, photos, duration: 10, aiSeconds: 10, voice: "flow" });
 const klipTunggal = satuKlip.shots.find(shot => shot.kind === "ai");
 assert.equal(satuKlip.aiCalls, 1);
 assert.ok(/berkata: /.test(klipTunggal.prompt), "dialog harus memakai bentuk berkata:");
@@ -198,9 +213,10 @@ assert.ok(/Tanpa musik latar/.test(klipTunggal.prompt), "musik ditempel di edito
 /*
  * Dua klip yang masing-masing berdialog bisa keluar dengan warna suara berbeda,
  * dan pergantian suara di tengah iklan terdengar seperti dua video yang
- * disambung paksa. Karena itu video berklip banyak dibuat tanpa dialog.
+ * disambung paksa. Karena itu dialog ditolak untuk video berklip banyak,
+ * bahkan ketika diminta secara eksplisit.
  */
-const banyakKlip = planShots({ variant, product, photos, duration: 24, aiSeconds: 24 });
+const banyakKlip = planShots({ variant, product, photos, duration: 24, aiSeconds: 24, voice: "flow" });
 assert.ok(banyakKlip.aiCalls > 1);
 for (const shot of banyakKlip.shots.filter(item => item.kind === "ai")) {
   assert.ok(/Tanpa dialog/.test(shot.prompt), `shot ${shot.id} tidak boleh berdialog di video berklip banyak`);
@@ -225,7 +241,7 @@ for (const detik of [2, 4, 8, 10]) {
 }
 
 // Tanpa naskah sama sekali, blok suara tetap sah dan tidak menyisakan "berkata:" kosong.
-const tanpaNaskah = audioBlockFor({ variant: {}, beats: ["hook"], scene: { ambience: "ruang senyap" }, duration: 8, clipCount: 1 });
+const tanpaNaskah = audioBlockFor({ variant: {}, beats: ["hook"], scene: { ambience: "ruang senyap" }, duration: 8, clipCount: 1, voice: "flow" });
 assert.ok(!/berkata:/.test(tanpaNaskah));
 assert.ok(/Ambience: ruang senyap/.test(tanpaNaskah));
 

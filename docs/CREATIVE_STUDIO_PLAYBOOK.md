@@ -417,14 +417,33 @@ Untuk klip kedua dan seterusnya, ganti *"Ini shot pembuka"* menjadi:
 Keduanya terdengar seperti satu fitur yang sama, padahal jauh berbeda
 keandalannya. Yang satu dipakai, yang satu dihindari.
 
+Bawaannya: **Flow membuat gambar dan ambience. Voiceover dan caption ditempel
+di editor.**
+
 | | Dari Flow | Sebabnya |
 |---|---|---|
-| **Voiceover** | **Ya** | Veo membuat audio bersama gambarnya, jadi bibir dan suara sinkron |
-| **Caption** | **Tidak** | Teks digambar, bukan diketik. Hasilnya sering salah eja dan tidak bisa dihapus |
+| **Gambar + ambience** | **Ya** | Ini yang tidak bisa dibuat di tempat lain |
+| **Voiceover** | Hanya bila ada yang bicara di depan kamera | Warna suara berubah tiap generate, dan salah intonasi berarti bayar lagi |
+| **Caption** | **Tidak pernah** | Teks digambar, bukan diketik. Sering salah eja dan tidak bisa dihapus |
 
-### 10.1 Voiceover — sintaksnya yang menentukan
+Ada keuntungan yang tidak langsung kelihatan dari klip tanpa dialog: **model
+menggambar subtitle karena ia mendeteksi ada yang bicara.** Klip bisu menutup
+masalah caption rusak dari akarnya, bukan sekadar menahannya lewat larangan.
 
-Cara menulis dialog lebih berpengaruh daripada isinya.
+### 10.1 Voiceover — kapan dari Flow, kapan dari editor
+
+| Keadaan | VO dari | Sebabnya |
+|---|---|---|
+| Ada orang di frame yang mulutnya bergerak | **Flow** | VO editor di atas bibir yang bergerak adalah dubbing, dan terlihat sebagai dubbing |
+| Semua keadaan lain | **Editor** | Suara sama di seluruh iklan, revisi gratis, naskah persis, timing bisa dipas |
+
+Format orang bicara ke kamera bukan pinggiran — testimoni termasuk yang paling
+laku di kategori kecantikan. Jadi jangan ditutup permanen; cukup jangan dipilih
+tanpa sadar. Mulai dari klip tanpa dialog selagi alurnya masih diuji, lalu coba
+satu varian talking-head setelah sisanya terbukti.
+
+Bagian di bawah ini berlaku ketika VO memang diambil dari Flow. Cara menulis
+dialog di situ lebih berpengaruh daripada isinya.
 
 **Pakai bentuk `berkata:` tanpa tanda kutip.**
 
@@ -464,18 +483,19 @@ Yang perlu dipatuhi:
 - **Minta ambience meskipun VO-nya dari editor.** Suara ruangan yang cocok
   membuat klip terasa nyata, dan itu gratis.
 
-**Kapan VO diambil dari Flow, kapan dari editor:**
+**Satu klip saja.** Dua klip yang masing-masing punya VO Flow bisa keluar dengan
+warna suara berbeda, dan pergantian suara di tengah iklan terdengar seperti dua
+video yang disambung paksa. Kalau videonya butuh lebih dari satu klip, VO-nya
+pindah ke editor seluruhnya — bukan sebagian.
 
-| Keadaan | VO dari |
-|---|---|
-| Ada orang di frame yang mulutnya bergerak | **Flow.** VO dari editor tidak akan pernah sinkron dengan bibir |
-| Video cukup satu klip (≤10 detik) | **Flow.** Satu suara, satu generate, tidak ada risiko sambungan |
-| Video lebih dari satu klip, tidak ada orang bicara di frame | **Editor.** Suara Flow tidak dijamin sama persis antar generate |
-| Lebih dari satu klip dan ada yang bicara | Flow untuk klip yang ada bicaranya, sisanya diam |
+**Blok bisu untuk klip tanpa dialog**, yang jadi bawaan:
 
-Jebakannya di baris ketiga: dua klip yang masing-masing punya VO Flow bisa
-keluar dengan warna suara berbeda, dan pergantian suara di tengah iklan terdengar
-seperti dua video yang disambung paksa.
+```
+AUDIO
+Tanpa dialog, tanpa narasi, tanpa suara orang bicara.
+Ambience: <suara latar sesuai set>, pelan.
+Tanpa musik latar.
+```
 
 ### 10.2 Caption — jangan dari Flow
 
@@ -563,12 +583,11 @@ tahap perakitan — dengan alat apa pun yang dipakai.
 
 **Audio dan teks:**
 
-- [ ] Dialog ditulis dengan `berkata:` **tanpa tanda kutip**
-- [ ] Blok AUDIO menyebut bahasa Indonesia dan "tanpa musik latar"
 - [ ] Blok LARANGAN ada di setiap prompt video
-- [ ] Naskah per klip di bawah ~25 kata
-- [ ] Sumber VO sudah diputuskan sadar: Flow bila ada yang bicara di frame,
-      editor bila lebih dari satu klip tanpa orang bicara
+- [ ] Blok AUDIO menyebut ambience set dan "tanpa musik latar"
+- [ ] Klip dibuat tanpa dialog, kecuali memang ada yang bicara di depan kamera
+- [ ] Kalau ada dialog: ditulis `berkata:` **tanpa tanda kutip**, menyebut
+      bahasa Indonesia, di bawah ~25 kata, dan videonya cukup satu klip
 
 ---
 
@@ -585,10 +604,9 @@ ulang — mungkin jadi satu klip panjang dengan porsi foto lebih besar.
 
 **Yang perlu diuji juga:** kualitas VO Indonesia dari Flow. Sinkron bibirnya
 memang jalan, tetapi apakah logat dan intonasinya terdengar wajar untuk telinga
-Indonesia belum diuji pada produk nyata. Kalau ternyata kaku, pindahkan VO ke
-editor dan pakai Flow hanya untuk gambar dan ambience — semua panduan di bagian
-10.2 tetap berlaku, karena larangan subtitle tetap perlu meskipun tidak ada
-dialog.
+Indonesia belum diuji pada produk nyata. Selama belum, bawaannya klip dibuat
+tanpa dialog — dan itu sekaligus jawaban paling aman untuk masalah caption.
+Uji satu varian talking-head setelah sisanya terbukti, bukan sebelumnya.
 
 **Angka 40% subtitle rusak** berasal dari laporan pemakai dan liputan media,
 bukan dari pengukuran sendiri. Perlakukan sebagai peringatan, bukan angka pasti

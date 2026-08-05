@@ -226,23 +226,45 @@ function fitSpeech(text, seconds) {
 /*
  * Blok suara untuk satu klip.
  *
- * Dialog ditulis dengan bentuk "berkata:" tanpa tanda kutip. Tanda kutip
- * memperlihatkan kalimatnya sebagai teks tertulis, dan teks tertulis persis
- * yang cenderung ikut digambar model ke layar — pemicu tunggal paling sering
- * dari subtitle rusak.
+ * Bawaannya klip dibuat tanpa dialog dan voiceover disambung di editor. Tiga
+ * sebabnya, berurut dari yang paling menentukan:
  *
- * Dialog hanya dititipkan ke Flow ketika videonya cukup satu klip. Dua klip
- * yang masing-masing punya dialog bisa keluar dengan warna suara berbeda, dan
- * pergantian suara di tengah iklan terdengar seperti dua video yang disambung
- * paksa. Untuk video berklip banyak, klip dibuat tanpa dialog dan voiceover
- * disambung sekali jalan di editor.
+ *   Model menggambar subtitle karena ia mendeteksi ada yang bicara. Klip tanpa
+ *   dialog menutup masalah caption rusak dari akarnya, bukan cuma menahannya
+ *   lewat larangan di prompt.
+ *
+ *   Warna suara berbeda tiap generate. Satu rekaman di editor terpakai untuk
+ *   seluruh video sekaligus seluruh iklan berikutnya, dan suara yang sama terus
+ *   lama-lama jadi ciri yang dikenali.
+ *
+ *   Salah intonasi berarti rekam ulang, bukan generate ulang. Yang satu gratis,
+ *   yang satu memakan kredit.
+ *
+ * Dialog tetap bisa diminta lewat voice: "flow", dan itu wajib untuk satu
+ * keadaan: ada orang di frame yang mulutnya bergerak. Voiceover editor di atas
+ * bibir yang bergerak adalah dubbing, dan terlihat sebagai dubbing. Format itu
+ * bukan pinggiran — testimoni orang bicara termasuk yang paling laku di
+ * kategori kecantikan — jadi jalannya dibiarkan terbuka, hanya tidak dipilih
+ * diam-diam.
+ *
+ * Ketika dipakai, dialog ditulis dengan bentuk "berkata:" tanpa tanda kutip.
+ * Tanda kutip memperlihatkan kalimatnya sebagai teks tertulis, dan teks
+ * tertulis persis yang cenderung ikut digambar model ke layar.
+ *
+ * Dialog juga hanya dititipkan ke Flow ketika videonya cukup satu klip. Dua
+ * klip yang masing-masing berdialog bisa keluar dengan suara berbeda, dan
+ * pergantiannya di tengah iklan terdengar seperti dua video disambung paksa.
  */
-function audioBlockFor({ variant = {}, beats = [], scene, duration, clipCount = 1 } = {}) {
+function audioBlockFor({ variant = {}, beats = [], scene, duration, clipCount = 1, voice = "editor" } = {}) {
   const ambience = scene && scene.ambience ? scene.ambience : "suara ruangan yang wajar sesuai latar";
   const dasar = [`Ambience: ${ambience}, pelan.`, "Tanpa musik latar."];
+  const tanpaDialog = ["Tanpa dialog, tanpa narasi, tanpa suara orang bicara.", ...dasar];
 
+  if (voice !== "flow") {
+    return [...tanpaDialog, "Voiceover ditambahkan di editor."].join(" ");
+  }
   if (clipCount !== 1) {
-    return ["Tanpa dialog, tanpa narasi.", ...dasar, "Voiceover ditambahkan di editor supaya suaranya sama di seluruh video."].join(" ");
+    return [...tanpaDialog, "Voiceover ditambahkan di editor supaya suaranya sama di seluruh video."].join(" ");
   }
 
   const naskah = beats
@@ -250,7 +272,7 @@ function audioBlockFor({ variant = {}, beats = [], scene, duration, clipCount = 
     .filter(Boolean)
     .join(" ");
   const ucapan = fitSpeech(naskah, duration);
-  if (!ucapan) return [...dasar].join(" ");
+  if (!ucapan) return [...tanpaDialog, "Voiceover ditambahkan di editor."].join(" ");
 
   return [
     "Suara perempuan muda Indonesia, nada santai, tempo sedang, artikulasi jelas, berbahasa Indonesia.",
@@ -268,7 +290,8 @@ function planShots(input = {}) {
     aiSeconds = DEFAULT_AI_SECONDS,
     pacing = "medium",
     scene,
-    sceneId
+    sceneId,
+    voice = "editor"
   } = input;
 
   const total = Math.max(MIN_SHOT_SECONDS, Number(duration) || DEFAULT_DURATION);
@@ -300,7 +323,8 @@ function planShots(input = {}) {
           beats: beats.length ? beats : [role],
           scene: activeScene,
           duration: clip.duration,
-          clipCount: aiClips.length
+          clipCount: aiClips.length,
+          voice
         })
       }),
       chainFrom: index === 0 ? null : `shot-${index}`
