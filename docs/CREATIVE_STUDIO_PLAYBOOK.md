@@ -183,10 +183,62 @@ memberi setiap iklan cukup tayangan untuk disimpulkan.
       └ IKLAN 3   pembuka C
 ```
 
-**Satu ad set, bukan tiga.** Ini yang paling sering salah. Memisahkan tiap
-creative ke ad set sendiri-sendiri memecah budget, memperpanjang fase belajar,
-dan membuat ketiganya sama-sama tidak pernah keluar dari fase itu. Dalam satu
-ad set, Meta sendiri yang memindahkan tayangan ke yang lebih kuat.
+**Satu ad set, bukan tiga.** Ini yang paling sering salah, dan aturannya
+sederhana:
+
+```
+AD SET  =  audiens
+IKLAN   =  creative
+```
+
+Pengujian dilakukan di level tempat yang diubah berada. Mengganti creative
+diuji di level iklan; mengganti audiens tidak punya pilihan lain selain level
+ad set, karena audiens memang setelan ad set.
+
+Memisahkan tiap creative ke ad set sendiri-sendiri merugikan karena dua hal:
+
+1. **Menawar melawan diri sendiri.** Tiga ad set dengan audiens mirip masuk ke
+   lelang yang sama dan menaikkan CPC sendiri — lawan persis dari tujuannya.
+2. **Terpaksa membiayai yang kalah.** Tiap ad set wajib menghabiskan jatahnya
+   setiap hari, menang atau kalah. Dalam satu ad set, Meta memindahkan tayangan
+   ke yang lebih kuat dalam hitungan hari, tanpa diminta dan lebih cepat.
+
+Yang kedua yang paling mahal.
+
+**Bukan karena fase belajar.** Alasan itu sering disebut tapi tidak berlaku di
+sini: eventnya klik, dan bahkan sepertiga budget kecil pun melewati lima puluh
+klik seminggu dengan mudah.
+
+### Kalau memang audiens yang diuji
+
+Baru di situ ad set dipecah, dan **creative-nya harus sama persis di semuanya.**
+Kalau creative-nya ikut berbeda, tidak akan ketahuan yang membedakan hasilnya
+audiensnya atau videonya.
+
+**Pada CPC rendah, memecah ad set jauh lebih murah daripada kelihatannya.**
+Rp 25.000 di CPC Rp 125 memberi dua ratus klik sehari — cukup untuk
+menyimpulkan apa pun. Keberatan "budgetnya terlalu kecil untuk dipecah" tidak
+berlaku di sini, dan itu perlu disebut karena keberatan itu paling sering
+diulang tanpa dihitung.
+
+Yang tersisa cuma satu, dan itu tetap nyata: **audiens yang beririsan saling
+menaikkan CPC.** Broad dan minat belanja punya irisan besar, jadi dua ad set
+itu ikut menawar di lelang yang sama.
+
+| Cara | Kapan masuk akal |
+|---|---|
+| Berurutan per minggu | Belum punya CPC dasar. Minggu pertama yang memberikannya |
+| 2–3 ad set paralel | Sudah punya CPC dasar, dan audiensnya memang berbeda jauh |
+
+```
+Minggu 1   1 ad set broad, 3 iklan   →  CPC dasar + pembuka mana yang menang
+Minggu 2   1 ad set minat belanja    →  pakai pembuka pemenang minggu 1,
+                                        bandingkan komisi ÷ spend
+Minggu 3+  boleh paralel             →  patokannya sudah ada
+```
+
+Berurutan menang di awal bukan karena budgetnya kurang, melainkan karena
+sebelum punya CPC sendiri **angka minggu kedua tidak punya pembanding.**
 
 ### Membacanya
 
@@ -861,7 +913,7 @@ iklan yang menjual barang berbeda dari yang datang.
 | Kalau tidak disebut | Yang dipakai |
 |---|---|
 | Platform | Meta |
-| Budget harian | Rp 75.000 |
+| Budget | Rp 25.000 per ad set per hari |
 | Durasi | 15–18 detik |
 | Suara | Tanpa dialog, voiceover di editor |
 | Jumlah iklan | 3, pembeda ada di klip pembuka |
@@ -986,23 +1038,42 @@ Hitungannya satu langkah:
 klik per hari  =  budget harian ÷ CPC
 ```
 
-Contoh dengan budget Rp 75.000 sehari:
+Patokan yang dipakai di sini — CPC awal sekitar **Rp 125**, ad set **Rp 25.000
+sehari**:
 
-| CPC | Klik/hari | Cukup untuk |
-|---|---|---|
-| Rp 300 | 250 | 3–5 iklan |
-| Rp 750 | 100 | 3 iklan |
-| Rp 1.500 | 50 | 2 iklan |
+```
+25.000 ÷ 125  =  200 klik per hari, per ad set
+```
+
+**Dua ratus klik sehari itu banyak.** Kekurangan data bukan masalah di angka
+ini, dan sebagian besar kekhawatiran soal "budget terlalu kecil untuk dipecah"
+tidak berlaku. Yang membatasi bukan jumlah kliknya.
+
+| Klik/hari per ad set | Cukup untuk |
+|---|---|
+| Di bawah 30 | 2 iklan, dan kesimpulannya lambat |
+| 30–100 | 3 iklan |
+| Di atas 100 | 3–5 iklan, nyaman |
 
 Meta tidak membagi rata. Ia memindahkan tayangan ke yang lebih kuat dalam
 hitungan hari, dan **perpindahan itu sendiri sudah jawaban** — iklan yang
 dijatah sepuluh persen bukan iklan yang kurang data, melainkan iklan yang
 sudah kalah.
 
-**Kabar bagusnya:** fase belajar Meta butuh sekitar lima puluh event seminggu.
-Di kampanye konversi itu lima puluh pembelian dan berat sekali di budget kecil.
-Di sini eventnya klik, dan lima puluh klik seminggu tercapai di hari pertama.
-Kampanye traffic keluar dari fase belajar jauh lebih cepat.
+**Fase belajar bukan hambatan.** Meta butuh sekitar lima puluh event seminggu.
+Di kampanye konversi itu lima puluh pembelian dan berat sekali. Di sini
+eventnya klik, dan dua ratus klik sehari melewatinya di hari pertama.
+
+### 16.1b Peringatan yang menempel pada CPC rendah
+
+CPC yang sangat rendah bukan selalu kabar baik. Pada kampanye traffic, klik
+termurah biasanya datang dari penempatan bermutu paling rendah — dan sebagian
+darinya tertekan tidak sengaja.
+
+Semakin murah CPC-nya, semakin wajib **breakdown per placement dibuka**
+(16.3). Klik Rp 125 yang tidak pernah jadi order lebih mahal daripada klik
+Rp 500 yang jadi order, dan laporan Meta tidak akan pernah memberi tahu
+bedanya.
 
 ### 16.2 Broad atau pakai minat — ini yang paling tidak pasti
 
@@ -1081,6 +1152,28 @@ pendapatan per klik  =  (klik → order) × komisi rata-rata
 untung bila          :  pendapatan per klik > CPC
 ```
 
+Dibalik jadi angka yang perlu dikejar:
+
+```
+klik → order yang dibutuhkan  =  CPC ÷ komisi rata-rata per order
+```
+
+Pada CPC Rp 125, angkanya jauh lebih ringan daripada dugaan kebanyakan orang:
+
+| Komisi rata-rata per order | Klik → order yang harus tercapai |
+|---|---|
+| Rp 5.000 | 2,5% |
+| Rp 7.500 | 1,7% |
+| Rp 10.000 | 1,3% |
+
+Satu sampai dua setengah persen. Dan yang dihitung bukan pembelian produk yang
+diiklankan, melainkan **belanja apa pun di Shopee dalam tujuh hari** — sehingga
+angka itu jauh lebih mudah dicapai daripada konversi satu produk.
+
+Di situlah CPC rendah berubah dari sekadar enak dilihat menjadi penentu:
+selisih CPC Rp 125 dan Rp 500 adalah selisih antara butuh 1,7% dan butuh 6,7%,
+dan yang kedua nyaris tidak mungkin.
+
 Sebelum dua angka itu ada, tidak ada yang bisa disebut mahal atau murah.
 **Jangan mencari patokan CPC dari internet** — pasar, produk, dan creative
 setiap orang berbeda. Patokan sendiri jauh lebih berguna daripada rata-rata
@@ -1105,7 +1198,7 @@ SETELAN AD SET — <nama produk>
     Optimasi        : Link clicks
     Lokasi          : Indonesia
     Placement       : otomatis, pantau Audience Network
-    Budget          : harian, di ad set
+    Budget          : Rp 25.000 per hari, di ad set
 
   IKUT PRODUK
     Gender          : <perempuan / laki-laki / semua>
