@@ -112,7 +112,7 @@ Untuk setiap creative, tentukan satu-satu — bukan daftar:
 | **Momen pakai** | Pagi berangkat, siang meeting, sore pulang |
 | **Emosi** | Lega, tidak perlu memikirkan penampilan sepanjang hari |
 
-Varian kedua dan ketiga **ganti pembelinya**, bukan ganti kalimatnya. Mahasiswa
+Iklan kedua dan ketiga **ganti pembelinya**, bukan ganti kalimatnya. Mahasiswa
 yang mau terlihat rapi dengan anggaran terbatas adalah iklan yang berbeda —
 hambatannya beda, buktinya beda, bahasanya beda.
 
@@ -137,42 +137,73 @@ Yang wajib berbeda antar varian, berurut dari yang paling menentukan:
 | Sudut | Sebaiknya | Boleh sama kalau pembelinya cukup jauh berbeda |
 | Set visual | Tidak | Justru lebih baik sama — lihat di bawah |
 
-### Dua tingkat pengujian
+### Yang dibedakan cuma pembukanya
 
-Yang dipakai bareng menentukan biaya kredit. Pilih tingkatnya sesuai apa yang
-sedang diuji.
+Tiga caption di atas footage yang sama bukan tiga creative — itu satu creative
+dengan tiga tulisan. Perbedaan harus ada di tempat yang menentukan, dan tempat
+itu **tiga detik pertama**.
 
-**Tingkat 1 — menguji kata-kata. Satu generate untuk tiga varian.**
-
-```
-sama    : master image, set visual, klip video
-berbeda : pembeli, keberatan, hook, naskah, caption, voiceover
-```
-
-Footage-nya satu, dipakai tiga kali. Yang berbeda cuma caption dan voiceover —
-dan pada kampanye traffic itu bukan perbedaan kecil, karena kalimat hook
-adalah bagian terbesar dari apa yang menentukan orang berhenti atau tidak.
-
-Mulai dari sini. Paling murah, dan jawabannya paling cepat datang.
-
-**Tingkat 2 — menguji visual. Tiga generate.**
+Sisanya boleh dipakai bersama, karena bukan di situ orang memutuskan berhenti.
 
 ```
-sama    : master image, set visual
-berbeda : klip pembuka, dan semua yang di tingkat 1
+IKLAN 1   [pembuka A]──┐
+IKLAN 2   [pembuka B]──┼──[ badan, sama ]──[ penutup, sama ]
+IKLAN 3   [pembuka C]──┘
 ```
 
-Dipakai setelah tahu kalimat mana yang menang, untuk mencari tahu apakah
-visualnya bisa menaikkan lagi.
+| Bagian | Antar iklan | Kenapa |
+|---|---|---|
+| **Pembuka** (0–3 detik) | **Berbeda** — visual sekaligus kalimatnya | Di sini CPC ditentukan, dan CPC yang menentukan untung |
+| **Badan** | Footage sama, voiceover berbeda | Keberatan tiap pembeli dijawab lewat suara, produknya toh itu-itu juga |
+| **Penutup** | Sama | CTA-nya sama, mekanismenya sama |
+| **Master image dan set** | Sama | Kalau latarnya ikut berubah, tidak ketahuan yang menang pembukanya atau setnya |
 
-**Jujurnya tingkat 1:** kalau footage-nya sama, gambarnya tidak ikut bicara ke
-pembeli yang berbeda. Itu kompromi, bukan kesetaraan. Sah ketika yang diuji
-kata-kata; tidak sah ketika yang diuji sudut kreatif — dua sudut yang berbeda
-tapi gambarnya sama bukan dua sudut, cuma dua caption.
+### Biayanya
 
-**Set visual sengaja disamakan antar varian satu produk.** Keragaman berlaku
-antar produk, bukan di dalam satu pengujian. Kalau setnya ikut berubah, tidak
-akan ketahuan apakah yang menang itu kalimatnya atau latarnya.
+```
+3 pembuka + 1 badan + 1 penutup  =  5 generate  →  3 iklan
+4 pembuka + 1 badan + 1 penutup  =  6 generate  →  4 iklan
+5 pembuka + 1 badan + 1 penutup  =  7 generate  →  5 iklan
+```
+
+Bandingkan dengan membuat tiga video terpisah dari nol: tiap video butuh dua
+klip, jadi tiga iklan berarti enam generate — dan yang berbeda malah bagian
+yang tidak menentukan apa-apa.
+
+**Mulai dari tiga iklan.** Naik ke lima setelah tahu budget hariannya sanggup
+memberi setiap iklan cukup tayangan untuk disimpulkan.
+
+### Bentuknya di Meta
+
+```
+1 KAMPANYE   Traffic
+  └ 1 AD SET   sasaran lebar, satu budget
+      ├ IKLAN 1   pembuka A
+      ├ IKLAN 2   pembuka B
+      └ IKLAN 3   pembuka C
+```
+
+**Satu ad set, bukan tiga.** Ini yang paling sering salah. Memisahkan tiap
+creative ke ad set sendiri-sendiri memecah budget, memperpanjang fase belajar,
+dan membuat ketiganya sama-sama tidak pernah keluar dari fase itu. Dalam satu
+ad set, Meta sendiri yang memindahkan tayangan ke yang lebih kuat.
+
+### Membacanya
+
+| Kapan | Yang dilakukan |
+|---|---|
+| Hari 1–3 | Jangan disentuh. Menilai setelah enam jam adalah kesalahan yang paling sering dan paling mahal |
+| Hari 3–4 | Matikan yang CPC-nya paling buruk |
+| Setelah itu | Biarkan sisanya jalan, budget mengalir sendiri ke yang menang |
+
+Yang dinilai **CPC lebih dulu**, baru CTR. Pada model traffic + cookie,
+pendapatan per klik praktis tetap — jadi yang murah kliknya itulah yang
+untung, bukan yang paling banyak ditonton.
+
+Dan yang dicari bukan cuma satu pemenang. **Yang dicari pembuka jenis apa yang
+menang**, karena itulah yang dipakai sebagai titik mulai untuk produk
+berikutnya. Satu pemenang cuma berlaku untuk satu produk; satu pola berlaku
+untuk semuanya.
 
 ---
 
@@ -832,7 +863,7 @@ iklan yang menjual barang berbeda dari yang datang.
 | Platform | Meta |
 | Durasi | 15–18 detik |
 | Suara | Tanpa dialog, voiceover di editor |
-| Jumlah varian | 3, pembeli berbeda, berbagi satu klip |
+| Jumlah iklan | 3, pembeda ada di klip pembuka |
 | Bahasa | Indonesia |
 | Kategori | Ditebak dari judul dan deskripsi |
 
@@ -862,32 +893,37 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
 2. Terima — sekali, dipakai ketiganya:
 
                    prompt master    — 2 pilihan set, pilih satu
-                   prompt video     — lengkap dengan blok AUDIO dan LARANGAN
-                   rencana shot     — berapa klip, potong di mana
+                   prompt badan     — klip tengah, dipakai bersama
+                   prompt penutup   — klip CTA, dipakai bersama
 
-   Terima — tiga kali, satu per varian:
+   Terima — tiga kali, satu per iklan:
 
                    creative brief   — pembeli, keinginan, hambatan, kerangka,
                                       sudut, dan alasan memilihnya
                    keberatan        — satu keberatan utama + jenis jawabannya
                    bukti            — aksi yang terlihat dan hasil yang terlihat
                    script 4 beat    — hook, agitate, solve, cta
+                   prompt pembuka   — klip 0–3 detik, berbeda tiap iklan
                    gerbang komersial— empat pertanyaan, dijawab kalimat
 
 3. Di Flow:        unggah foto produk → generate master image → pilih satu
-                   pakai master itu sebagai referensi → generate klip
-                   (satu klip untuk ketiga varian — lihat bagian 2)
+                   pakai master itu sebagai referensi
+                   generate 3 pembuka + 1 badan + 1 penutup   = 5 generate
 
 4. Periksa klip:   ada tulisan nyasar di layar?  → generate ulang
                    suara sinkron dengan bibir?
                    produk masih sama dengan foto aslinya?
 
-5. Di editor:      footage yang sama → tiga kali caption dan voiceover berbeda
-                   → tiga video, tiga nama berkas
+5. Di editor:      pembuka A + badan + penutup  → iklan 1
+                   pembuka B + badan + penutup  → iklan 2
+                   pembuka C + badan + penutup  → iklan 3
+                   voiceover dan caption berbeda tiap iklan
+
+6. Di Meta:        1 kampanye Traffic → 1 ad set sasaran lebar → 3 iklan
+                   biarkan 3 hari sebelum dinilai
 ```
 
-Ketiganya berangkat dari satu klip. Yang lo bayar ke Flow satu generate, yang
-lo dapat tiga iklan yang bisa dibandingkan.
+Lima generate, tiga iklan yang beda di tempat yang menentukan.
 
 ### Yang wajib ditangani editor
 
@@ -930,9 +966,10 @@ sering pada creative buatan AI: enak dilihat, komposisinya rapi, cahayanya bagus
 
 - [ ] Warna dan potongan di prompt cocok dengan foto yang dikirim, bukan
       dengan judul listing
-- [ ] Satu pembeli disebut jelas, dan varian lain memakai pembeli berbeda
-- [ ] Ketiga varian berbagi satu set visual, supaya yang menang ketahuan
-      kalimatnya — bukan latarnya
+- [ ] Satu pembeli disebut jelas, dan iklan lain memakai pembeli berbeda
+- [ ] Klip pembuka benar-benar berbeda antar iklan, bukan cuma captionnya
+- [ ] Badan, penutup, dan set visual sama, supaya yang menang ketahuan
+      pembukanya — bukan latarnya
 - [ ] Satu keberatan utama ditulis, dan jawabannya salah satu dari empat jenis
 - [ ] Alasan utamanya bisa difilmkan, bukan klaim
 - [ ] Hook memuat minimal satu sinyal penguat, tidak dibuka bernada artikel
