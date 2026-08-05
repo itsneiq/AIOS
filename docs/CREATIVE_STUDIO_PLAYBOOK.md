@@ -921,6 +921,7 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
 
 6. Di Meta:        1 kampanye Traffic → 1 ad set sasaran lebar → 3 iklan
                    biarkan 3 hari sebelum dinilai
+                   setelan lengkapnya di bagian 16
 ```
 
 Lima generate, tiga iklan yang beda di tempat yang menentukan.
@@ -940,7 +941,154 @@ tahap perakitan — dengan alat apa pun yang dipakai.
 
 ---
 
-## 16. Gerbang komersial — empat pertanyaan
+## 16. Setelan kampanye
+
+Rancangan creative tidak ada gunanya kalau kampanyenya disusun sehingga
+hasilnya tidak terbaca. Bagian ini urusan operasional, bukan kreatif — tapi
+letaknya persis di antara keduanya.
+
+### Titik awal
+
+```
+KAMPANYE
+  Objective        : Traffic
+  Budget           : di ad set — cuma ada satu ad set
+
+AD SET
+  Optimasi untuk   : Link clicks
+  Lokasi           : Indonesia
+  Umur             : 18–44
+  Gender           : sesuai produk
+  Minat            : kosong dulu — lihat 16.2
+  Placement        : otomatis, tapi breakdown-nya dipantau
+  Budget           : harian, bukan lifetime
+  Jadwal           : terus-menerus
+
+IKLAN
+  3 iklan, klip pembuka berbeda
+```
+
+Nama menu di Meta berubah-ubah. Yang tidak berubah logikanya.
+
+**Optimasi ke link clicks bukan pilihan, melainkan satu-satunya yang ada.**
+"Landing page views" butuh pixel di halaman tujuan, dan halaman Shopee bukan
+milik sendiri. Ini juga alasan creative harus menyaring sendiri: tidak ada
+sinyal lain yang mengerjakannya.
+
+### 16.1 Berapa iklan yang muat dalam budget
+
+Hitungannya satu langkah:
+
+```
+klik per hari  =  budget harian ÷ CPC
+```
+
+Contoh dengan budget Rp 75.000 sehari:
+
+| CPC | Klik/hari | Cukup untuk |
+|---|---|---|
+| Rp 300 | 250 | 3–5 iklan |
+| Rp 750 | 100 | 3 iklan |
+| Rp 1.500 | 50 | 2 iklan |
+
+Meta tidak membagi rata. Ia memindahkan tayangan ke yang lebih kuat dalam
+hitungan hari, dan **perpindahan itu sendiri sudah jawaban** — iklan yang
+dijatah sepuluh persen bukan iklan yang kurang data, melainkan iklan yang
+sudah kalah.
+
+**Kabar bagusnya:** fase belajar Meta butuh sekitar lima puluh event seminggu.
+Di kampanye konversi itu lima puluh pembelian dan berat sekali di budget kecil.
+Di sini eventnya klik, dan lima puluh klik seminggu tercapai di hari pertama.
+Kampanye traffic keluar dari fase belajar jauh lebih cepat.
+
+### 16.2 Broad atau pakai minat — ini yang paling tidak pasti
+
+Nasihat umum: biarkan broad, algoritmanya lebih pintar. Itu benar, **tapi
+asumsinya algoritma punya sinyal konversi.**
+
+Di sini tidak ada. Tanpa pixel, Meta tidak pernah tahu siapa yang membeli — ia
+cuma tahu siapa yang suka mengeklik.
+
+```
+broad + sinyal konversi   →  mencarikan pembeli
+broad tanpa sinyal        →  mencarikan pengklik
+```
+
+Itu argumen untuk menaruh sedikit minat — bukan minat produk, melainkan
+**minat perilaku belanja**: Shopee, belanja online, e-commerce. Yang dilakukan
+adalah mengganti sinyal yang hilang secara manual.
+
+Cara mengujinya, dan ini **berurutan, bukan bersamaan**: minggu pertama broad
+tanpa minat untuk mendapat CPC dasar; minggu kedua ganti dengan minat belanja.
+Membagi budget kecil ke dua ad set sekaligus membuat keduanya sama-sama tipis.
+
+Yang dibandingkan **komisi ÷ spend**, bukan CPC. Kemungkinan besar yang pakai
+minat CPC-nya lebih mahal tapi lebih untung — dan itu cuma terlihat dari
+dashboard Shopee, tidak pernah dari Meta.
+
+### 16.3 Audience Network — klik murah yang sering kosong
+
+Jebakan khusus kampanye traffic.
+
+Meta dioptimasi ke link click. Audience Network memberi klik paling murah,
+jadi algoritmanya senang menyimpan budget di situ. Masalahnya banyak klik di
+sana **tertekan tidak sengaja.**
+
+Laporannya terlihat bagus: CPC turun, klik banyak. Ordernya nol.
+
+Yang dilakukan: jalankan placement otomatis dulu, lalu **buka breakdown per
+placement**. Kalau Audience Network memakan porsi besar sementara order tidak
+bergerak, matikan. Reels dan Stories yang paling cocok untuk 9:16.
+
+### 16.4 Sampai mana boleh menyempit
+
+Sasaran dibiarkan lebar (bagian 1.3), tapi dua penyempitan ini tidak
+menurunkan nilai per klik:
+
+- **Gender** sesuai produk. Fashion wanita ke laki-laki bukan penyempitan,
+  itu membuang sampah
+- **Umur 18–44.** Masih luas. Jangan 20–28
+
+Yang **jangan** disempitkan: minat produk. "Suka fashion" mengeluarkan orang
+yang tidak mengikuti akun fashion tapi tetap belanja baju di Shopee — dan
+uang orang itu sama saja.
+
+### 16.5 Yang jangan dilakukan
+
+- **Jangan mengedit ad set saat masih fase belajar.** Mengganti budget, umur,
+  atau creative akan me-reset, dan hitungannya kembali dari nol
+- **Jangan membuat ad set per creative.** Ini yang paling sering, dan memecah
+  budget sampai tidak ada yang mengumpulkan data cukup
+- **Jangan memasang bid cap di awal.** Berapa CPC yang wajar belum diketahui;
+  biarkan otomatis sampai punya patokan sendiri
+
+### 16.6 Tugas minggu pertama bukan untung
+
+Minggu pertama dipakai untuk mendapat dua angka, dan cuma dua:
+
+```
+1. CPC          →  dari Meta
+2. klik → order →  dari dashboard Shopee
+```
+
+Setelah keduanya ada, semua sisanya aritmatika:
+
+```
+pendapatan per klik  =  (klik → order) × komisi rata-rata
+untung bila          :  pendapatan per klik > CPC
+```
+
+Sebelum dua angka itu ada, tidak ada yang bisa disebut mahal atau murah.
+**Jangan mencari patokan CPC dari internet** — pasar, produk, dan creative
+setiap orang berbeda. Patokan sendiri jauh lebih berguna daripada rata-rata
+milik orang lain.
+
+Biaya untuk tahu: budget harian × tujuh. Itu harga pendidikan yang murah untuk
+pertanyaan yang menentukan semuanya.
+
+---
+
+## 17. Gerbang komersial — empat pertanyaan
 
 Sebelum apa pun diserahkan, creative harus bisa menjawab empat ini. Kalau ada
 satu saja yang tidak terjawab, iklannya belum siap — seberapa pun bagus
@@ -993,7 +1141,7 @@ sering pada creative buatan AI: enak dilihat, komposisinya rapi, cahayanya bagus
 
 ---
 
-## 17. Catatan jujur
+## 18. Catatan jujur
 
 **Yang belum ada:** catatan hasil. Tanpa mencatat varian mana yang menang,
 seluruh keputusan di dokumen ini tetap tebakan berpengalaman — bukan tebakan
