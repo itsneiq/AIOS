@@ -656,6 +656,48 @@ memakan area tempat caption sungguhan akan diletakkan.
 
 ## 14. Alur kerja
 
+### Yang dikirim
+
+Dua yang wajib. Sisanya punya bawaan, dan bawaannya sengaja dibuat supaya
+tidak perlu dipikirkan setiap kali.
+
+```
+PRODUK    : <judul, salin apa adanya dari marketplace>
+DESKRIPSI : <salin apa adanya, tidak usah dirapikan>
+```
+
+Deskripsi mentah lebih berguna daripada yang sudah dirapikan. Angka bahan,
+ukuran, dan komposisi yang terlihat berantakan justru bahan bukti — dan yang
+dibuang saat merapikan biasanya justru itu.
+
+| Kalau tidak disebut | Yang dipakai |
+|---|---|
+| Platform | Meta |
+| Durasi | 15–18 detik |
+| Suara | Tanpa dialog, voiceover di editor |
+| Jumlah varian | 3, masing-masing pembeli berbeda |
+| Bahasa | Indonesia |
+| Kategori | Ditebak dari judul dan deskripsi |
+
+Sebut hanya yang menyimpang dari bawaan. Yang paling sering perlu disebut:
+
+```
+PLATFORM  : shopee              → ubah CTA jadi keranjang
+DURASI    : 10 detik            → cukup satu klip Flow
+SUARA     : silent              → ada orang di frame tapi tidak bicara
+PEMBELI   : ibu muda            → kalau sudah tahu siapa sasarannya
+CATATAN   : stok warna hitam habis, jangan ditampilkan
+```
+
+**Foto produk tidak perlu dikirim ke chat.** Fotonya diunggah langsung ke Flow
+sebagai referensi. Yang dikerjakan di chat adalah keputusan dan prompt-nya.
+
+Kalau informasinya kurang untuk menentukan pembeli atau keberatan, jangan
+menunggu — kerjakan dengan asumsi, lalu sebut asumsinya terang-terangan.
+Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
+
+### Urutannya
+
 ```
 1. Kirim ke chat:  judul produk + deskripsi + platform tujuan
                    (salin apa adanya dari marketplace)
