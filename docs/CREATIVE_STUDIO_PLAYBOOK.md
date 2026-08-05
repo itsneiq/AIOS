@@ -861,6 +861,7 @@ iklan yang menjual barang berbeda dari yang datang.
 | Kalau tidak disebut | Yang dipakai |
 |---|---|
 | Platform | Meta |
+| Budget harian | Rp 75.000 |
 | Durasi | 15–18 detik |
 | Suara | Tanpa dialog, voiceover di editor |
 | Jumlah iklan | 3, pembeda ada di klip pembuka |
@@ -892,6 +893,8 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
 
 2. Terima — sekali, dipakai ketiganya:
 
+                   setelan ad set   — gender, umur, minat, jumlah iklan
+                                      siap salin ke Meta (bagian 16.7)
                    prompt master    — 2 pilihan set, pilih satu
                    prompt badan     — klip tengah, dipakai bersama
                    prompt penutup   — klip CTA, dipakai bersama
@@ -1085,6 +1088,58 @@ milik orang lain.
 
 Biaya untuk tahu: budget harian × tujuh. Itu harga pendidikan yang murah untuk
 pertanyaan yang menentukan semuanya.
+
+### 16.7 Yang diberikan setiap intake
+
+Sebagian besar setelan di atas tetap dan tidak perlu dipikirkan lagi. **Tiga
+saja yang berubah mengikuti produk**, dan ketiganya ikut diserahkan bersama
+naskah dan prompt.
+
+Bentuknya siap salin ke Meta:
+
+```
+SETELAN AD SET — <nama produk>
+
+  TETAP
+    Objective       : Traffic
+    Optimasi        : Link clicks
+    Lokasi          : Indonesia
+    Placement       : otomatis, pantau Audience Network
+    Budget          : harian, di ad set
+
+  IKUT PRODUK
+    Gender          : <perempuan / laki-laki / semua>
+    Umur            : <rentang>
+    Minat           : <kosong minggu 1, atau daftar minat belanja>
+    Jumlah iklan    : <2–5, dari budget ÷ perkiraan CPC>
+
+  ALASAN
+    <satu kalimat kenapa umur dan gendernya begitu>
+```
+
+**Umur diturunkan dari isyarat produk, bukan ditebak:**
+
+| Isyarat di judul atau deskripsi | Rentang |
+|---|---|
+| Korea style, oversize, Y2K, aesthetic, kekinian | 18–30 |
+| Kerja, formal, blazer, kantor, semi formal | 25–44 |
+| Basic, daily, polos, tanpa isyarat gaya | 18–44 |
+| Harga jauh di bawah pasaran | condong ke lebih muda |
+| Harga premium | condong ke lebih tua |
+
+Kalau isyaratnya bertentangan, **pilih yang lebih lebar.** Rentang terlalu
+sempit menaikkan CPC untuk nilai per klik yang sama, dan itu kerugian yang
+tidak kelihatan sampai dibandingkan.
+
+**Gender dipersempit hanya kalau produknya memang khusus.** Fashion wanita ke
+laki-laki bukan penyempitan melainkan membuang sampah. Produk yang dipakai
+siapa saja dibiarkan semua.
+
+**Hijab dan busana muslim tidak mempersempit apa pun di Indonesia.** Itu segmen
+besar, bukan ceruk. Jangan diperlakukan sebagai minat khusus.
+
+**Jumlah iklan dihitung, bukan dipilih:** budget harian dibagi perkiraan CPC,
+lalu dicocokkan ke tabel di 16.1. Sebelum ada CPC sendiri, pakai tiga.
 
 ---
 
