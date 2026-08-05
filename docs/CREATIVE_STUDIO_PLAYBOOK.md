@@ -658,17 +658,42 @@ memakan area tempat caption sungguhan akan diletakkan.
 
 ### Yang dikirim
 
-Dua yang wajib. Sisanya punya bawaan, dan bawaannya sengaja dibuat supaya
+Tiga yang wajib. Sisanya punya bawaan, dan bawaannya sengaja dibuat supaya
 tidak perlu dipikirkan setiap kali.
 
 ```
 PRODUK    : <judul, salin apa adanya dari marketplace>
 DESKRIPSI : <salin apa adanya, tidak usah dirapikan>
+FOTO      : <foto produk dari listing, dilampirkan ke chat>
 ```
 
 Deskripsi mentah lebih berguna daripada yang sudah dirapikan. Angka bahan,
 ukuran, dan komposisi yang terlihat berantakan justru bahan bukti — dan yang
 dibuang saat merapikan biasanya justru itu.
+
+### Kenapa fotonya wajib ikut ke chat, bukan cuma ke Flow
+
+Foto memang diunggah ke Flow sebagai referensi gambar. Tapi prompt-nya ditulis
+sebelum itu, dan **prompt yang ditulis tanpa melihat produknya bisa keliru
+sejak baris pertama.**
+
+Yang paling sering meleset:
+
+| Yang meleset | Akibatnya |
+|---|---|
+| **Warna** | Judul menyebut satu varian, foto memperlihatkan varian lain. Prompt mengunci warna yang salah, dan iklan menampilkan barang yang tidak akan diterima pembeli |
+| **Potongan** | Lebar kaki, tinggi pinggang, panjang lengan — semuanya hanya bisa dijelaskan kalau terlihat |
+| **Keberatan** | Keberatan yang benar datang dari bentuk produknya. Kulot lebar berpinggang tinggi memicu "kelihatan pendek gak ya", dan itu tidak terbaca dari judul |
+| **Bukti** | Bukti yang bisa difilmkan bergantung pada apa yang terlihat. Denim yang jatuh dan mengayun saat berjalan adalah bukti; itu hanya ketahuan dari foto |
+| **Model dan wardrobe** | Foto berhijab berarti seluruh prompt harus berhijab. Salah di sini membuat iklan tidak nyambung dengan pembeli yang dituju |
+
+Kalau judul dan foto bertentangan soal warna atau varian, **fotonya yang
+dipercaya untuk apa yang tampak**, tapi sebutkan pertentangannya — biasanya
+artinya listing-nya punya beberapa varian dan perlu dipilih satu.
+
+Prompt boleh menyebut warna hanya kalau warna itu benar-benar terlihat di foto
+yang dikirim. Menyebut warna dari judul saja adalah cara paling cepat membuat
+iklan yang menjual barang berbeda dari yang datang.
 
 | Kalau tidak disebut | Yang dipakai |
 |---|---|
@@ -689,8 +714,8 @@ PEMBELI   : ibu muda            → kalau sudah tahu siapa sasarannya
 CATATAN   : stok warna hitam habis, jangan ditampilkan
 ```
 
-**Foto produk tidak perlu dikirim ke chat.** Fotonya diunggah langsung ke Flow
-sebagai referensi. Yang dikerjakan di chat adalah keputusan dan prompt-nya.
+Foto yang sama dipakai dua kali: di chat untuk menulis prompt yang benar, dan
+di Flow sebagai referensi gambar. Bukan salah satu.
 
 Kalau informasinya kurang untuk menentukan pembeli atau keberatan, jangan
 menunggu — kerjakan dengan asumsi, lalu sebut asumsinya terang-terangan.
@@ -761,6 +786,8 @@ sering pada creative buatan AI: enak dilihat, komposisinya rapi, cahayanya bagus
 
 **Naskah dan prompt:**
 
+- [ ] Warna dan potongan di prompt cocok dengan foto yang dikirim, bukan
+      dengan judul listing
 - [ ] Satu pembeli disebut jelas, dan varian lain memakai pembeli berbeda
 - [ ] Satu keberatan utama ditulis, dan jawabannya salah satu dari empat jenis
 - [ ] Alasan utamanya bisa difilmkan, bukan klaim
