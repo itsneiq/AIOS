@@ -712,7 +712,7 @@ diiklankan.
 
 ```
 <arah visual sesuai sudut, lihat bagian 11>.
-Ini shot pembuka.
+Ini shot mandiri, memakai master image sebagai referensi.
 Subjek utama: <nama produk>, tampil identik dengan gambar referensi.
 Latar: <world>. Pencahayaan: <lighting>. Kamera: <camera>. Aksi: <action>.
 Kamera stabil, gerakan halus, tanpa perpindahan gaya di tengah shot.
@@ -729,10 +729,16 @@ Tanpa tulisan tambahan, logo, atau watermark.
 
 Blok **LARANGAN** ikut di setiap prompt tanpa kecuali, alasannya di bagian 15.
 
-Untuk klip kedua dan seterusnya, ganti *"Ini shot pembuka"* menjadi:
+**Kelima klip — tiga pembuka, badan, penutup — semuanya pakai bentuk yang
+sama ini.** Tidak ada yang saling menyambung. Satu-satunya referensi gambar
+buat kelimanya adalah master image yang sama; tidak ada yang merujuk ke klip
+lain, dan tidak ada yang perlu diunggah selain master image itu.
 
-> *Lanjutkan dari shot sebelumnya: pertahankan produk, pencahayaan, latar, dan
-> sudut kamera yang sama. Ubah hanya gerakan yang diminta.*
+Ini beda dari model lama, waktu satu video masih berupa rangkaian klip yang
+saling menyambung ("lanjutkan dari shot sebelumnya"). Sejak badan dan penutup
+dipakai bersama oleh tiga pembuka yang berbeda (bagian 2), tidak ada lagi satu
+rangkaian tunggal untuk disambung — ketiganya baru bertemu nanti di editor,
+bukan saat digenerate.
 
 ### Ruang kosong disiapkan saat generate, bukan saat mengedit
 
