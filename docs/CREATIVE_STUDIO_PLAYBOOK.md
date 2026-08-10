@@ -683,7 +683,15 @@ buat lihat perbedaan tanpa kelamaan.
 
 ### Bentuk prompt master image
 
+Dua baris pertama cuma disertakan kalau ada foto karakter yang diunggah
+(bagian 14). Kalau tidak ada, langsung mulai dari "Foto produk untuk iklan".
+
 ```
+Foto referensi karakter: <deskripsi singkat, mis. "Model A, perempuan berhijab">.
+Pertahankan wajah, bentuk tubuh, dan gaya <deskripsi> persis seperti gambar
+referensi karakter yang diunggah. Jangan mengubah wajah atau proporsi tubuh
+model.
+
 Foto produk untuk iklan: <nama produk>.
 Pertahankan bentuk, warna, dan seluruh detail kemasan persis seperti gambar
 referensi yang diunggah. Jangan mengubah tulisan pada kemasan.
@@ -810,20 +818,9 @@ diandalkan. Yang boleh berubah cuma foto acuannya, bukan kalimat di atasnya.
 
 ### Bentuk kunci karakter
 
-Ditambahkan di depan kunci produk pada prompt master image, mengikuti urutan
-foto yang diunggah — karakter dulu, baru produk:
-
-```
-Foto referensi karakter: <deskripsi singkat, mis. "Model A, perempuan berhijab">.
-Pertahankan wajah, bentuk tubuh, dan gaya <deskripsi> persis seperti gambar
-referensi karakter yang diunggah. Jangan mengubah wajah atau proporsi tubuh
-model.
-
-Foto produk untuk iklan: <nama produk>.
-Pertahankan bentuk, warna, dan seluruh detail kemasan persis seperti gambar
-referensi yang diunggah. Jangan mengubah tulisan pada kemasan.
-...
-```
+Template lengkapnya — karakter digabung dengan produk dan lingkungan dalam
+satu prompt master image — ada di bagian 13. Urutannya mengikuti urutan foto
+yang diunggah: karakter dulu, baru produk.
 
 Baris "Subjek utama" di prompt video ikut berubah, dari cuma menyebut produk
 jadi menyebut dua-duanya: *"Subjek utama: `<karakter>` mengenakan `<produk>`,
