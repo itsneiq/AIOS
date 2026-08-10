@@ -136,6 +136,7 @@ Yang wajib berbeda antar varian, berurut dari yang paling menentukan:
 | Hook | **Wajib** | Di sinilah CPC ditentukan, dan CPC yang menentukan untung |
 | Sudut | Sebaiknya | Boleh sama kalau pembelinya cukup jauh berbeda |
 | Set visual | Tidak | Justru lebih baik sama — lihat di bawah |
+| Karakter | Tidak, kecuali | Ikut default, kecuali jawaban keberatannya soal fisik karakter — aturan lengkap di bagian 14 |
 
 ### Yang dibedakan cuma pembukanya
 
@@ -522,7 +523,7 @@ susun set baru mengikuti pola yang sama: latar, cahaya, kamera, wardrobe, aksi.
 
 Set bukan cuma tampilan. Kafe punya obrolan samar dan denting cangkir, rooftop
 punya angin dan kota di kejauhan, meja marmer nyaris senyap kecuali gesekan
-jari. Ambience ini masuk ke blok AUDIO prompt video (bagian 14) dan tidak
+jari. Ambience ini masuk ke blok AUDIO prompt video (bagian 15) dan tidak
 menambah biaya apa pun — klip dengan suara ruangan yang cocok terasa direkam,
 klip yang senyap total terasa dibuat.
 
@@ -702,14 +703,14 @@ Sisakan ruang kosong di sepertiga atas dan seperempat bawah frame.
 Rasio 9:16 vertikal. Durasi klip sekitar <n> detik.
 
 AUDIO
-<blok suara — lihat bagian 14>
+<blok suara — lihat bagian 15>
 
 LARANGAN
 Tanpa subtitle. Tanpa caption. Tanpa teks apa pun di layar.
 Tanpa tulisan tambahan, logo, atau watermark.
 ```
 
-Blok **LARANGAN** ikut di setiap prompt tanpa kecuali, alasannya di bagian 14.
+Blok **LARANGAN** ikut di setiap prompt tanpa kecuali, alasannya di bagian 15.
 
 Untuk klip kedua dan seterusnya, ganti *"Ini shot pembuka"* menjadi:
 
@@ -735,7 +736,129 @@ Satu hal yang tidak boleh dikorbankan: **produk tetap yang paling terlihat.**
 Kalau menyisakan ruang berarti produknya jadi kecil atau komposisinya jadi
 aneh, produk yang menang — ruangnya dikurangi.
 
-## 14. Voiceover dan caption di Flow
+## 14. Karakter — dikunci atau ikut default
+
+Produk punya kuncinya sendiri (bagian 13). Karakter — model yang mengenakan
+atau memegang produk — tidak wajib punya kunci, tapi kalau punya, caranya
+harus sama persis dengan cara produk dikunci: lewat foto referensi dan
+kalimat, bukan lewat deskripsi teks yang berdiri sendiri.
+
+**Kenapa tidak boleh cuma teks:** foto referensi adalah sinyal yang jauh lebih
+kuat daripada kalimat. Kalau teksnya bilang "agak gemuk" tapi foto yang
+menempel masih yang lama, hasilnya tidak bisa ditebak — bisa tetap ikut foto,
+bisa campur aduk setengah-setengah. Ini kesalahan yang sama dengan kasus warna
+kemasan di bagian 16: teks yang bertentangan dengan foto tidak bisa
+diandalkan. Yang boleh berubah cuma foto acuannya, bukan kalimat di atasnya.
+
+### Bentuk kunci karakter
+
+Ditambahkan di depan kunci produk pada prompt master image, mengikuti urutan
+foto yang diunggah — karakter dulu, baru produk:
+
+```
+Foto referensi karakter: <deskripsi singkat, mis. "Model A, perempuan berhijab">.
+Pertahankan wajah, bentuk tubuh, dan gaya <deskripsi> persis seperti gambar
+referensi karakter yang diunggah. Jangan mengubah wajah atau proporsi tubuh
+model.
+
+Foto produk untuk iklan: <nama produk>.
+Pertahankan bentuk, warna, dan seluruh detail kemasan persis seperti gambar
+referensi yang diunggah. Jangan mengubah tulisan pada kemasan.
+...
+```
+
+Baris "Subjek utama" di prompt video ikut berubah, dari cuma menyebut produk
+jadi menyebut dua-duanya: *"Subjek utama: `<karakter>` mengenakan `<produk>`,
+tampil identik dengan gambar referensi karakter dan produk."*
+
+Karakter tidak wajib. Tanpa referensi, model tetap boleh muncul di arahan
+visual seperti biasa — cuma penampilannya tidak dijamin sama antar generate,
+karena tidak ada yang dikunci.
+
+### Kapan karakter perlu ikut buyer, kapan tetap default
+
+Ini keputusan yang paling sering salah kalau diambil buru-buru: bukan "tiap
+iklan boleh beda karakter", dan bukan juga "karakter harus selalu sama". Yang
+menentukan adalah **jenis bukti yang dipakai buat jawab keberatan** (bagian 4).
+
+| Jenis jawaban keberatan | Karakter |
+|---|---|
+| Bukti yang terlihat, dan buktinya soal fisik karakter (badan, kulit) | **Ikut buyer** — kalau tidak, buktinya kontradiksi sama yang di layar |
+| Bukti yang terlihat, tapi soal produk (kain, tekstur) | Tetap default |
+| Fakta dari deskripsi (dikutip, bukan diperagakan) | Tetap default |
+| Jawaban kreatif aman | Tetap default |
+| Risiko yang diakui | Tetap default |
+
+Contoh dari kulot jeans: keberatan soal ukuran badan besar dijawab pakai
+**fakta dari deskripsi** — VO menyebut angka size chart, bukan memperagakan
+badan besar di layar. Karakter default tetap kepakai, tidak aneh, karena
+klaimnya disampaikan lewat angka bukan lewat visual. Baru kalau jawabannya
+diganti jadi "lihat bagaimana bagusnya di badan seperti ini" — klaim visual —
+karakter wajib ikut menyesuaikan.
+
+**Jangan paksa keberatan yang butuh karakter khusus kalau cuma punya satu
+karakter.** Ganti ke keberatan lain yang jawabannya faktual atau kreatif —
+itu gratis, dan sering hasilnya sama kuatnya.
+
+### Karakter adalah satuan pembagian, bukan iklan
+
+Begitu satu iklan butuh karakter berbeda, **seluruh tiga klipnya** — pembuka,
+badan, penutup — ikut pindah ke karakter itu. Tidak bisa cuma badan dan
+penutupnya, sementara pembukanya masih pakai karakter default: itu artinya
+video yang sama tiba-tiba ganti orang di tengah jalan.
+
+```
+1 karakter  =  1 paket lengkap (pembuka + badan + penutup)
+```
+
+Kalau ketiga iklan pakai karakter yang sama, badan dan penutup tetap bisa
+dibagi seperti biasa (bagian 2) — cuma pembukanya yang beda. Begitu satu iklan
+keluar dari karakter default, dia keluar dari paket berbagi dan jadi paket
+sendiri:
+
+```
+2 iklan karakter sama    →  2 pembuka + 1 badan + 1 penutup  =  4 generate
+1 iklan karakter beda    →  1 pembuka + 1 badan + 1 penutup  =  3 generate
+                                                        Total  =  7 generate
+```
+
+Naiknya sebanding sama berapa banyak yang beneran butuh karakter beda — bukan
+borongan semua iklan jadi paket sendiri-sendiri (yang berarti 9 generate).
+
+### Kalau karakter yang diunggah tidak cocok
+
+Jangan ditambal pakai kalimat di atas foto yang sama. Yang berubah harus
+fotonya:
+
+```
+Karakter yang diunggah cocok sama kebutuhan iklan ini?
+
+  COCOK      →  kunci — pakai foto yang diunggah apa adanya
+
+  TIDAK      →  generate SATU master image baru pakai deskripsi teks
+                (foto lama tetap dipakai untuk elemen yang masih relevan,
+                mis. wajah, kalau cuma badannya yang beda)
+                Master image baru ini sekarang jadi foto acuan yang
+                dikunci, dipakai persis seperti foto asli
+```
+
+Ini nambah satu generate, jadi sebutkan dulu sebelum dikerjakan — jangan
+diam-diam. Tiga pilihan yang bisa ditawarkan:
+
+| Pilihan | Biaya |
+|---|---|
+| Generate master image kedua (karakter B) | +1 generate |
+| Pakai foto karakter kedua kalau sudah ada | Gratis kalau sudah punya stoknya |
+| Ganti keberatan ke yang jawabannya tidak butuh karakter khusus | Gratis, lihat tabel di atas |
+
+**Baru investasikan karakter kedua secara permanen setelah kebukti.** Kalau
+suatu jenis keberatan (misal soal ukuran badan) berulang kali jadi angle yang
+menang, saat itu baru masuk akal mengunci satu karakter khusus dan
+menyimpannya sebagai aset tetap — dipakai berkali-kali di produk-produk
+berikutnya, bukan taruhan sekali pakai untuk satu produk yang belum tentu
+jalan.
+
+## 15. Voiceover dan caption di Flow
 
 Keduanya terdengar seperti satu fitur yang sama, padahal jauh berbeda
 keandalannya. Yang satu dipakai, yang satu dihindari.
@@ -753,7 +876,7 @@ Ada keuntungan yang tidak langsung kelihatan dari klip tanpa dialog: **model
 menggambar subtitle karena ia mendeteksi ada yang bicara.** Klip bisu menutup
 masalah caption rusak dari akarnya, bukan sekadar menahannya lewat larangan.
 
-### 14.1 Voiceover — kapan dari Flow, kapan dari editor
+### 15.1 Voiceover — kapan dari Flow, kapan dari editor
 
 Ada tiga pilihan, bukan dua. Yang ketiga paling sering terlewat dan biasanya
 paling bagus.
@@ -835,7 +958,7 @@ Ambience: <suara latar sesuai set>, pelan.
 Tanpa musik latar.
 ```
 
-### 14.2 Caption — jangan dari Flow
+### 15.2 Caption — jangan dari Flow
 
 Veo mengasosiasikan ucapan dengan tulisan di layar, jadi begitu ia mendeteksi
 ada yang bicara ia "membantu" dengan menggambar subtitle. Masalahnya ia
@@ -869,7 +992,7 @@ memakan area tempat caption sungguhan akan diletakkan.
 
 ---
 
-## 15. Alur kerja
+## 16. Alur kerja
 
 ### Yang dikirim
 
@@ -880,11 +1003,17 @@ tidak perlu dipikirkan setiap kali.
 PRODUK    : <judul, salin apa adanya dari marketplace>
 DESKRIPSI : <salin apa adanya, tidak usah dirapikan>
 FOTO      : <foto produk dari listing, dilampirkan ke chat>
+KARAKTER  : (opsional) foto model yang mau dikunci, kalau punya
 ```
 
 Deskripsi mentah lebih berguna daripada yang sudah dirapikan. Angka bahan,
 ukuran, dan komposisi yang terlihat berantakan justru bahan bukti — dan yang
 dibuang saat merapikan biasanya justru itu.
+
+Foto karakter tidak wajib. Tanpa itu, model di setiap generate ditentukan AI
+sendiri dan penampilannya boleh berbeda-beda — itu bawaan yang sah, bukan
+kekurangan. Kalau nanti muncul kebutuhan mengunci wajah tertentu (lihat
+bagian 14), foto karakter baru diminta saat itu.
 
 ### Kenapa fotonya wajib ikut ke chat, bukan cuma ke Flow
 
@@ -946,7 +1075,7 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
 2. Terima — sekali, dipakai ketiganya:
 
                    setelan ad set   — gender, umur, minat, jumlah iklan
-                                      siap salin ke Meta (bagian 16.7)
+                                      siap salin ke Meta (bagian 17.7)
                    prompt master    — 2 pilihan set, pilih satu
                    prompt badan     — klip tengah, dipakai bersama
                    prompt penutup   — klip CTA, dipakai bersama
@@ -976,7 +1105,7 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
 
 6. Di Meta:        1 kampanye Traffic → 1 ad set sasaran lebar → 3 iklan
                    biarkan 3 hari sebelum dinilai
-                   setelan lengkapnya di bagian 16
+                   setelan lengkapnya di bagian 17
 ```
 
 Lima generate, tiga iklan yang beda di tempat yang menentukan.
@@ -996,7 +1125,7 @@ tahap perakitan — dengan alat apa pun yang dipakai.
 
 ---
 
-## 16. Setelan kampanye
+## 17. Setelan kampanye
 
 Rancangan creative tidak ada gunanya kalau kampanyenya disusun sehingga
 hasilnya tidak terbaca. Bagian ini urusan operasional, bukan kreatif — tapi
@@ -1014,7 +1143,7 @@ AD SET
   Lokasi           : Indonesia
   Umur             : 18–44
   Gender           : sesuai produk
-  Minat            : kosong dulu — lihat 16.2
+  Minat            : kosong dulu — lihat 17.2
   Placement        : otomatis, tapi breakdown-nya dipantau
   Budget           : harian, bukan lifetime
   Jadwal           : terus-menerus
@@ -1030,7 +1159,7 @@ Nama menu di Meta berubah-ubah. Yang tidak berubah logikanya.
 milik sendiri. Ini juga alasan creative harus menyaring sendiri: tidak ada
 sinyal lain yang mengerjakannya.
 
-### 16.1 Berapa iklan yang muat dalam budget
+### 17.1 Berapa iklan yang muat dalam budget
 
 Hitungannya satu langkah:
 
@@ -1064,18 +1193,18 @@ sudah kalah.
 Di kampanye konversi itu lima puluh pembelian dan berat sekali. Di sini
 eventnya klik, dan dua ratus klik sehari melewatinya di hari pertama.
 
-### 16.1b Peringatan yang menempel pada CPC rendah
+### 17.1b Peringatan yang menempel pada CPC rendah
 
 CPC yang sangat rendah bukan selalu kabar baik. Pada kampanye traffic, klik
 termurah biasanya datang dari penempatan bermutu paling rendah — dan sebagian
 darinya tertekan tidak sengaja.
 
 Semakin murah CPC-nya, semakin wajib **breakdown per placement dibuka**
-(16.3). Klik Rp 125 yang tidak pernah jadi order lebih mahal daripada klik
+(17.3). Klik Rp 125 yang tidak pernah jadi order lebih mahal daripada klik
 Rp 500 yang jadi order, dan laporan Meta tidak akan pernah memberi tahu
 bedanya.
 
-### 16.2 Broad atau pakai minat — ini yang paling tidak pasti
+### 17.2 Broad atau pakai minat — ini yang paling tidak pasti
 
 Nasihat umum: biarkan broad, algoritmanya lebih pintar. Itu benar, **tapi
 asumsinya algoritma punya sinyal konversi.**
@@ -1100,7 +1229,7 @@ Yang dibandingkan **komisi ÷ spend**, bukan CPC. Kemungkinan besar yang pakai
 minat CPC-nya lebih mahal tapi lebih untung — dan itu cuma terlihat dari
 dashboard Shopee, tidak pernah dari Meta.
 
-### 16.3 Audience Network — klik murah yang sering kosong
+### 17.3 Audience Network — klik murah yang sering kosong
 
 Jebakan khusus kampanye traffic.
 
@@ -1114,7 +1243,7 @@ Yang dilakukan: jalankan placement otomatis dulu, lalu **buka breakdown per
 placement**. Kalau Audience Network memakan porsi besar sementara order tidak
 bergerak, matikan. Reels dan Stories yang paling cocok untuk 9:16.
 
-### 16.4 Sampai mana boleh menyempit
+### 17.4 Sampai mana boleh menyempit
 
 Sasaran dibiarkan lebar (bagian 1.3), tapi dua penyempitan ini tidak
 menurunkan nilai per klik:
@@ -1127,7 +1256,7 @@ Yang **jangan** disempitkan: minat produk. "Suka fashion" mengeluarkan orang
 yang tidak mengikuti akun fashion tapi tetap belanja baju di Shopee — dan
 uang orang itu sama saja.
 
-### 16.5 Yang jangan dilakukan
+### 17.5 Yang jangan dilakukan
 
 - **Jangan mengedit ad set saat masih fase belajar.** Mengganti budget, umur,
   atau creative akan me-reset, dan hitungannya kembali dari nol
@@ -1136,7 +1265,7 @@ uang orang itu sama saja.
 - **Jangan memasang bid cap di awal.** Berapa CPC yang wajar belum diketahui;
   biarkan otomatis sampai punya patokan sendiri
 
-### 16.6 Tugas minggu pertama bukan untung
+### 17.6 Tugas minggu pertama bukan untung
 
 Minggu pertama dipakai untuk mendapat dua angka, dan cuma dua:
 
@@ -1182,7 +1311,7 @@ milik orang lain.
 Biaya untuk tahu: budget harian × tujuh. Itu harga pendidikan yang murah untuk
 pertanyaan yang menentukan semuanya.
 
-### 16.7 Yang diberikan setiap intake
+### 17.7 Yang diberikan setiap intake
 
 Sebagian besar setelan di atas tetap dan tidak perlu dipikirkan lagi. **Tiga
 saja yang berubah mengikuti produk**, dan ketiganya ikut diserahkan bersama
@@ -1232,11 +1361,11 @@ siapa saja dibiarkan semua.
 besar, bukan ceruk. Jangan diperlakukan sebagai minat khusus.
 
 **Jumlah iklan dihitung, bukan dipilih:** budget harian dibagi perkiraan CPC,
-lalu dicocokkan ke tabel di 16.1. Sebelum ada CPC sendiri, pakai tiga.
+lalu dicocokkan ke tabel di 17.1. Sebelum ada CPC sendiri, pakai tiga.
 
 ---
 
-## 17. Gerbang komersial — empat pertanyaan
+## 18. Gerbang komersial — empat pertanyaan
 
 Sebelum apa pun diserahkan, creative harus bisa menjawab empat ini. Kalau ada
 satu saja yang tidak terjawab, iklannya belum siap — seberapa pun bagus
@@ -1274,6 +1403,10 @@ sering pada creative buatan AI: enak dilihat, komposisinya rapi, cahayanya bagus
 - [ ] Tidak ada klaim medis, mutlak, atau janji berjangka waktu
 - [ ] Arah visual mengikuti sudut, bukan close-up produk generik
 - [ ] Prompt master memuat kalimat pengunci produk
+- [ ] Kalau pakai karakter: kalimat penguncinya ada, dan foto yang menempel
+      benar-benar cocok dengan kebutuhan iklan itu — bukan ditambal teks
+- [ ] Kalau satu iklan pakai karakter berbeda: pembuka, badan, dan penutupnya
+      ikut satu paket yang sama, tidak tercampur dengan iklan lain
 - [ ] Prompt meminta ruang kosong atas dan bawah disisakan
 - [ ] Set berbeda dari produk sebelumnya
 - [ ] Jumlah klip sesedikit mungkin
@@ -1289,7 +1422,7 @@ sering pada creative buatan AI: enak dilihat, komposisinya rapi, cahayanya bagus
 
 ---
 
-## 18. Catatan jujur
+## 19. Catatan jujur
 
 **Yang belum ada:** catatan hasil. Tanpa mencatat varian mana yang menang,
 seluruh keputusan di dokumen ini tetap tebakan berpengalaman — bukan tebakan

@@ -272,3 +272,42 @@ assert.ok(!/berkata:/.test(tanpaNaskah));
 assert.ok(/Ambience: ruang senyap/.test(tanpaNaskah));
 
 console.log("shot planner audio tests passed");
+
+/*
+ * Karakter dikunci sama seperti produk: lewat kalimat yang menempel foto
+ * referensi, bukan lewat deskripsi teks yang berdiri sendiri. Tanpa karakter,
+ * perilaku lama harus tetap persis sama — ini fitur tambahan, bukan pengganti.
+ */
+const { characterLockLine } = require("../shot-planner");
+
+// Tanpa karakter, kalimat subjek dan prompt master sama persis seperti sebelum
+// fitur ini ada — tidak boleh ada regresi buat pemakai yang belum pakai karakter.
+assert.equal(characterLockLine(), "");
+assert.equal(characterLockLine({}), "");
+assert.ok(styleContract({ product }).startsWith("Subjek utama: Kemeja Oversize Katun,"));
+assert.ok(!master.prompt.includes("Foto referensi karakter"));
+
+// Dengan karakter, kalimat pengunci menempel di kedua tempat: kontrak gaya
+// (untuk video) dan prompt master image, dengan urutan karakter dulu baru produk
+// supaya cocok dengan urutan foto yang diunggah.
+const karakter = { label: "Model A, perempuan berhijab" };
+const kontrakBerkarakter = styleContract({ product, character: karakter });
+assert.ok(kontrakBerkarakter.includes("Model A, perempuan berhijab mengenakan Kemeja Oversize Katun"));
+assert.ok(kontrakBerkarakter.includes("referensi karakter dan produk"));
+
+const masterBerkarakter = buildMasterImagePrompt({ product: { title: "Serum Glow", category: "beauty" }, variant, character: karakter });
+assert.ok(masterBerkarakter.prompt.includes("Foto referensi karakter: Model A, perempuan berhijab."));
+assert.ok(masterBerkarakter.prompt.includes("Jangan mengubah wajah atau proporsi tubuh model."));
+assert.ok(masterBerkarakter.prompt.indexOf("referensi karakter") < masterBerkarakter.prompt.indexOf("Foto produk untuk iklan"), "karakter dikunci sebelum produk, mengikuti urutan unggah");
+// Kunci produk tidak boleh hilang cuma karena karakter ditambahkan.
+assert.ok(masterBerkarakter.prompt.includes("Jangan mengubah tulisan pada kemasan."));
+
+// Karakter ikut ke setiap shot lewat kontrak, dan ikut ke setiap pilihan master image.
+const rencanaBerkarakter = planShots({ variant, product, photos, duration: 10, aiSeconds: 10, character: karakter });
+for (const shot of rencanaBerkarakter.shots.filter(item => item.kind === "ai")) {
+  assert.ok(shot.prompt.includes("Model A, perempuan berhijab"), `shot ${shot.id} tidak membawa kunci karakter`);
+}
+const pilihanBerkarakter = masterImageOptions({ product: { title: "Serum Glow", category: "beauty" }, variant, count: 2, character: karakter });
+assert.ok(pilihanBerkarakter.every(item => item.prompt.includes("Foto referensi karakter: Model A")));
+
+console.log("shot planner character lock tests passed");

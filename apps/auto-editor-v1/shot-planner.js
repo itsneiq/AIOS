@@ -92,15 +92,34 @@ function resolveScene({ product = {}, scene, sceneId } = {}) {
 }
 
 /*
+ * Karakter dikunci dengan pola yang sama seperti produk, dan alasannya sama:
+ * teks yang bertentangan dengan foto referensi tidak bisa diandalkan — foto
+ * yang menang, atau hasilnya campur aduk antara dua instruksi yang saling
+ * berlawanan. Begitu ada foto karakter, wajah dan tubuhnya dikunci lewat
+ * kalimat, bukan sekadar disebut di deskripsi.
+ *
+ * Karakter tidak wajib. Tanpa referensi, model tetap boleh muncul di arahan
+ * visual seperti biasa — cuma penampilannya tidak dijamin sama antar produk
+ * atau antar generate, karena tidak ada yang dikunci.
+ */
+function characterLockLine(character) {
+  if (!character || !character.label) return "";
+  return `Pertahankan wajah, bentuk tubuh, dan gaya ${character.label} persis seperti gambar referensi karakter yang diunggah. Jangan mengubah wajah atau proporsi tubuh model.`;
+}
+
+/*
  * Kontrak gaya mengikat seluruh shot pada satu set yang sama. Keseragaman di
  * dalam satu video itulah yang membuat potongan menyambung; keragaman berlaku
  * antar produk, dan itu ditangani pemilihan set di scene-library.
  */
-function styleContract({ product = {}, scene, sceneId } = {}) {
+function styleContract({ product = {}, scene, sceneId, character } = {}) {
   const subject = product.title || "produk";
   const dipakai = resolveScene({ product, scene, sceneId });
+  const subjectLine = character && character.label
+    ? `Subjek utama: ${character.label} mengenakan ${subject}, tampil identik dengan gambar referensi karakter dan produk di setiap shot.`
+    : `Subjek utama: ${subject}, tampil identik dengan gambar referensi di setiap shot.`;
   return [
-    `Subjek utama: ${subject}, tampil identik dengan gambar referensi di setiap shot.`,
+    subjectLine,
     describeScene(dipakai),
     "Tidak ada tulisan, logo, atau watermark tambahan di dalam gambar.",
     "Kamera stabil, gerakan halus, tanpa perpindahan gaya di tengah shot.",
@@ -114,13 +133,19 @@ function styleContract({ product = {}, scene, sceneId } = {}) {
  * saat masih murah. Klip video kemudian berangkat dari satu gambar yang sudah
  * benar, bukan mengarang dunianya masing-masing dari foto produk berlatar
  * putih — di situlah perbedaan antar klip biasanya muncul.
+ *
+ * Kunci karakter ditulis sebelum kunci produk supaya urutannya sama dengan
+ * urutan foto yang diunggah: referensi karakter dulu, baru referensi produk.
  */
-function buildMasterImagePrompt({ product = {}, scene, sceneId, variant = {} } = {}) {
+function buildMasterImagePrompt({ product = {}, scene, sceneId, variant = {}, character } = {}) {
   const dipakai = resolveScene({ product, scene, sceneId });
   const subject = product.title || "produk";
+  const karakterLock = characterLockLine(character);
   return {
     sceneId: dipakai.id,
     prompt: [
+      karakterLock ? `Foto referensi karakter: ${character.label}.` : "",
+      karakterLock,
       `Foto produk untuk iklan: ${subject}.`,
       "Pertahankan bentuk, warna, dan seluruh detail kemasan persis seperti gambar referensi yang diunggah. Jangan mengubah tulisan pada kemasan.",
       describeScene(dipakai),
@@ -133,9 +158,9 @@ function buildMasterImagePrompt({ product = {}, scene, sceneId, variant = {} } =
   };
 }
 
-function masterImageOptions({ product = {}, variant = {}, count = 2 } = {}) {
+function masterImageOptions({ product = {}, variant = {}, count = 2, character } = {}) {
   return pickScenes({ category: product.category, seed: product.title || "", count })
-    .map(scene => ({ ...buildMasterImagePrompt({ product, scene, variant }), scene }));
+    .map(scene => ({ ...buildMasterImagePrompt({ product, scene, variant, character }), scene }));
 }
 
 function splitDurations(duration, pacing) {
@@ -327,14 +352,15 @@ function planShots(input = {}) {
     pacing = "medium",
     scene,
     sceneId,
-    voice = "editor"
+    voice = "editor",
+    character
   } = input;
 
   const total = Math.max(MIN_SHOT_SECONDS, Number(duration) || DEFAULT_DURATION);
   const segments = splitDurations(total, pacing);
   const aiClips = planAiClips(total, aiSeconds);
   const activeScene = resolveScene({ product, scene, sceneId });
-  const contract = styleContract({ product, scene: activeScene });
+  const contract = styleContract({ product, scene: activeScene, character });
 
   const shots = [];
   aiClips.forEach((clip, index) => {
@@ -413,6 +439,7 @@ module.exports = {
   ROLE_RATIOS,
   audioBlockFor,
   beatsInSpan,
+  characterLockLine,
   dominantRole,
   fitSpeech,
   planAiClips,

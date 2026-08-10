@@ -56,6 +56,11 @@ Opsi:
                      silent — orang tampil dan berekspresi tetapi tidak bicara,
                               sehingga voiceover editor tidak terbaca dubbing
                      flow   — dialog dari Flow, hanya untuk video satu klip
+  --character <teks> Deskripsi singkat karakter yang dikunci, mis. "Model A,
+                     perempuan berhijab". Foto acuannya tetap diunggah manual
+                     ke Flow di TAHAP 1, sama seperti foto produk. Tanpa opsi
+                     ini, karakter tidak dikunci — penampilan model bisa
+                     berbeda tiap generate.
 
 Tidak ada biaya video yang keluar di tahap ini. Prompt yang dihasilkan
 ditempel ke Flow, lalu klipnya diunduh ke folder clips/ pada proyek.`);
@@ -114,6 +119,8 @@ if (variant.policy.blocking) {
   process.exit(1);
 }
 
+const character = args.character ? { label: String(args.character) } : undefined;
+
 const plan = planShots({
   variant,
   product: hasil.product,
@@ -121,9 +128,10 @@ const plan = planShots({
   duration,
   aiSeconds,
   sceneId: args.scene || undefined,
-  voice: ["flow", "silent"].includes(args.voice) ? args.voice : "editor"
+  voice: ["flow", "silent"].includes(args.voice) ? args.voice : "editor",
+  character
 });
-const masters = masterImageOptions({ product: hasil.product, variant, count: Number(args.masters) || 2 });
+const masters = masterImageOptions({ product: hasil.product, variant, count: Number(args.masters) || 2, character });
 const root = path.resolve(args.out || "projects", slug(hasil.product.title));
 const { paths } = createProject(root, { plan, variant, product: hasil.product, masters });
 
@@ -167,6 +175,7 @@ console.log(`          ${paths.prompts}\n`);
 
 console.log("LANGKAH BERIKUTNYA");
 console.log(`  1. Taruh foto produk di   ${paths.photos}`);
+if (character) console.log(`     Siapkan juga foto karakter — diunggah manual bareng foto produk di Flow`);
 console.log(`  2. Buka ${paths.prompts}`);
 console.log(`  3. TAHAP 1 — generate ${masters.length} pilihan master image, pilih satu`);
 console.log(`     Simpan sebagai          ${path.join(paths.master, "master.jpg")}`);
@@ -185,5 +194,6 @@ const SUARA = {
   editor: "klip dibuat tanpa dialog, voiceover ditempel di editor"
 };
 console.log(`\nSUARA     ${SUARA[args.voice] || SUARA.editor}`);
+console.log(`KARAKTER  ${character ? `dikunci — ${character.label}` : "tidak dikunci, model boleh berbeda tiap generate"}`);
 console.log("Caption ditempel di editor, bukan diminta ke Flow.");
 console.log("Tidak ada biaya API video yang keluar di tahap ini.");
