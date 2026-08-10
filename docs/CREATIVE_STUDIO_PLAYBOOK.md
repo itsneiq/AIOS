@@ -162,10 +162,14 @@ IKLAN 3   [pembuka C]──┘
 ### Biayanya
 
 ```
-3 pembuka + 1 badan + 1 penutup  =  5 generate  →  3 iklan
-4 pembuka + 1 badan + 1 penutup  =  6 generate  →  4 iklan
-5 pembuka + 1 badan + 1 penutup  =  7 generate  →  5 iklan
+3 pembuka + 1 badan + 1 penutup  =  5 generate video  →  3 iklan
+4 pembuka + 1 badan + 1 penutup  =  6 generate video  →  4 iklan
+5 pembuka + 1 badan + 1 penutup  =  7 generate video  →  5 iklan
 ```
+
+Ini cuma hitungan klip video. Master image dan variasi lain yang berupa
+gambar (bagian 13) gratis dan tidak masuk hitungan — yang menagih di Flow
+cuma klip video, jadi cuma itu yang layak dihemat.
 
 Bandingkan dengan membuat tiga video terpisah dari nol: tiap video butuh dua
 klip, jadi tiga iklan berarti enam generate — dan yang berbeda malah bagian
@@ -666,11 +670,16 @@ antar klip muncul.
 
 ```
 foto produk mentah
-      ↓  murah, cepat, boleh diulang sepuasnya
+      ↓  GRATIS, boleh diulang sepuasnya — generate gambar tidak menagih kredit
 MASTER IMAGE — produk di set yang benar, cahaya benar, gaya benar
-      ↓  mahal, lambat
+      ↓  BERBAYAR — yang menagih cuma klip video
 KLIP VIDEO — tinggal memberi gerakan
 ```
+
+Karena generate gambar gratis, batasan dua pilihan set di bawah bukan soal
+kredit — mau bikin lebih dari dua opsi silakan, gratis juga. Batasannya cuma
+waktu yang mau dipakai buat meninjau satu-satu; dua biasanya sudah cukup
+buat lihat perbedaan tanpa kelamaan.
 
 ### Bentuk prompt master image
 
@@ -736,15 +745,15 @@ Satu hal yang tidak boleh dikorbankan: **produk tetap yang paling terlihat.**
 Kalau menyisakan ruang berarti produknya jadi kecil atau komposisinya jadi
 aneh, produk yang menang — ruangnya dikurangi.
 
-### Pratinjau komposisi — opsional, cuma kalau ragu
+### Pratinjau komposisi — default, karena gambarnya gratis
 
 Master image mengunci identitas: karakter, produk, set. Yang tidak
 diperlihatkannya adalah bagaimana **ketiga arah pembuka** akan terlihat
 begitu benar-benar dirender. Dua pembuka bisa terdengar beda di teks tapi
 ternyata blocking-nya mirip begitu digambar — dan itu baru ketahuan setelah
-tiga klip video sudah keluar duit.
+tiga klip video sudah keluar biaya.
 
-Kalau ragu tiga pembuka bakal cukup beda, minta satu gambar tambahan:
+Setelah master image dipilih, generate satu gambar tambahan:
 
 ```
 Gambar pratinjau komposisi, tiga panel berdampingan dalam satu gambar,
@@ -773,17 +782,17 @@ pratinjau belum tentu sama dengan hasil produksi sesungguhnya.
 sesudahnya.** Begitu komposisinya dicek, gambar ini selesai tugasnya. Klip
 video tetap merujuk ke master image, bukan ke pratinjau ini.
 
-**Opsional, bukan langkah wajib tiap produk.** Biayanya satu generate — cuma
-worth-nya kalau lo genuinely ragu, bukan dipakai default di setiap intake.
-Kalau tiga arah pembuka udah jelas beda di kepala (misalnya satu buka dengan
-masalah, satu buka dengan aksi buru-buru, satu buka dengan raut kecewa),
-langsung lanjut ke video — pratinjau ini gak nambah apa-apa buat kasus yang
-udah jelas.
+**Defaultnya dipakai, bukan ditunda sampai ragu.** Generate gambar tidak
+memakan kredit di Flow — yang menagih cuma klip video. Karena itu tidak ada
+alasan untuk melewatkan langkah ini: paling buruk dia tidak menemukan masalah
+apa pun (rugi nol), paling baik dia menyelamatkan satu atau dua generate video
+yang akan mubazir.
 
-**Kenapa gak dijadiin default:** biayanya sama kayak generate gambar beneran,
-gak ada versi "sketsa murah" di sistem yang nagih per generate. Worth-nya
-cuma muncul kalau dia nyelametin generate video yang bakal mubazir — dan itu
-gak selalu kejadian.
+**Satu-satunya alasan sah untuk melewatkannya:** tiga arah pembuka sudah jelas
+berbeda di kepala (misalnya satu buka dengan masalah, satu buka dengan aksi
+buru-buru, satu buka dengan raut kecewa) dan waktu untuk meninjau satu gambar
+lagi memang tidak ada. Itu soal waktu tinjau, bukan soal biaya — biayanya
+selalu nol.
 
 ## 14. Karakter — dikunci atau ikut default
 
@@ -866,13 +875,15 @@ keluar dari karakter default, dia keluar dari paket berbagi dan jadi paket
 sendiri:
 
 ```
-2 iklan karakter sama    →  2 pembuka + 1 badan + 1 penutup  =  4 generate
-1 iklan karakter beda    →  1 pembuka + 1 badan + 1 penutup  =  3 generate
-                                                        Total  =  7 generate
+2 iklan karakter sama    →  2 pembuka + 1 badan + 1 penutup  =  4 generate video
+1 iklan karakter beda    →  1 pembuka + 1 badan + 1 penutup  =  3 generate video
+                                                        Total  =  7 generate video
 ```
 
-Naiknya sebanding sama berapa banyak yang beneran butuh karakter beda — bukan
-borongan semua iklan jadi paket sendiri-sendiri (yang berarti 9 generate).
+Hitungan ini cuma klip video — master image untuk karakter beda gratis dan
+tidak masuk hitungan. Naiknya sebanding sama berapa banyak yang beneran butuh
+karakter beda — bukan borongan semua iklan jadi paket sendiri-sendiri (yang
+berarti 9 generate video).
 
 ### Kalau karakter yang diunggah tidak cocok
 
@@ -891,21 +902,28 @@ Karakter yang diunggah cocok sama kebutuhan iklan ini?
                 dikunci, dipakai persis seperti foto asli
 ```
 
-Ini nambah satu generate, jadi sebutkan dulu sebelum dikerjakan — jangan
-diam-diam. Tiga pilihan yang bisa ditawarkan:
+Master image Karakter B sendiri **gratis** — itu gambar, bukan video. Yang
+beneran menambah biaya bukan foto acuannya, melainkan akibatnya: begitu satu
+iklan punya karakter sendiri, ketiga klipnya (pembuka, badan, penutup) keluar
+dari paket berbagi dan jadi tiga generate video sendiri, bukan menumpang di
+paket iklan lain. Biaya itu sama saja mau karakternya digenerate baru atau
+dari foto yang sudah ada — dua-duanya gratis di level gambar, yang mahal
+tetap video-nya.
+
+Karena itu sebutkan dulu sebelum dikerjakan — jangan diam-diam. Dua pilihan
+yang bisa ditawarkan:
 
 | Pilihan | Biaya |
 |---|---|
-| Generate master image kedua (karakter B) | +1 generate |
-| Pakai foto karakter kedua kalau sudah ada | Gratis kalau sudah punya stoknya |
-| Ganti keberatan ke yang jawabannya tidak butuh karakter khusus | Gratis, lihat tabel di atas |
+| Karakter disesuaikan — generate baru atau pakai foto yang sudah ada | Foto gratis, tapi iklan itu keluar dari paket berbagi: +3 generate video |
+| Ganti keberatan ke yang jawabannya tidak butuh karakter khusus | Gratis penuh, tetap di paket berbagi |
 
 **Baru investasikan karakter kedua secara permanen setelah kebukti.** Kalau
 suatu jenis keberatan (misal soal ukuran badan) berulang kali jadi angle yang
 menang, saat itu baru masuk akal mengunci satu karakter khusus dan
 menyimpannya sebagai aset tetap — dipakai berkali-kali di produk-produk
-berikutnya, bukan taruhan sekali pakai untuk satu produk yang belum tentu
-jalan.
+berikutnya, bukan menanggung tiga generate video ekstra untuk satu produk yang
+belum tentu jalan.
 
 ## 15. Voiceover dan caption di Flow
 
@@ -1140,10 +1158,10 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
                    gerbang komersial— empat pertanyaan, dijawab kalimat
 
 3. Di Flow:        unggah foto produk → generate master image → pilih satu
-                   (opsional, kalau ragu) generate pratinjau komposisi
-                                          — cek 3 arah pembuka dulu, bagian 13
+                   generate pratinjau komposisi — cek 3 arah pembuka dulu,
+                                                    gratis, bagian 13
                    pakai master itu sebagai referensi
-                   generate 3 pembuka + 1 badan + 1 penutup   = 5 generate
+                   generate 3 pembuka + 1 badan + 1 penutup   = 5 generate video
 
 4. Periksa klip:   ada tulisan nyasar di layar?  → generate ulang
                    suara sinkron dengan bibir?
@@ -1159,7 +1177,7 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
                    setelan lengkapnya di bagian 17
 ```
 
-Lima generate, tiga iklan yang beda di tempat yang menentukan.
+Lima generate video, tiga iklan yang beda di tempat yang menentukan.
 
 ### Yang wajib ditangani editor
 
