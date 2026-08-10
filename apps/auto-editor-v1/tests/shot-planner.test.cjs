@@ -311,3 +311,39 @@ const pilihanBerkarakter = masterImageOptions({ product: { title: "Serum Glow", 
 assert.ok(pilihanBerkarakter.every(item => item.prompt.includes("Foto referensi karakter: Model A")));
 
 console.log("shot planner character lock tests passed");
+
+/*
+ * Pratinjau komposisi. Bukan pengganti master image — cuma mengecek apakah
+ * tiga arah pembuka cukup beda satu sama lain sebelum tiga klip video benar-
+ * benar digenerate. Dipakai setelah master image, jadi identitasnya mengacu
+ * ke situ, bukan mengunci identitas baru.
+ */
+const { buildCompositionPreviewPrompt } = require("../shot-planner");
+
+const openers = [
+  "Berdiri ragu memegang ujung kulot sebelum melangkah",
+  "Memegang kulot sambil melirik jam tangan, terburu-buru",
+  "Melihat HP kecewa, lalu melirik kulot dengan ekspresi berharap"
+];
+
+const pratinjau = buildCompositionPreviewPrompt({ product, scene: rencanaBerset.scene, openers });
+assert.ok(pratinjau.includes("3 panel berdampingan"));
+assert.ok(pratinjau.includes("Panel 1: Berdiri ragu"));
+assert.ok(pratinjau.includes("Panel 2: Memegang kulot"));
+assert.ok(pratinjau.includes("Panel 3: Melihat HP"));
+assert.ok(pratinjau.includes(rencanaBerset.scene.world), "latar pratinjau harus konsisten sama master image");
+assert.ok(pratinjau.includes("gambar referensi master image yang diunggah"), "bukan referensi baru, harus rujuk master image");
+assert.ok(/LARANGAN/.test(pratinjau));
+assert.ok(/Tanpa teks, angka, atau label/.test(pratinjau), "gambar pratinjau tidak boleh mengandalkan teks yang digambar");
+assert.ok(pratinjau.includes("Rasio 16:9 horizontal"), "landscape supaya tiga panel muat berdampingan");
+
+// Karakter ikut ke subjek pratinjau kalau ada, sama seperti di master image.
+const pratinjauBerkarakter = buildCompositionPreviewPrompt({ product, character: karakter, scene: rencanaBerset.scene, openers });
+assert.ok(pratinjauBerkarakter.includes("Model A, perempuan berhijab mengenakan"));
+
+// Kurang dari tiga pembuka tetap sah — jumlah panel menyesuaikan, tidak dipatok.
+const pratinjauDua = buildCompositionPreviewPrompt({ product, scene: rencanaBerset.scene, openers: openers.slice(0, 2) });
+assert.ok(pratinjauDua.includes("2 panel berdampingan"));
+assert.ok(!pratinjauDua.includes("Panel 3"));
+
+console.log("shot planner composition preview tests passed");

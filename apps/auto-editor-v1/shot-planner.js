@@ -163,6 +163,38 @@ function masterImageOptions({ product = {}, variant = {}, count = 2, character }
     .map(scene => ({ ...buildMasterImagePrompt({ product, scene, variant, character }), scene }));
 }
 
+/*
+ * Pratinjau komposisi — opsional, dipakai setelah master image dipilih.
+ *
+ * Master image mengunci identitas (karakter, produk, set) tapi tidak
+ * menunjukkan bagaimana ketiga arah pembuka akan terlihat begitu benar-benar
+ * dirender. Kalau ragu tiga pembuka akan cukup berbeda satu sama lain, satu
+ * gambar ini mengecek blocking dan komposisinya lebih dulu — jauh lebih murah
+ * daripada ketahuan setelah tiga klip video digenerate.
+ *
+ * Ini bukan pengganti master image, dan tidak dipakai sebagai referensi untuk
+ * generate video sesudahnya — begitu komposisinya dicek, gambar ini selesai
+ * tugasnya. Dipakai SETELAH master image karena pratinjau yang akurat butuh
+ * identitas yang sudah terkunci sebagai acuan; sebelum itu, apa yang tampil
+ * di pratinjau belum tentu sama dengan hasil produksi sesungguhnya.
+ */
+function buildCompositionPreviewPrompt({ product = {}, character, scene, openers = [] } = {}) {
+  const subject = character && character.label
+    ? `${character.label} mengenakan ${product.title || "produk"}`
+    : product.title || "produk";
+  const daftar = openers.slice(0, 3);
+  const panels = daftar.map((direction, index) => `Panel ${index + 1}: ${direction}.`).join(" ");
+  const utama = [
+    `Gambar pratinjau komposisi, ${daftar.length} panel berdampingan dalam satu gambar, disusun dari kiri ke kanan.`,
+    panels,
+    `Subjek utama tiap panel: ${subject}, tampil identik dengan gambar referensi master image yang diunggah.`,
+    scene && scene.world ? `Latar tiap panel: ${scene.world}, konsisten dengan master image.` : "",
+    "Gaya sketsa komposisi kasar — fokus pada blocking, pose, dan framing, bukan detail akhir.",
+    "Rasio 16:9 horizontal."
+  ].filter(Boolean).join(" ");
+  return `${utama}\n\nLARANGAN\nTanpa teks, angka, atau label apa pun di dalam gambar. Tanpa watermark.`;
+}
+
 function splitDurations(duration, pacing) {
   const ratios = ROLE_RATIOS[pacing] || ROLE_RATIOS.medium;
   const roles = [...BEATS];
@@ -439,6 +471,7 @@ module.exports = {
   ROLE_RATIOS,
   audioBlockFor,
   beatsInSpan,
+  buildCompositionPreviewPrompt,
   characterLockLine,
   dominantRole,
   fitSpeech,

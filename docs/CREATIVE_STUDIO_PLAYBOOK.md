@@ -736,6 +736,55 @@ Satu hal yang tidak boleh dikorbankan: **produk tetap yang paling terlihat.**
 Kalau menyisakan ruang berarti produknya jadi kecil atau komposisinya jadi
 aneh, produk yang menang — ruangnya dikurangi.
 
+### Pratinjau komposisi — opsional, cuma kalau ragu
+
+Master image mengunci identitas: karakter, produk, set. Yang tidak
+diperlihatkannya adalah bagaimana **ketiga arah pembuka** akan terlihat
+begitu benar-benar dirender. Dua pembuka bisa terdengar beda di teks tapi
+ternyata blocking-nya mirip begitu digambar — dan itu baru ketahuan setelah
+tiga klip video sudah keluar duit.
+
+Kalau ragu tiga pembuka bakal cukup beda, minta satu gambar tambahan:
+
+```
+Gambar pratinjau komposisi, tiga panel berdampingan dalam satu gambar,
+disusun dari kiri ke kanan.
+
+Panel 1: <arah pembuka A, ringkas>.
+Panel 2: <arah pembuka B, ringkas>.
+Panel 3: <arah pembuka C, ringkas>.
+
+Subjek utama tiap panel: <karakter mengenakan produk / produk>, tampil
+identik dengan gambar referensi master image yang diunggah.
+Latar tiap panel: <world>, konsisten dengan master image.
+Gaya sketsa komposisi kasar — fokus pada blocking, pose, dan framing,
+bukan detail akhir.
+Rasio 16:9 horizontal.
+
+LARANGAN
+Tanpa teks, angka, atau label apa pun di dalam gambar. Tanpa watermark.
+```
+
+**Dipakai setelah master image, bukan sebelum.** Pratinjau yang akurat butuh
+identitas yang sudah terkunci sebagai acuan — sebelum itu, apa yang tampil di
+pratinjau belum tentu sama dengan hasil produksi sesungguhnya.
+
+**Bukan pengganti master image, dan bukan referensi buat generate video
+sesudahnya.** Begitu komposisinya dicek, gambar ini selesai tugasnya. Klip
+video tetap merujuk ke master image, bukan ke pratinjau ini.
+
+**Opsional, bukan langkah wajib tiap produk.** Biayanya satu generate — cuma
+worth-nya kalau lo genuinely ragu, bukan dipakai default di setiap intake.
+Kalau tiga arah pembuka udah jelas beda di kepala (misalnya satu buka dengan
+masalah, satu buka dengan aksi buru-buru, satu buka dengan raut kecewa),
+langsung lanjut ke video — pratinjau ini gak nambah apa-apa buat kasus yang
+udah jelas.
+
+**Kenapa gak dijadiin default:** biayanya sama kayak generate gambar beneran,
+gak ada versi "sketsa murah" di sistem yang nagih per generate. Worth-nya
+cuma muncul kalau dia nyelametin generate video yang bakal mubazir — dan itu
+gak selalu kejadian.
+
 ## 14. Karakter — dikunci atau ikut default
 
 Produk punya kuncinya sendiri (bagian 13). Karakter — model yang mengenakan
@@ -1091,6 +1140,8 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
                    gerbang komersial— empat pertanyaan, dijawab kalimat
 
 3. Di Flow:        unggah foto produk → generate master image → pilih satu
+                   (opsional, kalau ragu) generate pratinjau komposisi
+                                          — cek 3 arah pembuka dulu, bagian 13
                    pakai master itu sebagai referensi
                    generate 3 pembuka + 1 badan + 1 penutup   = 5 generate
 
