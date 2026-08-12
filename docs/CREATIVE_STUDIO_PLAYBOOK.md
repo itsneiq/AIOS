@@ -819,9 +819,12 @@ Dua baris pertama cuma disertakan kalau ada foto karakter yang diunggah
 
 ```
 Foto referensi karakter: <deskripsi singkat, mis. "Model A, perempuan berhijab">.
-Pertahankan wajah, bentuk tubuh, dan gaya <deskripsi> persis seperti gambar
-referensi karakter yang diunggah. Jangan mengubah wajah atau proporsi tubuh
-model.
+Pertahankan wajah, warna dan potongan rambut, riasan, serta bentuk tubuh
+<deskripsi> persis seperti gambar referensi karakter yang diunggah. Jangan
+mengubah wajah, rambut, riasan, atau proporsi tubuh model.
+(kalau karakter punya aksesoris ciri khas, mis. anting atau jam tangan
+tertentu — sebutkan juga: "Pertahankan juga <aksesoris> seperti di foto
+referensi.")
 
 Foto produk untuk iklan: <nama produk>.
 Pertahankan bentuk, warna, dan seluruh detail kemasan persis seperti gambar
@@ -952,6 +955,13 @@ menempel masih yang lama, hasilnya tidak bisa ditebak — bisa tetap ikut foto,
 bisa campur aduk setengah-setengah. Ini kesalahan yang sama dengan kasus warna
 kemasan di bagian 18: teks yang bertentangan dengan foto tidak bisa
 diandalkan. Yang boleh berubah cuma foto acuannya, bukan kalimat di atasnya.
+
+**Kalimat kuncinya juga harus rinci, bukan kata umum.** "Pertahankan gaya"
+tidak cukup — rambut, warna rambut, dan riasan itu sendiri sama rawannya
+"diperbaiki" model kalau tidak disebut satu-satu, persis seperti tulisan
+kemasan yang harus dikunci eksplisit di bagian 15. Kalimat yang dipakai
+menyebutkan wajah, rambut, riasan, dan bentuk tubuh terpisah — lihat bentuk
+lengkapnya di bagian 15.
 
 ### Bentuk kunci karakter
 

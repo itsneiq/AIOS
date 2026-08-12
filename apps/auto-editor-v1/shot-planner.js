@@ -98,13 +98,23 @@ function resolveScene({ product = {}, scene, sceneId } = {}) {
  * berlawanan. Begitu ada foto karakter, wajah dan tubuhnya dikunci lewat
  * kalimat, bukan sekadar disebut di deskripsi.
  *
+ * Kalimatnya rinci dengan sengaja — "pertahankan gaya" saja tidak cukup.
+ * Rambut, warna rambut, dan riasan sama rawannya "diperbaiki" model kalau
+ * tidak disebut satu-satu, persis seperti tulisan kemasan produk yang harus
+ * dikunci eksplisit (buildMasterImagePrompt). Aksesoris ciri khas (anting,
+ * jam tangan, dst) ditambahkan lewat character.accessories, opsional, karena
+ * tidak semua karakter punya penanda seperti itu.
+ *
  * Karakter tidak wajib. Tanpa referensi, model tetap boleh muncul di arahan
  * visual seperti biasa — cuma penampilannya tidak dijamin sama antar produk
  * atau antar generate, karena tidak ada yang dikunci.
  */
 function characterLockLine(character) {
   if (!character || !character.label) return "";
-  return `Pertahankan wajah, bentuk tubuh, dan gaya ${character.label} persis seperti gambar referensi karakter yang diunggah. Jangan mengubah wajah atau proporsi tubuh model.`;
+  const aksesoris = character.accessories
+    ? ` Pertahankan juga ${character.accessories} seperti di foto referensi.`
+    : "";
+  return `Pertahankan wajah, warna dan potongan rambut, riasan, serta bentuk tubuh ${character.label} persis seperti gambar referensi karakter yang diunggah. Jangan mengubah wajah, rambut, riasan, atau proporsi tubuh model.${aksesoris}`;
 }
 
 /*

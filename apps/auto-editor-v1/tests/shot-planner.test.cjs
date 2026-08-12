@@ -297,10 +297,22 @@ assert.ok(kontrakBerkarakter.includes("referensi karakter dan produk"));
 
 const masterBerkarakter = buildMasterImagePrompt({ product: { title: "Serum Glow", category: "beauty" }, variant, character: karakter });
 assert.ok(masterBerkarakter.prompt.includes("Foto referensi karakter: Model A, perempuan berhijab."));
-assert.ok(masterBerkarakter.prompt.includes("Jangan mengubah wajah atau proporsi tubuh model."));
+/*
+ * Kalimatnya rinci dengan sengaja. "Pertahankan gaya" saja pernah terbukti
+ * tidak cukup — rambut dan riasan sama rawannya "diperbaiki" model kalau
+ * tidak disebut satu-satu, persis kasus tulisan kemasan yang harus dikunci
+ * eksplisit di prompt produk.
+ */
+assert.ok(masterBerkarakter.prompt.includes("warna dan potongan rambut, riasan"), "rambut dan riasan harus disebut eksplisit, bukan cuma \"gaya\"");
+assert.ok(masterBerkarakter.prompt.includes("Jangan mengubah wajah, rambut, riasan, atau proporsi tubuh model."));
 assert.ok(masterBerkarakter.prompt.indexOf("referensi karakter") < masterBerkarakter.prompt.indexOf("Foto produk untuk iklan"), "karakter dikunci sebelum produk, mengikuti urutan unggah");
 // Kunci produk tidak boleh hilang cuma karena karakter ditambahkan.
 assert.ok(masterBerkarakter.prompt.includes("Jangan mengubah tulisan pada kemasan."));
+
+// Aksesoris ciri khas opsional — tidak semua karakter punya penanda seperti itu.
+assert.equal(characterLockLine({ label: "Model A" }).includes("Pertahankan juga"), false);
+const karakterBerAksesoris = { label: "Model A", accessories: "anting bulat dan jam tangan perak" };
+assert.ok(characterLockLine(karakterBerAksesoris).includes("Pertahankan juga anting bulat dan jam tangan perak seperti di foto referensi."));
 
 // Karakter ikut ke setiap shot lewat kontrak, dan ikut ke setiap pilihan master image.
 const rencanaBerkarakter = planShots({ variant, product, photos, duration: 10, aiSeconds: 10, character: karakter });
