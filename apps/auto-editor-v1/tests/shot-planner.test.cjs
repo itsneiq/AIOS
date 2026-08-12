@@ -293,26 +293,37 @@ assert.ok(!master.prompt.includes("Foto referensi karakter"));
 const karakter = { label: "Model A, perempuan berhijab" };
 const kontrakBerkarakter = styleContract({ product, character: karakter });
 assert.ok(kontrakBerkarakter.includes("Model A, perempuan berhijab mengenakan Kemeja Oversize Katun"));
-assert.ok(kontrakBerkarakter.includes("referensi karakter dan produk"));
 
 const masterBerkarakter = buildMasterImagePrompt({ product: { title: "Serum Glow", category: "beauty" }, variant, character: karakter });
 assert.ok(masterBerkarakter.prompt.includes("Foto referensi karakter: Model A, perempuan berhijab."));
 /*
  * Kalimatnya rinci dengan sengaja. "Pertahankan gaya" saja pernah terbukti
- * tidak cukup — rambut dan riasan sama rawannya "diperbaiki" model kalau
+ * tidak cukup — warna dan tekstur rambut rawan "diperbaiki" model kalau
  * tidak disebut satu-satu, persis kasus tulisan kemasan yang harus dikunci
  * eksplisit di prompt produk.
  */
-assert.ok(masterBerkarakter.prompt.includes("warna dan potongan rambut, riasan"), "rambut dan riasan harus disebut eksplisit, bukan cuma \"gaya\"");
-assert.ok(masterBerkarakter.prompt.includes("Jangan mengubah wajah, rambut, riasan, atau proporsi tubuh model."));
+assert.ok(masterBerkarakter.prompt.includes("warna rambut, panjang dasar rambut, tekstur rambut"), "identitas rambut harus disebut eksplisit, bukan cuma \"gaya\"");
 assert.ok(masterBerkarakter.prompt.indexOf("referensi karakter") < masterBerkarakter.prompt.indexOf("Foto produk untuk iklan"), "karakter dikunci sebelum produk, mengikuti urutan unggah");
 // Kunci produk tidak boleh hilang cuma karena karakter ditambahkan.
 assert.ok(masterBerkarakter.prompt.includes("Jangan mengubah tulisan pada kemasan."));
 
-// Aksesoris ciri khas opsional — tidak semua karakter punya penanda seperti itu.
-assert.equal(characterLockLine({ label: "Model A" }).includes("Pertahankan juga"), false);
-const karakterBerAksesoris = { label: "Model A", accessories: "anting bulat dan jam tangan perak" };
-assert.ok(characterLockLine(karakterBerAksesoris).includes("Pertahankan juga anting bulat dan jam tangan perak seperti di foto referensi."));
+/*
+ * Rincinya berhenti di identitas. Foto referensi cuma menangkap satu momen
+ * styling; mengunci penataannya berarti satu foto menentukan penampilan untuk
+ * semua produk selamanya — dress formal minta sanggul, olahraga minta
+ * ponytail, dan foto acuan tidak bisa melayani keduanya.
+ */
+const kunci = characterLockLine(karakter);
+assert.ok(/Penataan rambut, intensitas riasan, dan aksesoris boleh menyesuaikan/.test(kunci), "penataan harus dibebaskan eksplisit");
+assert.ok(!/Jangan mengubah[^.]*riasan/.test(kunci), "riasan tidak boleh ikut dilarang berubah");
+assert.ok(!/Jangan mengubah[^.]*aksesoris/.test(kunci), "aksesoris tidak boleh ikut dilarang berubah");
+// Yang dilarang berubah tetap identitasnya, dan itu harus tegas.
+assert.ok(kunci.includes("Jangan mengubah wajah, warna atau panjang dasar rambut, tekstur rambut, maupun proporsi tubuh model."));
+
+// Kontrak gaya untuk video ikut memisahkan keduanya — "identik" cuma untuk produk.
+assert.ok(kontrakBerkarakter.includes("Produk tampil identik dengan gambar referensi."));
+assert.ok(/Identitas karakter[^.]*tetap sama di setiap shot/.test(kontrakBerkarakter));
+assert.ok(kontrakBerkarakter.includes("penataan rambut dan riasan boleh menyesuaikan"));
 
 // Karakter ikut ke setiap shot lewat kontrak, dan ikut ke setiap pilihan master image.
 const rencanaBerkarakter = planShots({ variant, product, photos, duration: 10, aiSeconds: 10, character: karakter });

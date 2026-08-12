@@ -819,12 +819,12 @@ Dua baris pertama cuma disertakan kalau ada foto karakter yang diunggah
 
 ```
 Foto referensi karakter: <deskripsi singkat, mis. "Model A, perempuan berhijab">.
-Pertahankan wajah, warna dan potongan rambut, riasan, serta bentuk tubuh
-<deskripsi> persis seperti gambar referensi karakter yang diunggah. Jangan
-mengubah wajah, rambut, riasan, atau proporsi tubuh model.
-(kalau karakter punya aksesoris ciri khas, mis. anting atau jam tangan
-tertentu — sebutkan juga: "Pertahankan juga <aksesoris> seperti di foto
-referensi.")
+Pertahankan wajah, warna rambut, panjang dasar rambut, tekstur rambut, dan
+bentuk tubuh <deskripsi> persis seperti gambar referensi karakter yang
+diunggah. Jangan mengubah wajah, warna atau panjang dasar rambut, tekstur
+rambut, maupun proporsi tubuh model. Penataan rambut, intensitas riasan, dan
+aksesoris boleh menyesuaikan produk dan suasana — yang dikunci identitasnya,
+bukan penataannya.
 
 Foto produk untuk iklan: <nama produk>.
 Pertahankan bentuk, warna, dan seluruh detail kemasan persis seperti gambar
@@ -957,11 +957,50 @@ kemasan di bagian 18: teks yang bertentangan dengan foto tidak bisa
 diandalkan. Yang boleh berubah cuma foto acuannya, bukan kalimat di atasnya.
 
 **Kalimat kuncinya juga harus rinci, bukan kata umum.** "Pertahankan gaya"
-tidak cukup — rambut, warna rambut, dan riasan itu sendiri sama rawannya
-"diperbaiki" model kalau tidak disebut satu-satu, persis seperti tulisan
-kemasan yang harus dikunci eksplisit di bagian 15. Kalimat yang dipakai
-menyebutkan wajah, rambut, riasan, dan bentuk tubuh terpisah — lihat bentuk
-lengkapnya di bagian 15.
+tidak cukup — warna dan tekstur rambut sama rawannya "diperbaiki" model kalau
+tidak disebut satu-satu, persis seperti tulisan kemasan yang harus dikunci
+eksplisit di bagian 15.
+
+### Yang dikunci identitasnya, bukan penataannya
+
+Tapi rincinya berhenti di identitas. Ini pembedaan yang menentukan, dan
+gampang keliru ke arah mengunci terlalu banyak.
+
+Foto referensi cuma menangkap **satu momen styling** — rambut tergerai hari
+itu, riasan hari itu, aksesoris yang kebetulan dipakai. Kalau semua itu ikut
+dikunci, satu foto menentukan penampilan untuk semua produk selamanya. Dan
+itu langsung bentrok dengan konteks: dress formal minta sanggul, olahraga
+minta ponytail, dan satu foto acuan tidak bisa melayani keduanya.
+
+Ini pola yang sama dengan wardrobe pada foto karakter yang bentrok dengan
+produk yang dijual — cuma di lapisan yang berbeda.
+
+| Identitas — **dikunci** | Penataan — **bebas menyesuaikan** |
+|---|---|
+| Wajah | Gaya rambut (terurai, half-up, ponytail, sanggul) |
+| Warna rambut | Intensitas riasan |
+| Panjang dasar rambut | Aksesoris (anting, jam, gelang) |
+| Tekstur rambut | Pose dan ekspresi |
+| Bentuk tubuh dan proporsi | |
+
+Sistem ini memang sudah bisa memisahkan keduanya — pose dan aksi karakter
+sudah berbeda-beda di setiap klip (bagian 12) sementara identitasnya tetap.
+Penataan rambut dan riasan diperlakukan sama persis.
+
+**Panduan penataan per konteks** — ini arahan, bukan aturan; kalau ada yang
+lebih pas untuk produknya, pakai yang itu:
+
+| Konteks produk atau set | Rambut | Riasan |
+|---|---|---|
+| Kasual sehari-hari (kaos, denim) | Terurai natural, half-up | Minim, natural |
+| Formal atau elegan (dress, blazer) | Sanggul rendah, updo rapi | Lebih tegas |
+| Outdoor santai (rooftop, jalan kota) | Loose waves, tertiup angin | Natural glow |
+| Olahraga atau aktif | Ponytail, dikuncir rapi | Nyaris tanpa riasan |
+| Rumahan (kamar, teras pagi) | Terurai, agak berantakan wajar | Tanpa riasan |
+
+Kalau produknya punya detail di leher atau bahu — kerah, tali, aksen bahu —
+rambut yang diikat biasanya lebih tepat, karena tidak menutupi bagian yang
+justru mau diperlihatkan.
 
 ### Bentuk kunci karakter
 

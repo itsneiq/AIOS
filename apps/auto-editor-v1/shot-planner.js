@@ -98,12 +98,22 @@ function resolveScene({ product = {}, scene, sceneId } = {}) {
  * berlawanan. Begitu ada foto karakter, wajah dan tubuhnya dikunci lewat
  * kalimat, bukan sekadar disebut di deskripsi.
  *
- * Kalimatnya rinci dengan sengaja — "pertahankan gaya" saja tidak cukup.
- * Rambut, warna rambut, dan riasan sama rawannya "diperbaiki" model kalau
- * tidak disebut satu-satu, persis seperti tulisan kemasan produk yang harus
- * dikunci eksplisit (buildMasterImagePrompt). Aksesoris ciri khas (anting,
- * jam tangan, dst) ditambahkan lewat character.accessories, opsional, karena
- * tidak semua karakter punya penanda seperti itu.
+ * Kalimatnya rinci dengan sengaja — "pertahankan gaya" saja tidak cukup,
+ * karena warna dan tekstur rambut rawan "diperbaiki" model kalau tidak
+ * disebut satu-satu, persis seperti tulisan kemasan produk.
+ *
+ * Tetapi rincinya berhenti di identitas, bukan penataan. Foto referensi cuma
+ * menangkap satu momen styling — rambut tergerai, riasan hari itu, aksesoris
+ * yang kebetulan dipakai. Mengunci semua itu berarti satu foto menentukan
+ * penampilan untuk semua produk selamanya, dan itu bentrok dengan konteks:
+ * dress formal minta sanggul, olahraga minta ponytail. Ini pola yang sama
+ * dengan wardrobe pada foto karakter yang bentrok dengan produk yang dijual.
+ *
+ * Maka yang dikunci identitasnya (wajah, warna dan panjang dasar dan tekstur
+ * rambut, bentuk tubuh), sementara penataan rambut, intensitas riasan, dan
+ * aksesoris dibebaskan menyesuaikan produk. Sistem ini sudah terbukti bisa
+ * memisahkan keduanya: pose dan aksi karakter sudah berbeda-beda tiap klip
+ * sementara identitasnya tetap.
  *
  * Karakter tidak wajib. Tanpa referensi, model tetap boleh muncul di arahan
  * visual seperti biasa — cuma penampilannya tidak dijamin sama antar produk
@@ -111,10 +121,11 @@ function resolveScene({ product = {}, scene, sceneId } = {}) {
  */
 function characterLockLine(character) {
   if (!character || !character.label) return "";
-  const aksesoris = character.accessories
-    ? ` Pertahankan juga ${character.accessories} seperti di foto referensi.`
-    : "";
-  return `Pertahankan wajah, warna dan potongan rambut, riasan, serta bentuk tubuh ${character.label} persis seperti gambar referensi karakter yang diunggah. Jangan mengubah wajah, rambut, riasan, atau proporsi tubuh model.${aksesoris}`;
+  return [
+    `Pertahankan wajah, warna rambut, panjang dasar rambut, tekstur rambut, dan bentuk tubuh ${character.label} persis seperti gambar referensi karakter yang diunggah.`,
+    "Jangan mengubah wajah, warna atau panjang dasar rambut, tekstur rambut, maupun proporsi tubuh model.",
+    "Penataan rambut, intensitas riasan, dan aksesoris boleh menyesuaikan produk dan suasana — yang dikunci identitasnya, bukan penataannya."
+  ].join(" ");
 }
 
 /*
@@ -125,8 +136,13 @@ function characterLockLine(character) {
 function styleContract({ product = {}, scene, sceneId, character } = {}) {
   const subject = product.title || "produk";
   const dipakai = resolveScene({ product, scene, sceneId });
+  /*
+   * Produk identik, karakter identitasnya saja. Bedanya disebut terpisah
+   * karena "identik" untuk karakter akan mengunci penataan rambut dan riasan
+   * dari satu momen di foto referensi — lihat characterLockLine.
+   */
   const subjectLine = character && character.label
-    ? `Subjek utama: ${character.label} mengenakan ${subject}, tampil identik dengan gambar referensi karakter dan produk di setiap shot.`
+    ? `Subjek utama: ${character.label} mengenakan ${subject}. Produk tampil identik dengan gambar referensi. Identitas karakter — wajah, warna dan tekstur rambut, bentuk tubuh — tetap sama di setiap shot; penataan rambut dan riasan boleh menyesuaikan.`
     : `Subjek utama: ${subject}, tampil identik dengan gambar referensi di setiap shot.`;
   return [
     subjectLine,

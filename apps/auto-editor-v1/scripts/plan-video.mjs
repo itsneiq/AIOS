@@ -58,12 +58,10 @@ Opsi:
                      flow   — dialog dari Flow, hanya untuk video satu klip
   --character <teks> Deskripsi singkat karakter yang dikunci, mis. "Model A,
                      perempuan berhijab". Foto acuannya tetap diunggah manual
-                     ke Flow di TAHAP 1, sama seperti foto produk. Tanpa opsi
-                     ini, karakter tidak dikunci — penampilan model bisa
-                     berbeda tiap generate.
-  --accessories <teks>  Aksesoris ciri khas yang ikut dikunci, mis. "anting
-                     bulat dan jam tangan perak". Opsional, cuma dipakai
-                     kalau --character juga diisi.
+                     ke Flow di TAHAP 1, sama seperti foto produk. Yang
+                     dikunci identitasnya saja — penataan rambut, riasan, dan
+                     aksesoris tetap bebas menyesuaikan produk. Tanpa opsi
+                     ini, karakter tidak dikunci sama sekali.
 
 Tidak ada biaya video yang keluar di tahap ini. Prompt yang dihasilkan
 ditempel ke Flow, lalu klipnya diunduh ke folder clips/ pada proyek.`);
@@ -122,9 +120,7 @@ if (variant.policy.blocking) {
   process.exit(1);
 }
 
-const character = args.character
-  ? { label: String(args.character), accessories: args.accessories ? String(args.accessories) : undefined }
-  : undefined;
+const character = args.character ? { label: String(args.character) } : undefined;
 
 const plan = planShots({
   variant,
