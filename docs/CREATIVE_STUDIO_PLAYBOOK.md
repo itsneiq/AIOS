@@ -63,7 +63,7 @@ lima belas persen tidak ada gunanya kalau produk itu tidak membuat orang berhent
 
 Dua hal yang mudah tertukar dan akibatnya berlawanan:
 
-- **Creative tetap bicara ke satu pembeli** (bagian 2). Iklan yang bicara ke
+- **Creative tetap bicara ke satu pembeli** (bagian 3). Iklan yang bicara ke
   semua orang tidak menghentikan siapa pun.
 - **Sasaran di Meta dibiarkan lebar.** Yang dibutuhkan bukan orang yang mau
   produk ini, melainkan orang yang belanja di Shopee. Menyempitkan minat
@@ -93,7 +93,52 @@ selain menyadarinya saat angkanya terasa lebih rendah dari perhitungan.
 
 ---
 
-## 2. Satu creative, satu pembeli
+## 2. Dua jalur, satu identitas
+
+Playbook ini melayani dua kebutuhan yang tujuannya berlawanan, dan keduanya
+butuh disiplin yang berbeda — jangan dicampur.
+
+| | Jalur organik | Jalur Meta Ads |
+|---|---|---|
+| Tujuan | Dikenali. Begitu orang lihat, langsung tahu ini konten siapa | Convert. Tiap produk dicari sudut yang paling laku |
+| Format | **Terkunci** — sama tiap post: try-on/haul + PAS (bagian 13) | **Bervariasi** — delapan sudut kreatif (bagian 12), diuji lewat tiga pembuka (bagian 3) |
+| Yang membangun identitas | Pengulangan format, bukan cuma wajah | Tidak relevan — tiap iklan dinilai sendiri, bukan soal dikenali |
+| Karakter | Terkunci (bagian 16), dipakai konsisten | Sama — karakter yang sama dipakai di sini juga |
+| Platform | TikTok, IG Reels, FB Reels | Meta Ads (Traffic → Shopee, bagian 1) |
+| Budget | Gratis — organik, tidak ada spend | Berbayar, diatur di bagian 19 |
+
+**Karakter yang sama dipakai di dua-duanya.** Itu yang membuat orang
+menyambungkan titik — ketemu iklannya di feed, lalu ketemu lagi kontennya
+waktu scroll TikTok, dan sadar itu orang yang sama. Yang beda cuma
+formatnya, bukan siapa yang tampil.
+
+**Produksinya tetap terpisah**, meskipun identitasnya sama. Karakter, produk,
+dan set yang dikunci lewat master image (bagian 15) dipakai sebagai acuan di
+dua-duanya. Tapi klip videonya diproduksi masing-masing, karena temponya
+berlawanan: try-on/haul organik naratif dan lebih panjang, ads padat delapan
+sampai sepuluh detik. Memaksa satu klip melayani dua tempo yang berlawanan
+cuma merusak salah satunya.
+
+```
+1 karakter terkunci (bagian 16)
+      ↓
+Master image dibuat sekali → acuan visual untuk dua jalur (bagian 15)
+      ↓
+      ├── Jalur organik   →  format try-on/haul, bagian 13
+      └── Jalur Meta Ads  →  delapan sudut kreatif, bagian 12,
+                              diuji lewat struktur bagian 3
+```
+
+**Bagian 3 sampai 12 di dokumen ini ditulis untuk jalur Meta Ads** — buyer,
+keberatan, gerbang komersial, semuanya soal mencari sudut yang paling
+convert per produk. Bukan berarti tidak relevan untuk organik; prinsip
+seperti hook yang kuat (bagian 8) dan larangan klaim palsu (bagian 10) tetap
+berlaku di mana pun konten itu tayang. Tapi organik punya format dan
+checklist sendiri, ada di bagian 13.
+
+---
+
+## 3. Satu creative, satu pembeli
 
 Keputusan pertama bukan sudut, bukan kerangka, bukan hook. **Satu pembeli.**
 
@@ -136,7 +181,7 @@ Yang wajib berbeda antar varian, berurut dari yang paling menentukan:
 | Hook | **Wajib** | Di sinilah CPC ditentukan, dan CPC yang menentukan untung |
 | Sudut | Sebaiknya | Boleh sama kalau pembelinya cukup jauh berbeda |
 | Set visual | Tidak | Justru lebih baik sama — lihat di bawah |
-| Karakter | Tidak, kecuali | Ikut default, kecuali jawaban keberatannya soal fisik karakter — aturan lengkap di bagian 14 |
+| Karakter | Tidak, kecuali | Ikut default, kecuali jawaban keberatannya soal fisik karakter — aturan lengkap di bagian 16 |
 
 ### Yang dibedakan cuma pembukanya
 
@@ -168,7 +213,7 @@ IKLAN 3   [pembuka C]──┘
 ```
 
 Ini cuma hitungan klip video. Master image dan variasi lain yang berupa
-gambar (bagian 13) gratis dan tidak masuk hitungan — yang menagih di Flow
+gambar (bagian 15) gratis dan tidak masuk hitungan — yang menagih di Flow
 cuma klip video, jadi cuma itu yang layak dihemat.
 
 Bandingkan dengan membuat tiga video terpisah dari nol: tiap video butuh dua
@@ -264,7 +309,7 @@ untuk semuanya.
 
 ---
 
-## 3. Kerangka mengikuti kesadaran pembeli
+## 4. Kerangka mengikuti kesadaran pembeli
 
 Setelah pembelinya jelas, baru pilih kerangka. Kesalahan paling mahal bukan
 memilih sudut yang lemah, melainkan memilih kerangka yang salah untuk tingkat
@@ -289,7 +334,7 @@ merasa bermasalah, karena agitate-nya akan terasa mengada-ada.
 
 ---
 
-## 4. Keberatan — yang sebenarnya menahan orang checkout
+## 5. Keberatan — yang sebenarnya menahan orang checkout
 
 Bagian ini paling sering hilang, dan hilangnya paling mahal.
 
@@ -322,7 +367,7 @@ masuk. Untuk fashion dan kecantikan, tiga keberatan yang paling sering:
 
 ---
 
-## 5. Bukti harus bisa difilmkan
+## 6. Bukti harus bisa difilmkan
 
 Alasan yang tidak bisa ditunjukkan bukan alasan — itu klaim, dan klaim adalah
 yang paling tidak dipercaya di iklan affiliate.
@@ -346,7 +391,7 @@ Yang kedua tidak salah. Cuma tidak ada yang percaya.
 
 ---
 
-## 6. Empat beat
+## 7. Empat beat
 
 | Beat | Porsi | Tugas |
 |---|---|---|
@@ -373,7 +418,7 @@ sering dan paling tidak terlihat.
 
 ---
 
-## 7. Yang membuat hook berhenti digulir
+## 8. Yang membuat hook berhenti digulir
 
 Bobot ini dikalibrasi terhadap dua belas hook nyata. Dua hook bisa terlihat
 sama kuat secara tata bahasa namun berbeda jauh sebagai iklan.
@@ -408,7 +453,7 @@ Yang kedua menang karena satu kata: **padahal**.
 
 ---
 
-## 8. Platform
+## 9. Platform
 
 Perbedaan yang menyangkut isi. Margin, safe area, dan rasio bukan urusan di
 sini — itu tahap perakitan.
@@ -447,7 +492,7 @@ sini — itu tahap perakitan.
 
 ---
 
-## 9. Kebijakan — yang membuat iklan ditolak
+## 10. Kebijakan — yang membuat iklan ditolak
 
 Iklan yang ditolak lebih merugikan daripada iklan yang lemah, karena tidak
 menghasilkan data apa pun.
@@ -478,7 +523,7 @@ memang membuat masalah terasa. Periksa beat ini paling teliti.
 
 ---
 
-## 10. Set visual — seragam di dalam, beragam antar
+## 11. Set visual — seragam di dalam, beragam antar
 
 Dua hal yang mirip tetapi berlawanan akibatnya:
 
@@ -527,13 +572,13 @@ susun set baru mengikuti pola yang sama: latar, cahaya, kamera, wardrobe, aksi.
 
 Set bukan cuma tampilan. Kafe punya obrolan samar dan denting cangkir, rooftop
 punya angin dan kota di kejauhan, meja marmer nyaris senyap kecuali gesekan
-jari. Ambience ini masuk ke blok AUDIO prompt video (bagian 15) dan tidak
+jari. Ambience ini masuk ke blok AUDIO prompt video (bagian 17) dan tidak
 menambah biaya apa pun — klip dengan suara ruangan yang cocok terasa direkam,
 klip yang senyap total terasa dibuat.
 
 ---
 
-## 11. Arah visual per sudut
+## 12. Arah visual per sudut
 
 **Ini jembatan yang paling sering putus.** Sudut kreatif hanya hidup di teks,
 lalu gambarnya tetap close-up produk. Penonton mendengar keluhan tetapi melihat
@@ -621,7 +666,93 @@ tumpukan botol"* bisa dieksekusi model video; *"tampilkan kesan praktis"* tidak.
 
 ---
 
-## 12. Rencana shot
+## 13. Format try-on/haul untuk organik
+
+Ini format terkunci untuk jalur organik (bagian 2) — dipakai sama persis
+tiap post, karena pengulangan bentuknya sendiri yang membangun pengenalan.
+Berbeda dari bagian 12: di situ sudutnya sengaja bervariasi untuk mencari
+yang paling convert, di sini bentuknya sengaja tetap supaya penonton bisa
+langsung mengenali "ini konten akun ini" begitu lihat beberapa detik pertama.
+
+### Struktur — empat blok, satu try-on/haul
+
+| Blok | Porsi | Isi |
+|---|---|---|
+| **Hook** | 0–3 detik | Masalah atau kontras, produk sudah kelihatan di frame walau belum dibahas |
+| **Agitate** | 3–7 detik | Perbesar masalahnya. Maksimal dua kalimat — kepanjangan bikin drop-off |
+| **Solve** | 7–17 detik | Reveal → motion (badan bergerak/berputar) → detail (close-up bahan/jahitan) → info ukuran |
+| **CTA** | 17–20 detik | Satu ajakan, sesuai mekanisme platform (bagian 9) |
+
+Total sekitar 20 detik — lebih panjang dari iklan (bagian 7), karena
+organik tidak punya tekanan "skip dalam sepersekian detik" yang dipunya
+iklan. Waktunya dipakai buat membangun narasi, bukan cuma jualan cepat.
+
+**Pola hook yang bekerja untuk try-on/haul:**
+
+| Pola | Contoh | Kenapa |
+|---|---|---|
+| Masalah relatable | "Badan pendek tapi pengen keliatan tinggi?" | Langsung kena ke keraguan yang nyata |
+| Kontras harga | "Ini cuma 80 ribu. Serius." | Kesenjangan ekspektasi-realita, sinyal kontras (bagian 8) |
+| Hasil duluan | Langsung tampilkan look final, baru dijelasin | Penasaran duluan sebelum tau caranya |
+| Kesalahan umum | "Stop pakai kaos oversize kayak gini." | Risiko, sinyal penguat hook (bagian 8) |
+| Kondisi spesifik | "Buat yang badannya kurus dan susah cari fit." | Menyempit ke satu pembeli, bukan bicara ke semua orang |
+
+### Jadi berapa klip, dan gimana bentuk prompt-nya
+
+Empat klip, semuanya independen, semuanya rujuk ke master image yang sama
+(bagian 15) — bukan format testing seperti ads, jadi tidak ada pembuka yang
+dibagi-bagi:
+
+```
+KLIP 1  Hook          ~3 detik   produk sudah kelihatan
+KLIP 2  Reveal+Motion  ~6 detik   berputar/jalan, bahan bergerak natural
+KLIP 3  Detail         ~4 detik   close-up bahan, jahitan, tekstur
+KLIP 4  Fit info + CTA ~6 detik   info ukuran, lalu ajakan
+```
+
+Bentuk prompt-nya sama seperti bagian 15 (bentuk prompt video) — arah
+visual, subjek utama, latar, blok AUDIO, blok LARANGAN. Yang beda cuma
+arahannya mengikuti struktur di atas, bukan salah satu dari delapan sudut.
+
+**Info ukuran itu paling sering dilewatkan, padahal itu yang paling
+menentukan.** Sebutkan ukuran yang dipakai dan catatan sizing kalau ada
+("kalau bahu lebar, naik satu size") — ini yang membedakan penonton yang
+cuma nge-like dari yang jadi nanya link.
+
+### VO tetap ikut aturan bagian 17
+
+Empat klip di atas tetap empat generate terpisah, jadi risiko warna suara
+beda-beda tetap berlaku sama persis kayak di ads. VO default tetap di
+editor; kalau mau karakter kelihatan bicara ke kamera (blok fit info),
+pakai mode **silent** (bagian 17.1) supaya VO editor tidak terbaca dubbing.
+
+### Adaptasi ringan per platform
+
+Formatnya tetap, yang berubah cuma pembungkusnya:
+
+| | TikTok | IG Reels | FB Reels |
+|---|---|---|---|
+| Nada | Mentah, cepat | Lebih rapi, konsisten sama estetika feed | Netral, jelas |
+| CTA | "Cek keranjang kuning" | Sesuai fitur tag produk yang aktif di akun | Link di kolom komentar, bukan di caption |
+| Caption | Pendek, hashtag niche | Daftar item + info sizing per item | Benefit-led, satu-dua kalimat |
+| Yang didorong | Watch time, share | Save, komentar | Komentar, share |
+
+**Soal fitur tag produk (IG/FB) — cek dulu di akun sebelum dijadikan
+acuan tetap.** Fitur macam ini berubah-ubah dan batasnya beda-beda; jangan
+disamakan dengan aturan CTA-mekanisme di bagian 9 yang sudah teruji.
+
+### Yang wajib diperiksa
+
+- [ ] Bentuknya sama kayak post sebelumnya — pengulangan itu tujuannya
+- [ ] Karakter sama dengan yang dipakai di iklan (bagian 2)
+- [ ] Info ukuran/sizing disebutkan, bukan cuma ditunjukkan
+- [ ] Hook di bawah 3 detik, produk sudah kelihatan
+- [ ] Blok LARANGAN dan AUDIO ada di tiap klip (bagian 15, 17)
+- [ ] CTA satu aksi saja, sesuai mekanisme platform tujuan
+
+---
+
+## 14. Rencana shot
 
 **Satu-satunya batas keras: 10 detik per generate.** Semua pembagian shot
 turun dari situ, bukan dari kemampuan alat perakit.
@@ -662,7 +793,7 @@ tengah.
 
 ---
 
-## 13. Master image dulu, video kemudian
+## 15. Master image dulu, video kemudian
 
 Foto produk marketplace biasanya berlatar putih polos. Kalau langsung diberikan
 ke Flow, model harus mengarang seluruh dunianya — dan di situlah perbedaan
@@ -684,7 +815,7 @@ buat lihat perbedaan tanpa kelamaan.
 ### Bentuk prompt master image
 
 Dua baris pertama cuma disertakan kalau ada foto karakter yang diunggah
-(bagian 14). Kalau tidak ada, langsung mulai dari "Foto produk untuk iklan".
+(bagian 16). Kalau tidak ada, langsung mulai dari "Foto produk untuk iklan".
 
 ```
 Foto referensi karakter: <deskripsi singkat, mis. "Model A, perempuan berhijab">.
@@ -711,7 +842,7 @@ diiklankan.
 ### Bentuk prompt video
 
 ```
-<arah visual sesuai sudut, lihat bagian 11>.
+<arah visual sesuai sudut, lihat bagian 12>.
 Ini shot mandiri, memakai master image sebagai referensi.
 Subjek utama: <nama produk>, tampil identik dengan gambar referensi.
 Latar: <world>. Pencahayaan: <lighting>. Kamera: <camera>. Aksi: <action>.
@@ -720,14 +851,14 @@ Sisakan ruang kosong di sepertiga atas dan seperempat bawah frame.
 Rasio 9:16 vertikal. Durasi klip sekitar <n> detik.
 
 AUDIO
-<blok suara — lihat bagian 15>
+<blok suara — lihat bagian 17>
 
 LARANGAN
 Tanpa subtitle. Tanpa caption. Tanpa teks apa pun di layar.
 Tanpa tulisan tambahan, logo, atau watermark.
 ```
 
-Blok **LARANGAN** ikut di setiap prompt tanpa kecuali, alasannya di bagian 15.
+Blok **LARANGAN** ikut di setiap prompt tanpa kecuali, alasannya di bagian 17.
 
 **Kelima klip — tiga pembuka, badan, penutup — semuanya pakai bentuk yang
 sama ini.** Tidak ada yang saling menyambung. Satu-satunya referensi gambar
@@ -736,7 +867,7 @@ lain, dan tidak ada yang perlu diunggah selain master image itu.
 
 Ini beda dari model lama, waktu satu video masih berupa rangkaian klip yang
 saling menyambung ("lanjutkan dari shot sebelumnya"). Sejak badan dan penutup
-dipakai bersama oleh tiga pembuka yang berbeda (bagian 2), tidak ada lagi satu
+dipakai bersama oleh tiga pembuka yang berbeda (bagian 3), tidak ada lagi satu
 rangkaian tunggal untuk disambung — ketiganya baru bertemu nanti di editor,
 bukan saat digenerate.
 
@@ -808,9 +939,9 @@ buru-buru, satu buka dengan raut kecewa) dan waktu untuk meninjau satu gambar
 lagi memang tidak ada. Itu soal waktu tinjau, bukan soal biaya — biayanya
 selalu nol.
 
-## 14. Karakter — dikunci atau ikut default
+## 16. Karakter — dikunci atau ikut default
 
-Produk punya kuncinya sendiri (bagian 13). Karakter — model yang mengenakan
+Produk punya kuncinya sendiri (bagian 15). Karakter — model yang mengenakan
 atau memegang produk — tidak wajib punya kunci, tapi kalau punya, caranya
 harus sama persis dengan cara produk dikunci: lewat foto referensi dan
 kalimat, bukan lewat deskripsi teks yang berdiri sendiri.
@@ -819,13 +950,13 @@ kalimat, bukan lewat deskripsi teks yang berdiri sendiri.
 kuat daripada kalimat. Kalau teksnya bilang "agak gemuk" tapi foto yang
 menempel masih yang lama, hasilnya tidak bisa ditebak — bisa tetap ikut foto,
 bisa campur aduk setengah-setengah. Ini kesalahan yang sama dengan kasus warna
-kemasan di bagian 16: teks yang bertentangan dengan foto tidak bisa
+kemasan di bagian 18: teks yang bertentangan dengan foto tidak bisa
 diandalkan. Yang boleh berubah cuma foto acuannya, bukan kalimat di atasnya.
 
 ### Bentuk kunci karakter
 
 Template lengkapnya — karakter digabung dengan produk dan lingkungan dalam
-satu prompt master image — ada di bagian 13. Urutannya mengikuti urutan foto
+satu prompt master image — ada di bagian 15. Urutannya mengikuti urutan foto
 yang diunggah: karakter dulu, baru produk.
 
 Baris "Subjek utama" di prompt video ikut berubah, dari cuma menyebut produk
@@ -840,7 +971,7 @@ karena tidak ada yang dikunci.
 
 Ini keputusan yang paling sering salah kalau diambil buru-buru: bukan "tiap
 iklan boleh beda karakter", dan bukan juga "karakter harus selalu sama". Yang
-menentukan adalah **jenis bukti yang dipakai buat jawab keberatan** (bagian 4).
+menentukan adalah **jenis bukti yang dipakai buat jawab keberatan** (bagian 5).
 
 | Jenis jawaban keberatan | Karakter |
 |---|---|
@@ -873,7 +1004,7 @@ video yang sama tiba-tiba ganti orang di tengah jalan.
 ```
 
 Kalau ketiga iklan pakai karakter yang sama, badan dan penutup tetap bisa
-dibagi seperti biasa (bagian 2) — cuma pembukanya yang beda. Begitu satu iklan
+dibagi seperti biasa (bagian 3) — cuma pembukanya yang beda. Begitu satu iklan
 keluar dari karakter default, dia keluar dari paket berbagi dan jadi paket
 sendiri:
 
@@ -928,7 +1059,7 @@ menyimpannya sebagai aset tetap — dipakai berkali-kali di produk-produk
 berikutnya, bukan menanggung tiga generate video ekstra untuk satu produk yang
 belum tentu jalan.
 
-## 15. Voiceover dan caption di Flow
+## 17. Voiceover dan caption di Flow
 
 Keduanya terdengar seperti satu fitur yang sama, padahal jauh berbeda
 keandalannya. Yang satu dipakai, yang satu dihindari.
@@ -946,7 +1077,7 @@ Ada keuntungan yang tidak langsung kelihatan dari klip tanpa dialog: **model
 menggambar subtitle karena ia mendeteksi ada yang bicara.** Klip bisu menutup
 masalah caption rusak dari akarnya, bukan sekadar menahannya lewat larangan.
 
-### 15.1 Voiceover — kapan dari Flow, kapan dari editor
+### 17.1 Voiceover — kapan dari Flow, kapan dari editor
 
 Ada tiga pilihan, bukan dua. Yang ketiga paling sering terlewat dan biasanya
 paling bagus.
@@ -1028,7 +1159,7 @@ Ambience: <suara latar sesuai set>, pelan.
 Tanpa musik latar.
 ```
 
-### 15.2 Caption — jangan dari Flow
+### 17.2 Caption — jangan dari Flow
 
 Veo mengasosiasikan ucapan dengan tulisan di layar, jadi begitu ia mendeteksi
 ada yang bicara ia "membantu" dengan menggambar subtitle. Masalahnya ia
@@ -1062,7 +1193,7 @@ memakan area tempat caption sungguhan akan diletakkan.
 
 ---
 
-## 16. Alur kerja
+## 18. Alur kerja
 
 ### Yang dikirim
 
@@ -1083,7 +1214,7 @@ dibuang saat merapikan biasanya justru itu.
 Foto karakter tidak wajib. Tanpa itu, model di setiap generate ditentukan AI
 sendiri dan penampilannya boleh berbeda-beda — itu bawaan yang sah, bukan
 kekurangan. Kalau nanti muncul kebutuhan mengunci wajah tertentu (lihat
-bagian 14), foto karakter baru diminta saat itu.
+bagian 16), foto karakter baru diminta saat itu.
 
 ### Kenapa fotonya wajib ikut ke chat, bukan cuma ke Flow
 
@@ -1145,7 +1276,7 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
 2. Terima — sekali, dipakai ketiganya:
 
                    setelan ad set   — gender, umur, minat, jumlah iklan
-                                      siap salin ke Meta (bagian 17.7)
+                                      siap salin ke Meta (bagian 19.7)
                    prompt master    — 2 pilihan set, pilih satu
                    prompt badan     — klip tengah, dipakai bersama
                    prompt penutup   — klip CTA, dipakai bersama
@@ -1162,7 +1293,7 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
 
 3. Di Flow:        unggah foto produk → generate master image → pilih satu
                    generate pratinjau komposisi — cek 3 arah pembuka dulu,
-                                                    gratis, bagian 13
+                                                    gratis, bagian 15
                    pakai master itu sebagai referensi
                    generate 3 pembuka + 1 badan + 1 penutup   = 5 generate video
 
@@ -1177,7 +1308,7 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
 
 6. Di Meta:        1 kampanye Traffic → 1 ad set sasaran lebar → 3 iklan
                    biarkan 3 hari sebelum dinilai
-                   setelan lengkapnya di bagian 17
+                   setelan lengkapnya di bagian 19
 ```
 
 Lima generate video, tiga iklan yang beda di tempat yang menentukan.
@@ -1190,14 +1321,14 @@ tahap perakitan — dengan alat apa pun yang dipakai.
 | Hal | Ketentuan |
 |---|---|
 | **Caption** | Diketik sendiri, bukan dari Flow. Potong di batas frasa, bukan di hitungan kata — "merawat kulit kusam agar tampak" lalu "lebih cerah" terbaca patah |
-| **Safe area** | Beri jarak dari bawah, jangan dipatok satu angka. Meta, Shopee, dan TikTok menaruh UI di ketinggian berbeda, dan caption yang tertutup tombol sama saja dengan tidak ada. Ruang untuk menaruhnya sudah disiapkan sejak prompt — lihat bagian 13 |
+| **Safe area** | Beri jarak dari bawah, jangan dipatok satu angka. Meta, Shopee, dan TikTok menaruh UI di ketinggian berbeda, dan caption yang tertutup tombol sama saja dengan tidak ada. Ruang untuk menaruhnya sudah disiapkan sejak prompt — lihat bagian 15 |
 | **VO sambungan** | Kalau VO dari editor, satu rekaman untuk seluruh video — bukan per klip |
 | **Musik** | Volume di bawah VO. Kalau VO dari Flow, musik ditempel di editor karena promptnya sudah minta tanpa musik |
 | **Durasi akhir** | Sesuai rencana. Video yang terpotong di detik terakhir kehilangan justru CTA-nya |
 
 ---
 
-## 17. Setelan kampanye
+## 19. Setelan kampanye
 
 Rancangan creative tidak ada gunanya kalau kampanyenya disusun sehingga
 hasilnya tidak terbaca. Bagian ini urusan operasional, bukan kreatif — tapi
@@ -1231,7 +1362,7 @@ Nama menu di Meta berubah-ubah. Yang tidak berubah logikanya.
 milik sendiri. Ini juga alasan creative harus menyaring sendiri: tidak ada
 sinyal lain yang mengerjakannya.
 
-### 17.1 Berapa iklan yang muat dalam budget
+### 19.1 Berapa iklan yang muat dalam budget
 
 Hitungannya satu langkah:
 
@@ -1265,7 +1396,7 @@ sudah kalah.
 Di kampanye konversi itu lima puluh pembelian dan berat sekali. Di sini
 eventnya klik, dan dua ratus klik sehari melewatinya di hari pertama.
 
-### 17.1b Peringatan yang menempel pada CPC rendah
+### 19.1b Peringatan yang menempel pada CPC rendah
 
 CPC yang sangat rendah bukan selalu kabar baik. Pada kampanye traffic, klik
 termurah biasanya datang dari penempatan bermutu paling rendah — dan sebagian
@@ -1276,7 +1407,7 @@ Semakin murah CPC-nya, semakin wajib **breakdown per placement dibuka**
 Rp 500 yang jadi order, dan laporan Meta tidak akan pernah memberi tahu
 bedanya.
 
-### 17.2 Broad atau pakai minat — ini yang paling tidak pasti
+### 19.2 Broad atau pakai minat — ini yang paling tidak pasti
 
 Nasihat umum: biarkan broad, algoritmanya lebih pintar. Itu benar, **tapi
 asumsinya algoritma punya sinyal konversi.**
@@ -1301,7 +1432,7 @@ Yang dibandingkan **komisi ÷ spend**, bukan CPC. Kemungkinan besar yang pakai
 minat CPC-nya lebih mahal tapi lebih untung — dan itu cuma terlihat dari
 dashboard Shopee, tidak pernah dari Meta.
 
-### 17.3 Audience Network — klik murah yang sering kosong
+### 19.3 Audience Network — klik murah yang sering kosong
 
 Jebakan khusus kampanye traffic.
 
@@ -1315,7 +1446,7 @@ Yang dilakukan: jalankan placement otomatis dulu, lalu **buka breakdown per
 placement**. Kalau Audience Network memakan porsi besar sementara order tidak
 bergerak, matikan. Reels dan Stories yang paling cocok untuk 9:16.
 
-### 17.4 Sampai mana boleh menyempit
+### 19.4 Sampai mana boleh menyempit
 
 Sasaran dibiarkan lebar (bagian 1.3), tapi dua penyempitan ini tidak
 menurunkan nilai per klik:
@@ -1328,7 +1459,7 @@ Yang **jangan** disempitkan: minat produk. "Suka fashion" mengeluarkan orang
 yang tidak mengikuti akun fashion tapi tetap belanja baju di Shopee — dan
 uang orang itu sama saja.
 
-### 17.5 Yang jangan dilakukan
+### 19.5 Yang jangan dilakukan
 
 - **Jangan mengedit ad set saat masih fase belajar.** Mengganti budget, umur,
   atau creative akan me-reset, dan hitungannya kembali dari nol
@@ -1337,7 +1468,7 @@ uang orang itu sama saja.
 - **Jangan memasang bid cap di awal.** Berapa CPC yang wajar belum diketahui;
   biarkan otomatis sampai punya patokan sendiri
 
-### 17.6 Tugas minggu pertama bukan untung
+### 19.6 Tugas minggu pertama bukan untung
 
 Minggu pertama dipakai untuk mendapat dua angka, dan cuma dua:
 
@@ -1383,7 +1514,7 @@ milik orang lain.
 Biaya untuk tahu: budget harian × tujuh. Itu harga pendidikan yang murah untuk
 pertanyaan yang menentukan semuanya.
 
-### 17.7 Yang diberikan setiap intake
+### 19.7 Yang diberikan setiap intake
 
 Sebagian besar setelan di atas tetap dan tidak perlu dipikirkan lagi. **Tiga
 saja yang berubah mengikuti produk**, dan ketiganya ikut diserahkan bersama
@@ -1437,7 +1568,7 @@ lalu dicocokkan ke tabel di 17.1. Sebelum ada CPC sendiri, pakai tiga.
 
 ---
 
-## 18. Gerbang komersial — empat pertanyaan
+## 20. Gerbang komersial — empat pertanyaan
 
 Sebelum apa pun diserahkan, creative harus bisa menjawab empat ini. Kalau ada
 satu saja yang tidak terjawab, iklannya belum siap — seberapa pun bagus
@@ -1494,7 +1625,7 @@ sering pada creative buatan AI: enak dilihat, komposisinya rapi, cahayanya bagus
 
 ---
 
-## 19. Catatan jujur
+## 21. Catatan jujur
 
 **Yang belum ada:** catatan hasil. Tanpa mencatat varian mana yang menang,
 seluruh keputusan di dokumen ini tetap tebakan berpengalaman — bukan tebakan
