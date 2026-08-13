@@ -112,12 +112,15 @@ menyambungkan titik — ketemu iklannya di feed, lalu ketemu lagi kontennya
 waktu scroll TikTok, dan sadar itu orang yang sama. Yang beda cuma
 formatnya, bukan siapa yang tampil.
 
-**Produksinya tetap terpisah**, meskipun identitasnya sama. Karakter, produk,
-dan set yang dikunci lewat master image (bagian 15) dipakai sebagai acuan di
-dua-duanya. Tapi klip videonya diproduksi masing-masing, karena temponya
-berlawanan: try-on/haul organik naratif dan lebih panjang, ads padat delapan
-sampai sepuluh detik. Memaksa satu klip melayani dua tempo yang berlawanan
-cuma merusak salah satunya.
+**Produksinya sebagian dibagi.** Karakter, produk, dan set yang dikunci lewat
+master image (bagian 15) dipakai sebagai acuan di dua-duanya. Klipnya juga
+sebagian bisa dipakai bersama — tapi cuma satu arah: klip organik yang
+panjang boleh dipangkas untuk iklan, tidak sebaliknya. Tempo ditentukan
+potongan di editor, bukan panjang klipnya.
+
+Yang tidak dibagi: **klip pembuka iklan.** Klip organik sengaja dirancang
+membangun, sehingga tiga detik pertamanya justru bagian paling lemah — persis
+kebalikan dari yang dibutuhkan pembuka iklan. Rinciannya di bagian 13.
 
 ```
 1 karakter terkunci (bagian 16)
@@ -697,18 +700,29 @@ iklan. Waktunya dipakai buat membangun narasi, bukan cuma jualan cepat.
 | Kesalahan umum | "Stop pakai kaos oversize kayak gini." | Risiko, sinyal penguat hook (bagian 8) |
 | Kondisi spesifik | "Buat yang badannya kurus dan susah cari fit." | Menyempit ke satu pembeli, bukan bicara ke semua orang |
 
-### Jadi berapa klip, dan gimana bentuk prompt-nya
+### Tiga klip, bukan empat — jumlah klip ditentukan pergantian framing
 
-Empat klip, semuanya independen, semuanya rujuk ke master image yang sama
-(bagian 15) — bukan format testing seperti ads, jadi tidak ada pembuka yang
-dibagi-bagi:
+**Klip bukan potongan.** Satu klip sepuluh detik boleh dipotong jadi lima
+potongan dua detik di editor; tempo cepat tetap didapat tanpa membayar lima
+generate. Jadi yang menentukan jumlah klip adalah **berapa kali framing-nya
+berganti**, bukan berapa cepat potongannya.
+
+Empat blok naskah tidak berarti empat klip:
 
 ```
-KLIP 1  Hook          ~3 detik   produk sudah kelihatan
-KLIP 2  Reveal+Motion  ~6 detik   berputar/jalan, bahan bergerak natural
-KLIP 3  Detail         ~4 detik   close-up bahan, jahitan, tekstur
-KLIP 4  Fit info + CTA ~6 detik   info ukuran, lalu ajakan
+KLIP A  ~10 detik  hook → reveal → motion   satu gerakan menyambung
+KLIP B  ~4 detik   detail close-up          framing beda, layak berdiri sendiri
+KLIP C  ~10 detik  fit info + CTA           sama-sama menghadap kamera
 ```
+
+Hook dan reveal digabung karena memang satu gerakan berkelanjutan — berdiri,
+lalu berputar atau berjalan. Menyambungnya justru lebih wajar daripada
+dipotong. Detail berdiri sendiri karena close-up adalah framing yang jauh
+berbeda.
+
+Bisa dipaksa jadi dua klip, tapi tidak disarankan: menyuruh satu klip
+melakukan "close-up kain → tarik mundur → pose akhir" itu berat, dan hasilnya
+gampang belepotan.
 
 Bentuk prompt-nya sama seperti bagian 15 (bentuk prompt video) — arah
 visual, subjek utama, latar, blok AUDIO, blok LARANGAN. Yang beda cuma
@@ -719,12 +733,96 @@ menentukan.** Sebutkan ukuran yang dipakai dan catatan sizing kalau ada
 ("kalau bahu lebar, naik satu size") — ini yang membedakan penonton yang
 cuma nge-like dari yang jadi nanya link.
 
-### VO tetap ikut aturan bagian 17
+### Satu set footage, beberapa post
 
-Empat klip di atas tetap empat generate terpisah, jadi risiko warna suara
-beda-beda tetap berlaku sama persis kayak di ads. VO default tetap di
-editor; kalau mau karakter kelihatan bicara ke kamera (blok fit info),
-pakai mode **silent** (bagian 17.1) supaya VO editor tidak terbaca dubbing.
+Yang membuat organik mahal bukan jumlah klip, melainkan asumsi **satu set
+klip sama dengan satu post.**
+
+Organik butuh volume — akun terbangun dari posting rutin, bukan dari satu
+video bagus. Tapi kalau tiap post digenerate baru, tiap post memakan hampir
+sebanyak satu set tes iklan penuh. Itu terbalik: yang paling butuh volume
+justru yang paling mahal per satuan.
+
+Tiga klip yang sama bisa dipotong ulang jadi dua sampai tiga post berbeda —
+hook diganti (ambil momen lain dari Klip A), urutan detail digeser, caption
+dan CTA berbeda. Semuanya kerja editor, gratis.
+
+```
+3 generate → 1 post    kalau tiap post digenerate baru
+3 generate → 2-3 post  kalau di-recut
+```
+
+### VO dari editor — di sini alasannya lebih kuat daripada di iklan
+
+Aturannya sama dengan bagian 17, tapi sebabnya berbeda dan lebih menentukan.
+
+Di iklan, VO harus dari editor karena badan dan penutup dipakai bersama tiga
+naskah yang berbeda. Di organik tidak ada struktur berbagi itu — tapi ada
+alasan yang lebih mendasar: **suara adalah bagian dari identitas.**
+
+Tujuan jalur organik adalah dikenali (bagian 2). Wajah, warna rambut, dan
+tekstur rambut sudah dikunci supaya orang langsung tahu ini akun siapa. Flow
+memberi warna suara yang berbeda tiap generate — kalau VO diambil dari situ,
+wajahnya konsisten tapi suaranya berganti tiap post, dan itu merusak justru
+di sinyal yang paling cepat dikenali. Satu rekaman suara yang dipakai di
+semua post adalah aset, sama seperti karakter yang terkunci.
+
+Dua akibat teknis ikut menguatkan:
+
+- **Tiga klip berarti tiga warna suara dalam satu video** kalau tiap klip
+  diberi dialog Flow — persis masalah "seperti dua video disambung paksa".
+- **VO yang menyatu ke video mematikan recut.** Kalau narasinya ikut terbakar,
+  dua-tiga post hasil recut akan bernarasi identik; hook tidak bisa diganti,
+  dan tuas terbesar organik hilang.
+
+Kalau yang dikejar kesan "orangnya benar-benar bicara", pakai mode **silent**
+(bagian 17.1): karakter tampil dan ekspresif tapi mulutnya tidak bergerak.
+VO editor ditempel di atasnya tanpa terbaca dubbing, dan satu suara yang sama
+tetap dipakai di semua post.
+
+### Klip yang dipakai dua jalur sekaligus
+
+Flow menagih per generate, bukan per detik — jadi menggenerate klip pendek
+itu pemborosan. Prinsipnya: **generate panjang, potong pendek.** Klip organik
+yang panjang bisa dipangkas untuk iklan; klip iklan yang pendek tidak bisa
+dipanjangkan untuk organik. Arahnya satu, tidak bolak-balik.
+
+Tapi tidak semua bagian layak dibagi:
+
+| Bagian | Dibagi? | Sebabnya |
+|---|---|---|
+| Badan iklan | **Ya** — potong bagian tengah Klip A | Tidak menentukan CPC, dipotong dari mana pun sama saja |
+| Penutup iklan | **Ya** — potong tiga detik akhir Klip C | Sama, tidak menentukan performa |
+| Pembuka iklan | **Tidak** — generate sendiri | Butuh hantaman di depan; klip organik sengaja dirancang membangun, jadi tiga detik pertamanya justru bagian paling lemah |
+
+Ini turunan langsung dari bagian 1.1: hook adalah tuas keuntungan. Menghemat
+satu generate dengan mengorbankan kekuatan hook berarti menukar yang murah
+dengan yang mahal — generate dibayar sekali, CPC yang naik dibayar sepanjang
+kampanye berjalan.
+
+```
+KLIP A  ~10 dtk  → organik klip 1 utuh
+                 → iklan: badan (potong bagian tengah)
+KLIP B  ~4 dtk   → organik klip 2
+KLIP C  ~10 dtk  → organik klip 3 utuh
+                 → iklan: penutup (potong tiga detik akhir)
+PEMBUKA A, B, C  ~3 dtk  → iklan saja, digenerate sendiri
+
+6 generate  →  1 post organik + 3 iklan siap uji
+```
+
+Bandingkan dengan memproduksi keduanya terpisah: delapan generate untuk
+keluaran yang sama. Kualitas organik tidak berkurang sama sekali — Klip A
+dan C tetap digenerate untuk organik, dengan tempo membangun yang memang
+dibutuhkan; iklan cuma memanen bagian yang tidak butuh impact di depan.
+
+**Syarat yang membuat ini jalan: penataan disamakan di seluruh set satu
+produk.** Sejak penataan rambut dan riasan dibebaskan (bagian 16), tiap
+generate bisa keluar berbeda. Untuk organik itu tidak masalah karena klipnya
+menyambung sendiri — tapi begitu Pembuka B disambung ke badan hasil potongan
+Klip A, rambutnya melompat di tengah iklan. Jadi sebutkan penataannya
+eksplisit dan sama persis di keenam prompt; identitas tetap terkunci,
+penataannya ditentukan sekali di awal.
 
 ### Adaptasi ringan per platform
 
@@ -745,9 +843,12 @@ disamakan dengan aturan CTA-mekanisme di bagian 9 yang sudah teruji.
 
 - [ ] Bentuknya sama kayak post sebelumnya — pengulangan itu tujuannya
 - [ ] Karakter sama dengan yang dipakai di iklan (bagian 2)
+- [ ] Penataan rambut dan riasan disebut eksplisit, sama persis di seluruh
+      set — termasuk prompt pembuka iklan yang digenerate sendiri
 - [ ] Info ukuran/sizing disebutkan, bukan cuma ditunjukkan
 - [ ] Hook di bawah 3 detik, produk sudah kelihatan
 - [ ] Blok LARANGAN dan AUDIO ada di tiap klip (bagian 15, 17)
+- [ ] VO direncanakan dari editor, satu suara yang sama seperti post sebelumnya
 - [ ] CTA satu aksi saja, sesuai mekanisme platform tujuan
 
 ---
@@ -1361,6 +1462,33 @@ Bertanya balik untuk hal yang bisa ditebak dengan aman cuma memperlambat.
 ```
 
 Lima generate video, tiga iklan yang beda di tempat yang menentukan.
+
+### Kalau sekalian mau post organiknya
+
+Alur di atas iklan saja. Kalau produk yang sama juga mau jadi post organik,
+yang berubah cuma **panjang dua klip yang dipakai bersama** — badan dan
+penutup digenerate sepanjang versi organiknya, lalu dipangkas untuk iklan
+(bagian 13).
+
+```
+3. Di Flow:   generate KLIP A ~10 dtk  hook → reveal → motion
+                       KLIP B ~4 dtk   detail close-up
+                       KLIP C ~10 dtk  fit info + CTA
+                       3 pembuka ~3 dtk masing-masing   = 6 generate video
+
+5. Di editor: ORGANIK  Klip A + B + C                  → 1 post ~20 detik
+              IKLAN 1  pembuka A + tengah Klip A + akhir Klip C
+              IKLAN 2  pembuka B + tengah Klip A + akhir Klip C
+              IKLAN 3  pembuka C + tengah Klip A + akhir Klip C
+```
+
+Enam generate untuk satu post organik plus tiga iklan — dibanding delapan
+kalau keduanya diproduksi terpisah. Klip B dipakai organik saja; boleh
+disisipkan ke iklan sebagai potongan detail cepat kalau memang pas.
+
+**Penataan rambut dan riasan disebut sama persis di keenam prompt.** Ini
+syaratnya, bukan saran: pembuka digenerate sendiri, jadi kalau penataannya
+tidak dipatok, rambutnya melompat begitu pembuka disambung ke badan.
 
 ### Yang wajib ditangani editor
 
