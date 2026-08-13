@@ -930,6 +930,9 @@ bukan penataannya.
 Foto produk untuk iklan: <nama produk>.
 Pertahankan bentuk, warna, dan seluruh detail kemasan persis seperti gambar
 referensi yang diunggah. Jangan mengubah tulisan pada kemasan.
+
+<blok penengah — cuma kalau produknya dikenakan, lihat di bawah>
+
 Latar: <world>. Pencahayaan: <lighting>. Kamera: <camera>.
 Wardrobe pendukung: <wardrobe>. Aksi: <action>.
 Kualitas foto komersial, fokus tajam pada produk, latar sedikit kabur.
@@ -942,6 +945,47 @@ Rasio 9:16 vertikal.
 Kalimat pengunci produk itu wajib. Tanpa itu model kerap "memperbaiki" kemasan
 menurut seleranya, dan penonton menerima barang yang berbeda dari yang
 diiklankan.
+
+### Blok penengah — kalau produknya dikenakan karakter
+
+Dua foto referensi yang sama-sama kuat bisa saling tarik. Foto karakter datang
+lengkap dengan pakaiannya sendiri, dan model bisa memenangkan pakaian itu
+alih-alih produk yang dijual — pernah terjadi, dan yang keluar celana cargo
+padahal produknya wide-leg polos.
+
+Kalau produknya barang yang dikenakan — baju, celana, hijab, sepatu — sisipkan
+blok ini setelah kunci produk:
+
+```
+Karakter mengenakan produk ini. Abaikan pakaian dan gaya rambut yang tampak
+pada foto referensi karakter — foto itu dipakai untuk wajah dan identitas,
+bukan untuk pakaian. Bagian tubuh yang tertutup produk mengikuti foto
+referensi produk sepenuhnya.
+```
+
+Kalimat kedua yang paling menentukan: **menyebutkan foto karakter itu dipakai
+untuk apa.** Tanpa itu model memperlakukan seluruh isi foto sebagai hal yang
+harus dipertahankan, termasuk bagian yang justru harus diganti produk.
+
+### Kalau produknya menutup atribut yang terkunci
+
+Satu kasus butuh baris tambahan, dan cuma satu: **hijab.**
+
+Rambut ada di daftar identitas yang dikunci (bagian 16), sementara hijab
+menutupinya sepenuhnya. Dua instruksi itu saling tarik — model bisa "berusaha
+menurut" pada kunci identitas dengan menampilkan rambut menyembul, supaya
+warnanya terlihat tidak berubah, dan hasilnya hijab terpakai setengah-setengah.
+
+```
+Rambut tertutup sepenuhnya oleh hijab, tidak ada rambut yang terlihat.
+```
+
+Produk lain tidak punya masalah ini. Celana menutupi kaki, tapi kaki memang
+tidak ada di daftar terkunci. **Rambut satu-satunya atribut terkunci yang bisa
+tertutup produk.**
+
+Kunci identitas sendiri tidak perlu dilonggarkan: kuncinya berbunyi "jangan
+diubah", bukan "harus selalu terlihat". Tertutup bukan berubah.
 
 ### Bentuk prompt video
 
@@ -1107,11 +1151,17 @@ justru mau diperlihatkan.
 
 Template lengkapnya — karakter digabung dengan produk dan lingkungan dalam
 satu prompt master image — ada di bagian 15. Urutannya mengikuti urutan foto
-yang diunggah: karakter dulu, baru produk.
+yang diunggah: karakter dulu, baru produk. Kalau produknya barang yang
+dikenakan, blok penengah di bagian 15 ikut disisipkan supaya pakaian pada
+foto karakter tidak mengalahkan produk yang dijual.
 
-Baris "Subjek utama" di prompt video ikut berubah, dari cuma menyebut produk
-jadi menyebut dua-duanya: *"Subjek utama: `<karakter>` mengenakan `<produk>`,
-tampil identik dengan gambar referensi karakter dan produk."*
+Baris "Subjek utama" di prompt video ikut berubah, dan pembedaannya dijaga di
+situ juga — identik cuma berlaku untuk produk:
+
+> *Subjek utama: `<karakter>` mengenakan `<produk>`. Produk tampil identik
+> dengan gambar referensi. Identitas karakter — wajah, warna dan tekstur
+> rambut, bentuk tubuh — tetap sama di setiap shot; penataan rambut dan
+> riasan boleh menyesuaikan.*
 
 Karakter tidak wajib. Tanpa referensi, model tetap boleh muncul di arahan
 visual seperti biasa — cuma penampilannya tidak dijamin sama antar generate,
@@ -1785,6 +1835,9 @@ sering pada creative buatan AI: enak dilihat, komposisinya rapi, cahayanya bagus
 - [ ] Prompt master memuat kalimat pengunci produk
 - [ ] Kalau pakai karakter: kalimat penguncinya ada, dan foto yang menempel
       benar-benar cocok dengan kebutuhan iklan itu — bukan ditambal teks
+- [ ] Kalau produknya dikenakan: blok penengah ada, supaya pakaian di foto
+      karakter tidak mengalahkan produk (bagian 15)
+- [ ] Kalau produknya hijab: baris "rambut tertutup sepenuhnya" ikut
 - [ ] Kalau satu iklan pakai karakter berbeda: pembuka, badan, dan penutupnya
       ikut satu paket yang sama, tidak tercampur dengan iklan lain
 - [ ] Prompt meminta ruang kosong atas dan bawah disisakan

@@ -155,6 +155,36 @@ function styleContract({ product = {}, scene, sceneId, character } = {}) {
 }
 
 /*
+ * Penengah antara dua foto referensi yang sama-sama kuat.
+ *
+ * Foto karakter datang lengkap dengan pakaiannya sendiri, dan model bisa
+ * memenangkan pakaian itu alih-alih produk yang dijual — pernah terjadi, dan
+ * yang keluar celana cargo padahal produknya wide-leg polos. Menyebutkan
+ * foto karakter dipakai UNTUK APA adalah bagian yang menentukan: tanpa itu
+ * model memperlakukan seluruh isi foto sebagai hal yang harus dipertahankan,
+ * termasuk bagian yang justru harus diganti produk.
+ *
+ * Hijab dapat baris tambahan karena satu-satunya produk yang menutup atribut
+ * yang justru dikunci. Rambut ada di daftar identitas, dan model bisa
+ * "berusaha menurut" pada kunci itu dengan menampilkan rambut menyembul
+ * supaya warnanya terlihat tidak berubah. Produk lain tidak punya masalah
+ * ini: celana menutupi kaki, tapi kaki memang tidak dikunci.
+ *
+ * Kunci identitasnya sendiri tidak dilonggarkan — kuncinya berbunyi "jangan
+ * diubah", bukan "harus selalu terlihat". Tertutup bukan berubah.
+ */
+const WORN_TIE_BREAKER = "Karakter mengenakan produk ini. Abaikan pakaian dan gaya rambut yang tampak pada foto referensi karakter — foto itu dipakai untuk wajah dan identitas, bukan untuk pakaian. Bagian tubuh yang tertutup produk mengikuti foto referensi produk sepenuhnya.";
+const HIJAB_LINE = "Rambut tertutup sepenuhnya oleh hijab, tidak ada rambut yang terlihat.";
+const HIJAB_PATTERN = /\b(hijab|jilbab|kerudung|khimar|pashmina|bergo)\b/i;
+
+function wornTieBreaker({ product = {}, character } = {}) {
+  if (!character || !character.label) return "";
+  if (product.worn === false) return "";
+  const teks = `${product.title || ""} ${product.category || ""}`;
+  return HIJAB_PATTERN.test(teks) ? `${WORN_TIE_BREAKER} ${HIJAB_LINE}` : WORN_TIE_BREAKER;
+}
+
+/*
  * Prompt master image dibuat lebih dulu supaya kesalahan komposisi tertangkap
  * saat masih murah. Klip video kemudian berangkat dari satu gambar yang sudah
  * benar, bukan mengarang dunianya masing-masing dari foto produk berlatar
@@ -162,6 +192,8 @@ function styleContract({ product = {}, scene, sceneId, character } = {}) {
  *
  * Kunci karakter ditulis sebelum kunci produk supaya urutannya sama dengan
  * urutan foto yang diunggah: referensi karakter dulu, baru referensi produk.
+ * Penengahnya menyusul setelah keduanya, karena baru bisa menengahi setelah
+ * dua-duanya disebut.
  */
 function buildMasterImagePrompt({ product = {}, scene, sceneId, variant = {}, character } = {}) {
   const dipakai = resolveScene({ product, scene, sceneId });
@@ -174,6 +206,7 @@ function buildMasterImagePrompt({ product = {}, scene, sceneId, variant = {}, ch
       karakterLock,
       `Foto produk untuk iklan: ${subject}.`,
       "Pertahankan bentuk, warna, dan seluruh detail kemasan persis seperti gambar referensi yang diunggah. Jangan mengubah tulisan pada kemasan.",
+      wornTieBreaker({ product, character }),
       describeScene(dipakai),
       variant.visualHint ? `Nuansa yang diinginkan: ${variant.visualHint}` : "",
       "Kualitas foto komersial, fokus tajam pada produk, latar sedikit kabur.",
@@ -506,7 +539,10 @@ module.exports = {
   planShots,
   splitDurations,
   styleContract,
+  wornTieBreaker,
+  HIJAB_LINE,
   NEGATIVE_SPACE,
+  WORN_TIE_BREAKER,
   TEXT_BAN,
   WORDS_PER_SECOND
 };

@@ -333,6 +333,41 @@ for (const shot of rencanaBerkarakter.shots.filter(item => item.kind === "ai")) 
 const pilihanBerkarakter = masterImageOptions({ product: { title: "Serum Glow", category: "beauty" }, variant, count: 2, character: karakter });
 assert.ok(pilihanBerkarakter.every(item => item.prompt.includes("Foto referensi karakter: Model A")));
 
+/*
+ * Penengah antara dua foto referensi. Foto karakter datang lengkap dengan
+ * pakaiannya sendiri, dan pernah memenangkan pakaian itu atas produk yang
+ * dijual — celana cargo keluar padahal produknya wide-leg polos.
+ */
+const { wornTieBreaker, HIJAB_LINE, WORN_TIE_BREAKER } = require("../shot-planner");
+
+// Tanpa karakter tidak ada yang perlu ditengahi — cuma satu foto referensi.
+assert.equal(wornTieBreaker({ product: { title: "Kemeja" } }), "");
+// Produk yang tidak dikenakan dilewati lewat penanda eksplisit.
+assert.equal(wornTieBreaker({ product: { title: "Panci", worn: false }, character: karakter }), "");
+
+// Yang menentukan: menyebutkan foto karakter dipakai untuk apa.
+const penengah = wornTieBreaker({ product: { title: "Kemeja Oversize" }, character: karakter });
+assert.ok(penengah.includes("dipakai untuk wajah dan identitas, bukan untuk pakaian"));
+assert.equal(penengah, WORN_TIE_BREAKER, "produk biasa cukup penengah dasar");
+
+/*
+ * Hijab satu-satunya produk yang menutup atribut yang justru dikunci. Tanpa
+ * baris tambahan, model bisa menampilkan rambut menyembul supaya kunci warna
+ * rambut terlihat dipatuhi — dan hijabnya jadi terpakai setengah-setengah.
+ */
+for (const judul of ["Hijab Segiempat Paris", "Jilbab Instan Katun", "Kerudung Pashmina Ceruty", "Bergo Maryam"]) {
+  const hasil = wornTieBreaker({ product: { title: judul }, character: karakter });
+  assert.ok(hasil.includes(HIJAB_LINE), `"${judul}" harus dapat baris rambut tertutup`);
+}
+// Produk lain tidak boleh kebagian baris itu — kaki memang tidak dikunci.
+assert.ok(!wornTieBreaker({ product: { title: "Celana Kulot Jeans" }, character: karakter }).includes(HIJAB_LINE));
+
+// Penengah ikut ke prompt master image, setelah kunci produk supaya bisa menengahi.
+const masterHijab = buildMasterImagePrompt({ product: { title: "Hijab Segiempat Paris", category: "fashion" }, variant, character: karakter });
+assert.ok(masterHijab.prompt.includes(WORN_TIE_BREAKER));
+assert.ok(masterHijab.prompt.includes(HIJAB_LINE));
+assert.ok(masterHijab.prompt.indexOf("Jangan mengubah tulisan pada kemasan") < masterHijab.prompt.indexOf(WORN_TIE_BREAKER), "penengah datang setelah kedua kunci disebut");
+
 console.log("shot planner character lock tests passed");
 
 /*
