@@ -101,7 +101,7 @@ butuh disiplin yang berbeda — jangan dicampur.
 | | Jalur organik | Jalur Meta Ads |
 |---|---|---|
 | Tujuan | Dikenali. Begitu orang lihat, langsung tahu ini konten siapa | Convert. Tiap produk dicari sudut yang paling laku |
-| Format | **Terkunci** — sama tiap post: try-on/haul + PAS (bagian 13) | **Bervariasi** — delapan sudut kreatif (bagian 12), diuji lewat tiga pembuka (bagian 3) |
+| Format | **Terkunci** — bentuk sama tiap post (bagian 13) | **Bervariasi** — delapan sudut kreatif (bagian 12), diuji lewat tiga pembuka (bagian 3) |
 | Yang membangun identitas | Pengulangan format, bukan cuma wajah | Tidak relevan — tiap iklan dinilai sendiri, bukan soal dikenali |
 | Karakter | Terkunci (bagian 16), dipakai konsisten | Sama — karakter yang sama dipakai di sini juga |
 | Platform | TikTok, IG Reels, FB Reels | Meta Ads (Traffic → Shopee, bagian 1) |
@@ -120,14 +120,14 @@ potongan di editor, bukan panjang klipnya.
 
 Yang tidak dibagi: **klip pembuka iklan.** Klip organik sengaja dirancang
 membangun, sehingga tiga detik pertamanya justru bagian paling lemah — persis
-kebalikan dari yang dibutuhkan pembuka iklan. Rinciannya di bagian 13.
+kebalikan dari yang dibutuhkan pembuka iklan. Rinciannya di bagian 13b.
 
 ```
 1 karakter terkunci (bagian 16)
       ↓
 Master image dibuat sekali → acuan visual untuk dua jalur (bagian 15)
       ↓
-      ├── Jalur organik   →  format try-on/haul, bagian 13
+      ├── Jalur organik   →  format terkunci, bagian 13
       └── Jalur Meta Ads  →  delapan sudut kreatif, bagian 12,
                               diuji lewat struktur bagian 3
 ```
@@ -579,6 +579,40 @@ jari. Ambience ini masuk ke blok AUDIO prompt video (bagian 17) dan tidak
 menambah biaya apa pun — klip dengan suara ruangan yang cocok terasa direkam,
 klip yang senyap total terasa dibuat.
 
+### Set yang ramai bikin latar rusak — **teruji**
+
+Kriteria memilih set di atas semuanya soal estetika: mana yang cocok dengan
+produknya, mana yang belum dipakai. Ada satu kriteria lagi yang cuma muncul
+setelah setnya benar-benar digenerate jadi video, dan tidak kelihatan sama
+sekali pada gambar diam.
+
+**Struktur tipis yang berulang adalah tempat model video paling sering
+gagal.** Kaki kursi, jeruji sandaran, kaki meja, baju gantung — semuanya
+berkedip, menyatu, atau berubah bentuk antar frame. Pada gambar diam tidak
+kelihatan; pada video langsung terbaca rusak.
+
+| Rawan rusak | Aman |
+|---|---|
+| kafe-siang — kursi berjeruji, meja, ruang dalam | studio-polos — latar polos tanpa properti |
+| lemari-pagi — baju gantung berulang | jalan-kota — dinding beton polos |
+| ruang-tamu — banyak perabot | netral-terang — permukaan polos |
+| kamar-cermin — pantulan cermin | rooftop-sore — langit lapang |
+
+**Yang menyelesaikan masalahnya bukan memburamkan latar, melainkan
+menyederhanakannya.** Ini kebalikan dari dugaan awal dan sudah dibuktikan
+sekali: generate pertama memakai set kafe dan latarnya rusak; generate kedua
+memakai dinding polos dengan satu tanaman dan satu kursi, latarnya tetap cukup
+tajam tapi rusaknya hilang. Ketajaman latar tidak perlu dikorbankan — cukup
+kurangi jumlah objeknya.
+
+Kedalaman ruang ikut berpengaruh dengan arah yang sama: subjek yang berdiri
+dekat dinding menyisakan lebih sedikit yang bisa rusak daripada ruangan yang
+memanjang jauh ke belakang.
+
+**Berlaku untuk video, bukan untuk master image.** Gambar diam tidak punya
+antar-frame, jadi set seramai apa pun aman di tahap master. Yang perlu dipilih
+hati-hati adalah set untuk klip yang akan bergerak.
+
 ---
 
 ## 12. Arah visual per sudut
@@ -589,6 +623,26 @@ katalog, dan tiga detik pertama terbuang.
 
 Arahan ditulis sebagai kejadian yang bisa difilmkan. *"Tangan menyingkirkan
 tumpukan botol"* bisa dieksekusi model video; *"tampilkan kesan praktis"* tidak.
+
+### Gestur dinamai, bukan disifati — **teruji**
+
+Aturan yang sama berlaku satu tingkat lebih dalam, dan ini baru ketahuan
+setelah hasilnya terasa datar: **kata sifat menghasilkan netral, nama gerakan
+menghasilkan gerakan.**
+
+```
+DATAR    "berpose santai", "terlihat ceria", "ekspresif"
+JADI     "membuat tanda peace", "merapikan rambut", "memiringkan kepala",
+         "memindahkan berat badan dari satu kaki ke kaki lain"
+```
+
+Sudah dibuktikan sekali: prompt yang menulis "berpose santai" menghasilkan
+berdiri netral; prompt yang menyebut tanda peace dan merapikan rambut
+menghasilkan persis kedua gerakan itu.
+
+**Ini paling menentukan ketika wajah tidak terlihat** — pada format yang
+menutupi wajah (bagian 13a), semua ekspresi harus lewat bahasa tubuh, dan
+bahasa tubuh cuma muncul kalau gerakannya disebut satu per satu.
 
 ### problem_solution
 
@@ -669,13 +723,137 @@ tumpukan botol"* bisa dieksekusi model video; *"tampilkan kesan praktis"* tidak.
 
 ---
 
-## 13. Format try-on/haul untuk organik
+## 13. Format organik
 
-Ini format terkunci untuk jalur organik (bagian 2) — dipakai sama persis
+Format di sini terkunci untuk jalur organik (bagian 2) — dipakai sama persis
 tiap post, karena pengulangan bentuknya sendiri yang membangun pengenalan.
 Berbeda dari bagian 12: di situ sudutnya sengaja bervariasi untuk mencari
 yang paling convert, di sini bentuknya sengaja tetap supaya penonton bisa
 langsung mengenali "ini konten akun ini" begitu lihat beberapa detik pertama.
+
+Ada dua format, dan pilihannya bergantung pada di mana daya tarik produknya:
+
+| | Mirror selfie 10 detik | Try-on/haul 20 detik |
+|---|---|---|
+| Biaya | 1 generate | 3 generate |
+| Cocok untuk | Produk yang menarik seketika secara visual | Produk yang nilainya butuh dijelaskan |
+| Suara | Musik saja, tanpa VO | VO dari editor |
+| Info ukuran | Seluruhnya di caption | Diucapkan di video |
+| Status | Sudah dipakai produksi | Belum diuji produksi |
+
+**Mulai dari mirror selfie.** Sepertiga biayanya, dan sudah terbukti jalan.
+Try-on/haul dipakai kalau produknya butuh penjelasan yang tidak muat di
+caption.
+
+---
+
+## 13a. Mirror selfie 10 detik — **teruji**
+
+Satu klip, sepuluh detik, satu generate. Karakter memegang ponsel di depan
+wajah seolah merekam diri di cermin.
+
+### Kenapa bentuk ini cocok untuk video AI
+
+Tiga masalah tersulit hilang sekaligus, dan bukan kebetulan:
+
+- **Wajah tertutup ponsel.** Wajah adalah bagian yang paling gampang meleot,
+  paling gampang berubah antar generate, dan paling cepat terbaca sebagai AI.
+  Ditutup ponsel, masalah itu tidak pernah muncul.
+- **Musik saja, tanpa dialog.** Tidak ada lip-sync yang harus sinkron, tidak
+  ada warna suara yang berbeda tiap generate, dan tidak ada pemicu subtitle
+  digambar — model menggambar subtitle karena mendeteksi ada yang bicara
+  (bagian 17.2), dan di sini tidak ada yang bicara.
+- **Kamera diam.** Yang bergerak subjeknya, bukan kameranya. Jauh lebih
+  ringan daripada kamera yang menyusur.
+
+### Bentuk prompt
+
+```
+Perempuan muda berdiri di <ruangan>, memegang ponsel di depan wajah seolah
+sedang merekam diri di cermin. Ponsel menutupi sebagian besar wajah.
+Bahasa tubuhnya ringan dan ceria: kepala sedikit dimiringkan, bahu diayun
+pelan, berat badan berpindah dari satu kaki ke kaki lain. Tangan yang bebas
+membuat gestur santai — sesekali tanda peace atau merapikan rambut.
+Ia berdiri agak jauh sehingga seluruh badan sampai sepatu terlihat, melangkah
+sedikit mendekat, lalu memutar badan pelan ke kiri dan ke kanan sambil
+berpose.
+
+Subjek utama: <produk>, tampil identik dengan gambar referensi.
+<untuk produk bawahan: seluruh panjangnya sampai ke sepatu tetap terlihat di
+sebagian besar durasi>
+Kamera diam menghadap subjek seolah cermin — yang bergerak subjeknya, bukan
+kameranya.
+
+Latar sederhana dan lapang: dinding polos warna netral, satu tanaman di
+sudut. Subjek berdiri tidak jauh dari dinding di belakangnya.
+Pencahayaan: cahaya dalam ruangan lembut dan merata.
+Gerakan halus dan natural, tanpa perpindahan gaya di tengah shot.
+Tanpa hewan dan tanpa orang lain di latar.
+Sisakan ruang kosong di sepertiga atas dan seperempat bawah frame.
+Rasio 9:16 vertikal. Durasi sekitar 10 detik.
+
+AUDIO
+Tanpa dialog, tanpa narasi, tanpa suara orang bicara.
+Ambience: ruangan tenang, pelan.
+Tanpa musik latar.
+
+LARANGAN
+Tanpa subtitle. Tanpa caption. Tanpa teks apa pun di layar.
+Tanpa tulisan tambahan, logo, atau watermark.
+```
+
+Empat baris yang tidak boleh hilang, masing-masing menutup satu kegagalan yang
+sudah pernah terjadi:
+
+| Baris | Menutup apa |
+|---|---|
+| Gestur disebut satu per satu | Kata sifat menghasilkan pose netral (bagian 12) |
+| "Kamera diam seolah cermin" | Kamera yang menyusur bikin gerakan belepotan |
+| "Latar sederhana", "tanpa hewan" | Latar ramai bikin glitch, hewan muncul sendiri (bagian 11) |
+| Panjang produk tetap terlihat | Produk bawahan terpotong di paha berarti produknya tidak terjual |
+
+### Yang wajib diperiksa
+
+```
+[ ] Ciri khas produk masih terbaca — jahitan, motif, potongan
+[ ] Jari tangan yang memegang ponsel wajar, tidak meleot
+[ ] Wajah benar-benar tertutup, bukan setengah terlihat lalu rusak
+[ ] Latar tidak berkedip atau berubah bentuk
+[ ] Untuk produk bawahan: panjangnya terlihat sampai sepatu
+[ ] Tidak ada teks atau watermark yang tergambar
+```
+
+Dua yang pertama paling sering gagal. Jari adalah harga yang dibayar untuk
+menyembunyikan wajah — masalah wajah hilang, masalah tangan masuk.
+
+### Caption menanggung seluruh penjualan
+
+Video ini bersih tanpa teks, jadi hook, info ukuran, dan CTA semuanya pindah
+ke caption. Baris pertama caption **adalah hook-nya**, karena itu yang terbaca
+di feed sebelum orang memutuskan menonton.
+
+```
+Baris 1     : hook — kalimat yang bikin berhenti
+Baris 2-3   : info produk + ukuran (bahan, size, catatan sizing)
+Baris akhir : CTA sesuai mekanisme platform (bagian 9)
+Hashtag     : niche, 3-5 untuk TikTok
+```
+
+**Info ukuran wajib masuk.** Di format try-on/haul dia diucapkan di video; di
+sini tidak ada tempatnya, dan kalau ikut hilang maka yang paling menentukan
+justru yang paling mudah terlewat.
+
+### Batasnya
+
+Format ini lemah untuk produk yang daya tariknya ada di detail halus. Karena
+videonya bersih tanpa teks, tidak ada cara menunjuk ke detail itu **di dalam
+video** — jahitan khusus atau fitur kecil akan terlewat dalam sepuluh detik
+scroll. Untuk produk seperti itu, try-on/haul lebih tepat karena detailnya
+bisa mendapat close-up sendiri dan disebut lewat VO.
+
+---
+
+## 13b. Try-on/haul 20 detik
 
 ### Struktur — empat blok, satu try-on/haul
 
@@ -1518,7 +1696,7 @@ Lima generate video, tiga iklan yang beda di tempat yang menentukan.
 Alur di atas iklan saja. Kalau produk yang sama juga mau jadi post organik,
 yang berubah cuma **panjang dua klip yang dipakai bersama** — badan dan
 penutup digenerate sepanjang versi organiknya, lalu dipangkas untuk iklan
-(bagian 13).
+(bagian 13b).
 
 ```
 3. Di Flow:   generate KLIP A ~10 dtk  hook → reveal → motion
