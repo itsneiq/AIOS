@@ -61,4 +61,20 @@ for (const kata of ["Latar:", "Pencahayaan:", "Kamera:", "Aksi:"]) assert.ok(des
 assert.ok(describeScene(SCENES.beauty[2]).includes("Tanpa model"), "set tanpa model harus menyebutkannya secara eksplisit");
 assert.ok(describeScene(SCENES.fashion[0]).includes("Wardrobe pendukung"));
 
+/*
+ * Set tanpa model bertentangan dengan karakter yang dikunci: prompt yang sama
+ * akan menyuruh karakter mengenakan produk sekaligus menyuruh tidak ada model
+ * di frame. Setnya tidak diganti — identitas visualnya masih dipakai — yang
+ * menyesuaikan cuma baris wardrobe-nya.
+ */
+const tanpaModel = SCENES.beauty[2];
+assert.ok(describeScene(tanpaModel, { withCharacter: true }).includes("Wardrobe pendukung"));
+assert.ok(!describeScene(tanpaModel, { withCharacter: true }).includes("Tanpa model"), "tidak boleh menyuruh tanpa model padahal karakternya dikunci");
+// Unsur set lainnya tetap utuh — yang berubah cuma wardrobe-nya.
+for (const kata of ["Latar:", "Pencahayaan:", "Kamera:", "Aksi:"]) {
+  assert.ok(describeScene(tanpaModel, { withCharacter: true }).includes(kata));
+}
+// Set yang memang punya wardrobe tidak berubah sama sekali.
+assert.equal(describeScene(SCENES.fashion[0], { withCharacter: true }), describeScene(SCENES.fashion[0]));
+
 console.log("scene library tests passed");

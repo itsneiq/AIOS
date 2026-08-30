@@ -99,15 +99,29 @@ function pickScenes({ category = "general", seed = "", count = 1 } = {}) {
 // begitu kalimatnya ditulis sedikit berbeda.
 const TANPA_MODEL = /tidak ada model|tanpa model/i;
 
-function describeScene(scene) {
+/*
+ * Sebagian set sengaja tidak memakai model — makro pada marmer, botol di rak.
+ * Tetapi begitu ada karakter yang dikunci, "tanpa model" berubah dari pilihan
+ * gaya menjadi kontradiksi: prompt yang sama menyuruh karakter mengenakan
+ * produk sekaligus menyuruh tidak ada model di frame.
+ *
+ * Set tidak diganti karena identitas visualnya masih dipakai; yang menyesuaikan
+ * cuma baris wardrobe-nya. Penggantinya sengaja netral supaya tidak mencuri
+ * perhatian dari produk — set tanpa model dipilih justru karena produknya yang
+ * harus jadi pusat.
+ */
+function describeScene(scene, { withCharacter = false } = {}) {
   const wardrobe = String(scene.wardrobe || "");
+  const tanpaModel = !wardrobe || TANPA_MODEL.test(wardrobe);
+  let wardrobeLine;
+  if (!tanpaModel) wardrobeLine = `Wardrobe pendukung: ${wardrobe}.`;
+  else if (withCharacter) wardrobeLine = "Wardrobe pendukung: pakaian polos warna netral yang tidak mencuri perhatian dari produk.";
+  else wardrobeLine = "Tanpa model, fokus pada produk dan tangan.";
   return [
     `Latar: ${scene.world}.`,
     `Pencahayaan: ${scene.lighting}.`,
     `Kamera: ${scene.camera}.`,
-    !wardrobe || TANPA_MODEL.test(wardrobe)
-      ? "Tanpa model, fokus pada produk dan tangan."
-      : `Wardrobe pendukung: ${wardrobe}.`,
+    wardrobeLine,
     `Aksi: ${scene.action}.`
   ].join(" ");
 }

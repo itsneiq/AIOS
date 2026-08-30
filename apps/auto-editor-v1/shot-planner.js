@@ -146,7 +146,7 @@ function styleContract({ product = {}, scene, sceneId, character } = {}) {
     : `Subjek utama: ${subject}, tampil identik dengan gambar referensi di setiap shot.`;
   return [
     subjectLine,
-    describeScene(dipakai),
+    describeScene(dipakai, { withCharacter: Boolean(character && character.label) }),
     "Tidak ada tulisan, logo, atau watermark tambahan di dalam gambar.",
     "Kamera stabil, gerakan halus, tanpa perpindahan gaya di tengah shot.",
     NEGATIVE_SPACE,
@@ -164,6 +164,18 @@ function styleContract({ product = {}, scene, sceneId, character } = {}) {
  * model memperlakukan seluruh isi foto sebagai hal yang harus dipertahankan,
  * termasuk bagian yang justru harus diganti produk.
  *
+ * Yang diambil dan yang diabaikan disebut satu per satu, bukan lewat kata
+ * payung seperti "identitas saja". Pelajaran yang sama sudah terbukti pada
+ * gestur: kata sifat menghasilkan hasil netral, daftar yang dinamai
+ * menghasilkan yang diminta. Sepatu, tas, dan aksesoris ikut disebut karena
+ * referensi seluruh badan memperlihatkan ketiganya, dan yang tidak disebut
+ * bisa menyelinap ikut.
+ *
+ * Kalimat "diganti sesuai produk dan wardrobe pendukung" menutup separuh
+ * lainnya: tanpa itu model tahu harus membuang, tapi tidak tahu harus
+ * menggantinya dengan apa, sehingga mengarang sendiri. Penggantinya sudah
+ * tersedia di baris "Wardrobe pendukung" dari scene library.
+ *
  * Hijab dapat baris tambahan karena satu-satunya produk yang menutup atribut
  * yang justru dikunci. Rambut ada di daftar identitas, dan model bisa
  * "berusaha menurut" pada kunci itu dengan menampilkan rambut menyembul
@@ -173,7 +185,7 @@ function styleContract({ product = {}, scene, sceneId, character } = {}) {
  * Kunci identitasnya sendiri tidak dilonggarkan — kuncinya berbunyi "jangan
  * diubah", bukan "harus selalu terlihat". Tertutup bukan berubah.
  */
-const WORN_TIE_BREAKER = "Karakter mengenakan produk ini. Abaikan pakaian dan gaya rambut yang tampak pada foto referensi karakter — foto itu dipakai untuk wajah dan identitas, bukan untuk pakaian. Bagian tubuh yang tertutup produk mengikuti foto referensi produk sepenuhnya.";
+const WORN_TIE_BREAKER = "Karakter mengenakan produk ini. Foto referensi karakter dipakai HANYA untuk identitas: wajah, bentuk tubuh, serta warna dan tekstur rambut. Abaikan seluruh pakaian, sepatu, tas, dan aksesoris yang tampak pada foto itu, termasuk gaya penataan rambutnya — semuanya diganti sesuai produk dan wardrobe pendukung yang disebut di bawah. Bagian tubuh yang tertutup produk mengikuti foto referensi produk sepenuhnya.";
 const HIJAB_LINE = "Rambut tertutup sepenuhnya oleh hijab, tidak ada rambut yang terlihat.";
 const HIJAB_PATTERN = /\b(hijab|jilbab|kerudung|khimar|pashmina|bergo)\b/i;
 
@@ -207,7 +219,7 @@ function buildMasterImagePrompt({ product = {}, scene, sceneId, variant = {}, ch
       `Foto produk untuk iklan: ${subject}.`,
       "Pertahankan bentuk, warna, dan seluruh detail kemasan persis seperti gambar referensi yang diunggah. Jangan mengubah tulisan pada kemasan.",
       wornTieBreaker({ product, character }),
-      describeScene(dipakai),
+      describeScene(dipakai, { withCharacter: Boolean(character && character.label) }),
       variant.visualHint ? `Nuansa yang diinginkan: ${variant.visualHint}` : "",
       "Kualitas foto komersial, fokus tajam pada produk, latar sedikit kabur.",
       "Tidak ada tulisan, logo, atau watermark tambahan di dalam gambar.",

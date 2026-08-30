@@ -1135,15 +1135,41 @@ Kalau produknya barang yang dikenakan — baju, celana, hijab, sepatu — sisipk
 blok ini setelah kunci produk:
 
 ```
-Karakter mengenakan produk ini. Abaikan pakaian dan gaya rambut yang tampak
-pada foto referensi karakter — foto itu dipakai untuk wajah dan identitas,
-bukan untuk pakaian. Bagian tubuh yang tertutup produk mengikuti foto
-referensi produk sepenuhnya.
+Karakter mengenakan produk ini. Foto referensi karakter dipakai HANYA untuk
+identitas: wajah, bentuk tubuh, serta warna dan tekstur rambut. Abaikan
+seluruh pakaian, sepatu, tas, dan aksesoris yang tampak pada foto itu,
+termasuk gaya penataan rambutnya — semuanya diganti sesuai produk dan
+wardrobe pendukung yang disebut di bawah. Bagian tubuh yang tertutup produk
+mengikuti foto referensi produk sepenuhnya.
 ```
 
-Kalimat kedua yang paling menentukan: **menyebutkan foto karakter itu dipakai
-untuk apa.** Tanpa itu model memperlakukan seluruh isi foto sebagai hal yang
-harus dipertahankan, termasuk bagian yang justru harus diganti produk.
+Tiga hal yang bikin blok ini bekerja, dan ketiganya gampang hilang kalau
+diringkas:
+
+**Menyebutkan foto karakter dipakai untuk apa.** Tanpa itu model
+memperlakukan seluruh isi foto sebagai hal yang harus dipertahankan, termasuk
+bagian yang justru harus diganti produk.
+
+**Yang diambil dan yang diabaikan disebut satu per satu, bukan lewat kata
+payung.** Menulis "gunakan identitasnya saja" terasa cukup, padahal "identitas"
+itu label kategori — model masih harus menebak isinya. Ini pelajaran yang sama
+dengan gestur di bagian 12: kata sifat menghasilkan hasil netral, daftar yang
+dinamai menghasilkan yang diminta. Sepatu, tas, dan aksesoris ikut disebut
+karena **referensi seluruh badan memperlihatkan ketiganya**, dan yang tidak
+disebut bisa menyelinap ikut.
+
+**Menyebut penggantinya, bukan cuma menyuruh membuang.** Tanpa kalimat
+"diganti sesuai produk dan wardrobe pendukung", model tahu harus membuang tapi
+tidak tahu harus menggantinya dengan apa, sehingga mengarang sendiri.
+Penggantinya sudah tersedia di baris `Wardrobe pendukung` yang datang dari
+scene library.
+
+**Set tanpa model otomatis menyesuaikan.** Sebagian set sengaja tidak memakai
+model — makro pada marmer, botol tersusun di rak. Begitu ada karakter yang
+dikunci, "tanpa model" berubah dari pilihan gaya jadi kontradiksi: prompt yang
+sama menyuruh karakter mengenakan produk sekaligus menyuruh tidak ada model di
+frame. Setnya tidak diganti karena identitas visualnya masih dipakai; yang
+menyesuaikan cuma baris wardrobe-nya jadi pakaian polos netral.
 
 ### Kalau produknya menutup atribut yang terkunci
 

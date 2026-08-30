@@ -347,8 +347,26 @@ assert.equal(wornTieBreaker({ product: { title: "Panci", worn: false }, characte
 
 // Yang menentukan: menyebutkan foto karakter dipakai untuk apa.
 const penengah = wornTieBreaker({ product: { title: "Kemeja Oversize" }, character: karakter });
-assert.ok(penengah.includes("dipakai untuk wajah dan identitas, bukan untuk pakaian"));
+assert.ok(penengah.includes("HANYA untuk identitas"));
 assert.equal(penengah, WORN_TIE_BREAKER, "produk biasa cukup penengah dasar");
+
+/*
+ * Yang diambil dan yang diabaikan disebut satu per satu, bukan lewat kata
+ * payung. Referensi seluruh badan memperlihatkan sepatu, tas, dan aksesoris —
+ * yang tidak disebut bisa menyelinap ikut ke hasil.
+ */
+for (const diambil of ["wajah", "bentuk tubuh", "warna dan tekstur rambut"]) {
+  assert.ok(penengah.includes(diambil), `identitas yang diambil kehilangan "${diambil}"`);
+}
+for (const diabaikan of ["pakaian", "sepatu", "tas", "aksesoris", "gaya penataan rambutnya"]) {
+  assert.ok(penengah.includes(diabaikan), `daftar yang diabaikan kehilangan "${diabaikan}"`);
+}
+/*
+ * Membuang saja tidak cukup — tanpa menyebut penggantinya model mengarang
+ * sendiri. Penggantinya sudah ada di baris "Wardrobe pendukung" dari scene.
+ */
+assert.ok(penengah.includes("diganti sesuai produk dan wardrobe pendukung"));
+assert.ok(masterBerkarakter.prompt.includes("Wardrobe pendukung:"), "penggantinya harus benar-benar ada di prompt yang sama");
 
 /*
  * Hijab satu-satunya produk yang menutup atribut yang justru dikunci. Tanpa
