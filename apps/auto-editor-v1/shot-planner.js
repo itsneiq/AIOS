@@ -146,7 +146,7 @@ function styleContract({ product = {}, scene, sceneId, character } = {}) {
     : `Subjek utama: ${subject}, tampil identik dengan gambar referensi di setiap shot.`;
   return [
     subjectLine,
-    describeScene(dipakai, { withCharacter: Boolean(character && character.label) }),
+    describeScene(dipakai, { withCharacter: Boolean(character && character.label), modest: isModestProduct(product) }),
     "Tidak ada tulisan, logo, atau watermark tambahan di dalam gambar.",
     "Kamera stabil, gerakan halus, tanpa perpindahan gaya di tengah shot.",
     NEGATIVE_SPACE,
@@ -187,7 +187,24 @@ function styleContract({ product = {}, scene, sceneId, character } = {}) {
  */
 const WORN_TIE_BREAKER = "Karakter mengenakan produk ini. Foto referensi karakter dipakai HANYA untuk identitas: wajah, bentuk tubuh, serta warna dan tekstur rambut. Abaikan seluruh pakaian, sepatu, tas, dan aksesoris yang tampak pada foto itu, termasuk gaya penataan rambutnya — semuanya diganti sesuai produk dan wardrobe pendukung yang disebut di bawah. Bagian tubuh yang tertutup produk mengikuti foto referensi produk sepenuhnya.";
 const HIJAB_LINE = "Rambut tertutup sepenuhnya oleh hijab, tidak ada rambut yang terlihat.";
+
+/*
+ * Dua pola, dua urusan berbeda, dan yang pertama bagian dari yang kedua.
+ *
+ * HIJAB_PATTERN memicu baris rambut tertutup, jadi isinya cuma penutup kepala —
+ * gamis dan koko tidak menutupi rambut.
+ *
+ * MODEST_PATTERN memicu wardrobe pendukung yang menutup, jadi isinya seluruh
+ * busana muslim. Tanpa ini, produk kerudung dipadukan wardrobe bawaan set
+ * seperti "kaos dalam polos": prompt yang konsisten secara logika tapi jelas
+ * salah konteks.
+ */
 const HIJAB_PATTERN = /\b(hijab|jilbab|kerudung|khimar|pashmina|bergo)\b/i;
+const MODEST_PATTERN = /\b(hijab|jilbab|kerudung|khimar|pashmina|bergo|gamis|abaya|tunik|koko|mukena|syari|syar'i|muslim|muslimah)\b/i;
+
+function isModestProduct(product = {}) {
+  return MODEST_PATTERN.test(`${product.title || ""} ${product.category || ""}`);
+}
 
 function wornTieBreaker({ product = {}, character } = {}) {
   if (!character || !character.label) return "";
@@ -219,7 +236,7 @@ function buildMasterImagePrompt({ product = {}, scene, sceneId, variant = {}, ch
       `Foto produk untuk iklan: ${subject}.`,
       "Pertahankan bentuk, warna, dan seluruh detail kemasan persis seperti gambar referensi yang diunggah. Jangan mengubah tulisan pada kemasan.",
       wornTieBreaker({ product, character }),
-      describeScene(dipakai, { withCharacter: Boolean(character && character.label) }),
+      describeScene(dipakai, { withCharacter: Boolean(character && character.label), modest: isModestProduct(product) }),
       variant.visualHint ? `Nuansa yang diinginkan: ${variant.visualHint}` : "",
       "Kualitas foto komersial, fokus tajam pada produk, latar sedikit kabur.",
       "Tidak ada tulisan, logo, atau watermark tambahan di dalam gambar.",
@@ -552,6 +569,7 @@ module.exports = {
   splitDurations,
   styleContract,
   wornTieBreaker,
+  isModestProduct,
   HIJAB_LINE,
   NEGATIVE_SPACE,
   WORN_TIE_BREAKER,

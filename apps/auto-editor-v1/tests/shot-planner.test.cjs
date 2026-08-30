@@ -380,6 +380,32 @@ for (const judul of ["Hijab Segiempat Paris", "Jilbab Instan Katun", "Kerudung P
 // Produk lain tidak boleh kebagian baris itu — kaki memang tidak dikunci.
 assert.ok(!wornTieBreaker({ product: { title: "Celana Kulot Jeans" }, character: karakter }).includes(HIJAB_LINE));
 
+/*
+ * Dua pola, dua urusan berbeda. Penutup kepala memicu baris rambut tertutup;
+ * seluruh busana muslim memicu wardrobe pendukung yang menutup. Gamis tidak
+ * menutupi rambut, jadi tidak boleh kebagian baris hijab.
+ */
+const { isModestProduct, WARDROBE_MODEST } = (() => {
+  const sp = require("../shot-planner");
+  const sl = require("../scene-library");
+  return { isModestProduct: sp.isModestProduct, WARDROBE_MODEST: sl.WARDROBE_MODEST };
+})();
+
+for (const judul of ["Hijab Segiempat Paris", "Gamis Syari Katun", "Tunik Muslimah", "Koko Pria", "Mukena Travel"]) {
+  assert.ok(isModestProduct({ title: judul }), `"${judul}" harus terbaca sebagai busana muslim`);
+}
+// Produk biasa tidak boleh keseret — polanya harus sempit, bukan menebak.
+for (const judul of ["Celana Kulot Jeans", "Kemeja Oversize Katun", "Serum Glow", "Panci Anti Lengket"]) {
+  assert.ok(!isModestProduct({ title: judul }), `"${judul}" tidak boleh terbaca sebagai busana muslim`);
+}
+// Gamis kebagian wardrobe modest tapi tidak kebagian baris rambut tertutup.
+const gamis = buildMasterImagePrompt({ product: { title: "Gamis Syari Katun", category: "fashion" }, variant, character: karakter });
+assert.ok(gamis.prompt.includes(WARDROBE_MODEST));
+assert.ok(!gamis.prompt.includes(HIJAB_LINE), "gamis tidak menutupi rambut, jangan diberi baris hijab");
+// Produk biasa tetap memakai wardrobe bawaan setnya.
+const biasa = buildMasterImagePrompt({ product: { title: "Celana Kulot Jeans", category: "fashion" }, variant, character: karakter });
+assert.ok(!biasa.prompt.includes(WARDROBE_MODEST));
+
 // Penengah ikut ke prompt master image, setelah kunci produk supaya bisa menengahi.
 const masterHijab = buildMasterImagePrompt({ product: { title: "Hijab Segiempat Paris", category: "fashion" }, variant, character: karakter });
 assert.ok(masterHijab.prompt.includes(WORN_TIE_BREAKER));

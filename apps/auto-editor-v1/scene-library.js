@@ -99,6 +99,20 @@ function pickScenes({ category = "general", seed = "", count = 1 } = {}) {
 // begitu kalimatnya ditulis sedikit berbeda.
 const TANPA_MODEL = /tidak ada model|tanpa model/i;
 
+const WARDROBE_NETRAL = "pakaian polos warna netral yang tidak mencuri perhatian dari produk";
+
+/*
+ * Seluruh bidang wardrobe di pustaka ini ditulis untuk fashion umum — celana
+ * pendek rumahan, kaos dalam polos, piyama satin. Tidak satu pun cocok untuk
+ * produk busana muslim, dan memakainya menghasilkan prompt yang secara logika
+ * konsisten tapi jelas salah konteks: hijab dipadukan kaos dalam.
+ *
+ * Ditulis sebagai batasan gaya, bukan daftar potongan tertentu, supaya tetap
+ * benar baik ketika produknya kerudung (busana pendukungnya lengkap) maupun
+ * ketika produknya gamis (produk itu sendiri sudah menutup hampir semuanya).
+ */
+const WARDROBE_MODEST = "busana muslim yang menutup — lengan panjang dan potongan longgar, warna netral";
+
 /*
  * Sebagian set sengaja tidak memakai model — makro pada marmer, botol di rak.
  * Tetapi begitu ada karakter yang dikunci, "tanpa model" berubah dari pilihan
@@ -109,13 +123,18 @@ const TANPA_MODEL = /tidak ada model|tanpa model/i;
  * cuma baris wardrobe-nya. Penggantinya sengaja netral supaya tidak mencuri
  * perhatian dari produk — set tanpa model dipilih justru karena produknya yang
  * harus jadi pusat.
+ *
+ * Busana muslim menimpa wardrobe bawaan set, bukan cuma mengisi yang kosong.
+ * Keragaman wardrobe antar set memang berkurang, tapi wardrobe yang salah
+ * konteks lebih merugikan daripada wardrobe yang seragam.
  */
-function describeScene(scene, { withCharacter = false } = {}) {
+function describeScene(scene, { withCharacter = false, modest = false } = {}) {
   const wardrobe = String(scene.wardrobe || "");
   const tanpaModel = !wardrobe || TANPA_MODEL.test(wardrobe);
   let wardrobeLine;
-  if (!tanpaModel) wardrobeLine = `Wardrobe pendukung: ${wardrobe}.`;
-  else if (withCharacter) wardrobeLine = "Wardrobe pendukung: pakaian polos warna netral yang tidak mencuri perhatian dari produk.";
+  if (modest) wardrobeLine = `Wardrobe pendukung: ${WARDROBE_MODEST}.`;
+  else if (!tanpaModel) wardrobeLine = `Wardrobe pendukung: ${wardrobe}.`;
+  else if (withCharacter) wardrobeLine = `Wardrobe pendukung: ${WARDROBE_NETRAL}.`;
   else wardrobeLine = "Tanpa model, fokus pada produk dan tangan.";
   return [
     `Latar: ${scene.world}.`,
@@ -126,4 +145,4 @@ function describeScene(scene, { withCharacter = false } = {}) {
   ].join(" ");
 }
 
-module.exports = { SCENES, describeScene, hash, pickScenes, scenesFor };
+module.exports = { SCENES, WARDROBE_MODEST, WARDROBE_NETRAL, describeScene, hash, pickScenes, scenesFor };

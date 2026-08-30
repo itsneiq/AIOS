@@ -77,4 +77,21 @@ for (const kata of ["Latar:", "Pencahayaan:", "Kamera:", "Aksi:"]) {
 // Set yang memang punya wardrobe tidak berubah sama sekali.
 assert.equal(describeScene(SCENES.fashion[0], { withCharacter: true }), describeScene(SCENES.fashion[0]));
 
+/*
+ * Seluruh bidang wardrobe di pustaka ini ditulis untuk fashion umum, jadi tidak
+ * satu pun cocok untuk busana muslim. Wardrobe modest menimpa bawaan set, bukan
+ * cuma mengisi yang kosong — wardrobe yang salah konteks lebih merugikan
+ * daripada wardrobe yang seragam antar set.
+ */
+const { WARDROBE_MODEST } = require("../scene-library");
+for (const set of [SCENES.fashion[0], SCENES.beauty[0], SCENES.beauty[2]]) {
+  const hasil = describeScene(set, { withCharacter: true, modest: true });
+  assert.ok(hasil.includes(WARDROBE_MODEST), `set ${set.id} tidak memakai wardrobe modest`);
+  assert.ok(!hasil.includes("Tanpa model"), `set ${set.id} tidak boleh menyuruh tanpa model saat modest`);
+  // Unsur set lain tetap utuh — yang ditimpa cuma wardrobe-nya.
+  for (const kata of ["Latar:", "Pencahayaan:", "Kamera:", "Aksi:"]) assert.ok(hasil.includes(kata));
+}
+// Wardrobe bawaan set yang tidak modest benar-benar hilang, bukan ditambahkan.
+assert.ok(!describeScene(SCENES.fashion[5], { modest: true }).includes(SCENES.fashion[5].wardrobe));
+
 console.log("scene library tests passed");

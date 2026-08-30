@@ -1171,6 +1171,36 @@ sama menyuruh karakter mengenakan produk sekaligus menyuruh tidak ada model di
 frame. Setnya tidak diganti karena identitas visualnya masih dipakai; yang
 menyesuaikan cuma baris wardrobe-nya jadi pakaian polos netral.
 
+### Busana muslim menimpa wardrobe set
+
+Seluruh bidang wardrobe di pustaka set (bagian 11) ditulis untuk fashion
+umum — celana pendek rumahan, kaos dalam polos, piyama satin. Tidak satu pun
+cocok untuk produk busana muslim, dan memakainya menghasilkan prompt yang
+**konsisten secara logika tapi jelas salah konteks**: kerudung dipadukan kaos
+dalam.
+
+Begitu produknya terbaca sebagai busana muslim — hijab, jilbab, kerudung,
+khimar, pashmina, bergo, gamis, abaya, tunik, koko, mukena, syari — baris
+wardrobe-nya diganti:
+
+```
+Wardrobe pendukung: busana muslim yang menutup — lengan panjang dan potongan
+longgar, warna netral.
+```
+
+Ditulis sebagai **batasan gaya, bukan daftar potongan tertentu**, supaya tetap
+benar baik ketika produknya kerudung (busana pendukungnya lengkap) maupun
+ketika produknya gamis (produk itu sendiri sudah menutup hampir semuanya).
+
+Wardrobe modest **menimpa** bawaan set, bukan cuma mengisi yang kosong.
+Keragaman wardrobe antar set memang berkurang, tapi wardrobe yang salah
+konteks lebih merugikan daripada wardrobe yang seragam.
+
+**Bedakan dari baris rambut tertutup di atas.** Keduanya dipicu daftar kata
+yang berbeda karena urusannya berbeda: penutup kepala memicu baris rambut,
+seluruh busana muslim memicu wardrobe. Gamis mendapat wardrobe modest tapi
+tidak mendapat baris rambut — gamis memang tidak menutupi rambut.
+
 ### Kalau produknya menutup atribut yang terkunci
 
 Satu kasus butuh baris tambahan, dan cuma satu: **hijab.**
