@@ -20,6 +20,7 @@ from modules.cut_recipe import (
     parse_recipe, recipe_total_duration, render_cut_recipe, probe_video, render_preview_frame,
     make_cached_tts, recipe_to_lines, DEFAULT_RECIPE,
 )
+from modules.watermark import DEFAULT_WATERMARK
 from modules.cut_catalog import (
     TRANSITIONS, EFFECTS, FILTERS, ADJUSTMENTS, DEFAULT_ADJUST, TEXT_PRESETS, DEFAULT_TEXT_STYLE,
 )
@@ -66,6 +67,9 @@ class CutStudioFrame(ctk.CTkFrame):
         self._frame_img = None
         self.engine = None
         self.proj_dirty = True
+        self.wm = dict(DEFAULT_WATERMARK)
+        self._wm_job = None
+        self._drag = None
         self._aud = None
         self._aud_sig = None
         self._aud_busy = False
@@ -141,11 +145,13 @@ class CutStudioFrame(ctk.CTkFrame):
         self.t_fx = self.tabs.add("Efek")
         self.t_flt = self.tabs.add("Filter")
         self.t_adj = self.tabs.add("Adjust")
+        self.t_wm = self.tabs.add("Watermark")
         self._build_text_tab()
         self._build_trans_tab()
         self._build_effect_tab()
         self._build_filter_tab()
         self._build_adjust_tab()
+        self._build_wm_tab()
 
     def _chip_grid(self, parent, table, command, cols=2, skip=()):
         fr = ctk.CTkScrollableFrame(parent)
@@ -273,6 +279,170 @@ class CutStudioFrame(ctk.CTkFrame):
             if col >= 3:
                 row, col = row + 1, 0
 
+    # ================================================== watermark
+    def _build_wm_tab(self):
+        t = self.t_wm
+        box = ctk.CTkScrollableFrame(t, fg_color="transparent")
+        box.pack(fill="both", expand=True)
+        self.v_wm_on = ctk.BooleanVar(value=False)
+        ctk.CTkCheckBox(box, text="Pakai watermark", variable=self.v_wm_on, command=self._wm_changed).pack(anchor="w", padx=6, pady=(6, 2))
+        ctk.CTkLabel(box, text="Geser langsung di preview untuk memindah posisinya.",
+                     text_color="gray", wraplength=300, justify="left").pack(anchor="w", padx=6, pady=(0, 6))
+        self.c_wm_kind = ctk.CTkSegmentedButton(box, values=["Teks", "Gambar"], command=self._wm_kind_changed)
+        self.c_wm_kind.set("Teks")
+        self.c_wm_kind.pack(anchor="w", padx=6, pady=4)
+
+        self.f_wm_text = ctk.CTkFrame(box)
+        self.f_wm_text.pack(fill="x", padx=4, pady=4)
+        self.e_wm_text = ctk.CTkEntry(self.f_wm_text, placeholder_text="tulisan watermark", width=260)
+        self.e_wm_text.insert(0, self.wm["text"])
+        self.e_wm_text.grid(row=0, column=0, columnspan=2, padx=6, pady=6)
+        self.e_wm_text.bind("<KeyRelease>", lambda e: self._wm_changed())
+        fonts = self.app.font_list
+        self.c_wm_font = ctk.CTkComboBox(self.f_wm_text, values=fonts, width=150, command=lambda v: self._wm_changed())
+        self.c_wm_font.set(self.wm["font_name"] if self.wm["font_name"] in fonts else fonts[0])
+        self.c_wm_font.grid(row=1, column=0, padx=6, pady=4)
+        names = list(self.app.color_map.keys())
+        self.c_wm_color = ctk.CTkComboBox(self.f_wm_text, values=names, width=110, command=self._wm_color_pick)
+        self.c_wm_color.set(names[0])
+        self.c_wm_color.grid(row=1, column=1, padx=4)
+        ctk.CTkLabel(self.f_wm_text, text="Hex warna").grid(row=2, column=0, sticky="w", padx=6)
+        self.e_wm_hex = ctk.CTkEntry(self.f_wm_text, width=90)
+        self.e_wm_hex.insert(0, self.wm["color_hex"])
+        self.e_wm_hex.grid(row=2, column=1, padx=4, pady=4, sticky="w")
+        self.e_wm_hex.bind("<KeyRelease>", lambda e: self._wm_changed())
+        self.v_wm_outline = ctk.BooleanVar(value=True)
+        ctk.CTkCheckBox(self.f_wm_text, text="Garis tepi hitam", variable=self.v_wm_outline,
+                        command=self._wm_changed).grid(row=3, column=0, columnspan=2, sticky="w", padx=6, pady=(2, 6))
+
+        self.f_wm_img = ctk.CTkFrame(box)
+        ctk.CTkButton(self.f_wm_img, text="Pilih gambar (logo)...", width=170, command=self._wm_pick_image).pack(padx=6, pady=(8, 4), anchor="w")
+        self.lbl_wm_img = ctk.CTkLabel(self.f_wm_img, text="belum ada gambar", text_color="gray")
+        self.lbl_wm_img.pack(padx=6, pady=(0, 8), anchor="w")
+
+        g = ctk.CTkFrame(box)
+        g.pack(fill="x", padx=4, pady=4)
+        ctk.CTkLabel(g, text="Ukuran").grid(row=0, column=0, sticky="w", padx=6, pady=4)
+        self.s_wm_size = ctk.CTkSlider(g, from_=4, to=60, width=170, command=lambda v: self._wm_changed())
+        self.s_wm_size.set(self.wm["size_pct"])
+        self.s_wm_size.grid(row=0, column=1, padx=4)
+        ctk.CTkLabel(g, text="Transparan").grid(row=1, column=0, sticky="w", padx=6, pady=4)
+        self.s_wm_op = ctk.CTkSlider(g, from_=0.1, to=1.0, width=170, command=lambda v: self._wm_changed())
+        self.s_wm_op.set(self.wm["opacity"])
+        self.s_wm_op.grid(row=1, column=1, padx=4)
+        bf = ctk.CTkFrame(box, fg_color="transparent")
+        bf.pack(fill="x", padx=4, pady=4)
+        for n, (txt, xy) in enumerate((("Kiri atas", (0.15, 0.06)), ("Kanan atas", (0.85, 0.06)), ("Tengah", (0.5, 0.5)),
+                                       ("Kiri bawah", (0.15, 0.94)), ("Kanan bawah", (0.85, 0.94)))):
+            ctk.CTkButton(bf, text=txt, width=84, height=26, fg_color="gray30",
+                          command=lambda xy=xy: self._wm_place(*xy)).grid(row=n // 3, column=n % 3, padx=2, pady=2)
+        self._wm_kind_changed(self.c_wm_kind.get(), notify=False)
+
+    def _wm_kind_changed(self, v, notify=True):
+        if v == "Teks":
+            self.f_wm_img.pack_forget()
+            self.f_wm_text.pack(fill="x", padx=4, pady=4, after=self.c_wm_kind)
+        else:
+            self.f_wm_text.pack_forget()
+            self.f_wm_img.pack(fill="x", padx=4, pady=4, after=self.c_wm_kind)
+        if notify:
+            self._wm_changed()
+
+    def _wm_color_pick(self, name):
+        hx = self.app.color_map.get(name)
+        if hx:
+            self.e_wm_hex.delete(0, "end")
+            self.e_wm_hex.insert(0, hx.lstrip("#"))
+        self._wm_changed()
+
+    def _wm_pick_image(self):
+        p = filedialog.askopenfilename(filetypes=[("Gambar", "*.png *.jpg *.jpeg *.webp *.bmp")])
+        if p:
+            self.wm["image_path"] = p
+            self.lbl_wm_img.configure(text=os.path.basename(p)[:34], text_color="white")
+            self.v_wm_on.set(True)
+            self._wm_changed()
+
+    def _wm_place(self, x, y):
+        self.wm["x"], self.wm["y"] = x, y
+        self.v_wm_on.set(True)
+        self._wm_changed()
+
+    def _wm_current(self):
+        hx = self.e_wm_hex.get().strip().lstrip("#")
+        if len(hx) != 6 or any(c not in "0123456789abcdefABCDEF" for c in hx):
+            hx = self.wm["color_hex"]
+        self.wm.update({
+            "enabled": bool(self.v_wm_on.get()),
+            "kind": "image" if self.c_wm_kind.get() == "Gambar" else "text",
+            "text": self.e_wm_text.get(),
+            "font_name": self.c_wm_font.get(),
+            "color_hex": hx.upper(),
+            "outline": bool(self.v_wm_outline.get()),
+            "size_pct": float(self.s_wm_size.get()),
+            "opacity": float(self.s_wm_op.get()),
+        })
+        return dict(self.wm)
+
+    def _wm_changed(self, *_):
+        self._wm_current()
+        if self._wm_job:
+            self.after_cancel(self._wm_job)
+        self._wm_job = self.after(40, self._wm_apply)
+
+    def _wm_apply(self):
+        self._wm_job = None
+        if not self.video_path:
+            return
+        if not self._ensure_engine():
+            return
+        self.engine.set_watermark(self._wm_current())
+        if not self.playing:
+            self._mark_dirty(0, resync=False)
+
+    # ---- drag di preview
+    def _wm_img_origin(self):
+        e = self.engine
+        lw, lh = self.lbl_frame.winfo_width(), self.lbl_frame.winfo_height()
+        return (lw - e.W) / 2, (lh - e.H) / 2
+
+    def _wm_hit(self, ev):
+        e = self.engine
+        if not e or not e.wm_bbox or not self.wm.get("enabled"):
+            return None
+        ox, oy = self._wm_img_origin()
+        x, y = ev.x - ox, ev.y - oy
+        x0, y0, x1, y1 = e.wm_bbox
+        m = 8
+        if x0 - m <= x <= x1 + m and y0 - m <= y <= y1 + m:
+            return x, y
+        return None
+
+    def _wm_hover(self, ev):
+        try:
+            self.lbl_frame.configure(cursor="fleur" if self._wm_hit(ev) else "")
+        except Exception:
+            pass
+
+    def _wm_press(self, ev):
+        hit = self._wm_hit(ev)
+        if hit:
+            e = self.engine
+            self._drag = (hit[0] - self.wm["x"] * e.W, hit[1] - self.wm["y"] * e.H)
+
+    def _wm_move(self, ev):
+        if not self._drag or not self.engine:
+            return
+        e = self.engine
+        ox, oy = self._wm_img_origin()
+        self.wm["x"] = min(max((ev.x - ox - self._drag[0]) / e.W, 0.0), 1.0)
+        self.wm["y"] = min(max((ev.y - oy - self._drag[1]) / e.H, 0.0), 1.0)
+        if not self._wm_job:
+            self._wm_job = self.after(33, self._wm_apply)
+
+    def _wm_release(self, ev):
+        self._drag = None
+
     def _build_adjust_tab(self):
         t = self.t_adj
         sc = ctk.CTkScrollableFrame(t)
@@ -302,6 +472,10 @@ class CutStudioFrame(ctk.CTkFrame):
         c.grid_columnconfigure(0, weight=1)
         self.lbl_frame = tk.Label(c, text="Pilih video dulu", fg="#888888", bg="#111111", bd=0)
         self.lbl_frame.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
+        self.lbl_frame.bind("<ButtonPress-1>", self._wm_press)
+        self.lbl_frame.bind("<B1-Motion>", self._wm_move)
+        self.lbl_frame.bind("<ButtonRelease-1>", self._wm_release)
+        self.lbl_frame.bind("<Motion>", self._wm_hover)
 
         ctl = ctk.CTkFrame(c, fg_color="transparent")
         ctl.grid(row=1, column=0, sticky="ew", padx=8)
@@ -606,6 +780,7 @@ class CutStudioFrame(ctk.CTkFrame):
             self.engine = GLEngine(self.video_path, preview_h=520, fonts_dir="assets/fonts")
             self._look_gen += 1
             self._apply_look_async()
+            self.engine.set_watermark(self._wm_current())
         except Exception as e:
             self.engine = None
             self.lbl_frame.configure(image="", text=f"Preview GPU tidak tersedia:\n{e}", fg="#f87171")
@@ -1047,6 +1222,7 @@ class CutStudioFrame(ctk.CTkFrame):
             filter_preset=self.filter_key, filter_intensity=self.filter_intensity, adjust=self._adjust_values(),
             caption=({"style": self.c_cap.get()} if self.v_caption.get() else None),
             transition_sec=float(self.s_trans.get()), preview=preview, eco=self.v_eco.get(), tmp_dir=self.tmp_dir,
+            watermark=self._wm_current(),
         )
         self.busy = True
         for b in (self.btn_export,):

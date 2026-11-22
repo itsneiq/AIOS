@@ -19,7 +19,8 @@ from modules.cut_recipe import (
 LUT_N = 64
 EFFECT_IDS = {k: i for i, k in enumerate([
     "none", "zoom_in", "zoom_out", "zoom_punch", "pulse", "shake", "shake_hard", "tilt", "glitch", "rgb_split",
-    "vhs", "film_grain", "flash", "flash_negatif", "fade_in", "fade_out", "vignette", "blur_in", "bw_flash", "mirror"])}
+    "vhs", "film_grain", "flash", "flash_negatif", "fade_in", "fade_out", "vignette", "blur_in", "bw_flash", "mirror",
+    "kenburns"])}
 TRANS_IDS = {k: i for i, k in enumerate([
     "cut", "fade", "fadeblack", "fadewhite", "dissolve", "distance", "wipeleft", "wiperight", "wipeup", "wipedown",
     "slideleft", "slideright", "slideup", "slidedown", "smoothleft", "smoothright", "circleopen", "circleclose",
@@ -31,13 +32,13 @@ void main(){ uv = p*0.5+0.5; gl_Position = vec4(p,0.0,1.0); }
 """
 
 FRAG = """#version 330
-uniform sampler2D A; uniform sampler2D B; uniform sampler2D TXT;
+uniform sampler2D A; uniform sampler2D B; uniform sampler2D TXT; uniform sampler2D WM; uniform float wmOn;
 uniform sampler3D LUTF; uniform sampler3D LUTA;
 uniform int useLutF; uniform int useLutA;
 uniform float tA; uniform float dA; uniform float tB; uniform float dB;
 uniform int fxA; uniform int fxB; uniform int tr; uniform float prog;
 uniform float inten; uniform float vign; uniform float grain; uniform float sharp;
-uniform float txtAlpha; uniform float aspect; uniform vec2 texel;
+uniform float txtAlpha; uniform float aspect; uniform vec2 texel; uniform float zp; uniform float kbr;
 in vec2 uv; out vec4 outc;
 
 float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233))) * 43758.5453); }
@@ -66,6 +67,7 @@ vec3 fx(sampler2D tex, vec2 u, int id, float t, float d){
     p = vec2(cos(a)*p.x - sin(a)*p.y, sin(a)*p.x + cos(a)*p.y); q = p/vec2(aspect,1.0) + c;
   }
   else if (id==19) q.x = 1.0 - u.x;
+  else if (id==20) q = (u-c)/(1.0+kbr*t/max(d,0.1)) + c;
   vec3 col;
   if (id==8 && mod(t,0.6) < 0.12){
     col = vec3(fetchRaw(tex,q+vec2(0.008,0)).r, fetchRaw(tex,q).g, fetchRaw(tex,q-vec2(0.008,0)).b);
@@ -136,6 +138,7 @@ vec3 transition(vec2 u, float p, int id){
 
 void main(){
   vec2 u = vec2(uv.x, 1.0-uv.y);
+  u = (u - vec2(0.5))/zp + vec2(0.5);
   vec3 c = (tr == 0) ? getA(u) : transition(u, prog, tr);
   c = clamp(c, 0.0, 1.0);
   if (useLutF == 1){
@@ -147,40 +150,15 @@ void main(){
   if (grain > 0.01){ c += (hash(u*vec2(733.0,911.0)+fract(tA*7.0))-0.5)*grain*0.35; }
   vec4 t = texture(TXT, u);
   c = c*(1.0 - t.a*txtAlpha) + t.rgb*txtAlpha;
+  vec4 w = texture(WM, u);
+  c = c*(1.0 - w.a*wmOn) + w.rgb*(w.a*wmOn);
   outc = vec4(clamp(c,0.0,1.0), 1.0);
 }
 """
 
 
 # ---------------------------------------------------------- util: font & LUT
-_FONT_FILES = {
-    "arial": ["arial.ttf"], "arial black": ["ariblk.ttf"], "impact": ["impact.ttf"], "georgia": ["georgia.ttf"],
-    "comic sans ms": ["comic.ttf"], "bangers": ["Bangers-Regular.ttf"], "luckiest guy": ["LuckiestGuy-Regular.ttf"],
-    "fredoka": ["Fredoka-Regular.ttf", "Fredoka-VariableFont_wdth,wght.ttf"], "chewy": ["Chewy-Regular.ttf"],
-    "permanent marker": ["PermanentMarker-Regular.ttf"],
-}
-
-
-def find_font(name: str, size: int, fonts_dir: str = "assets/fonts"):
-    cands = _FONT_FILES.get((name or "").lower(), [])
-    dirs = [fonts_dir]
-    if sys.platform.startswith("win"):
-        dirs.append(os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts"))
-        dirs.append(os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "Windows", "Fonts"))
-    for fn in cands + [name + ".ttf", name.replace(" ", "") + ".ttf"]:
-        for d in dirs:
-            p = os.path.join(d, fn)
-            if os.path.exists(p):
-                try:
-                    return ImageFont.truetype(p, size)
-                except Exception:
-                    pass
-    for fn in ("DejaVuSans-Bold.ttf", "arial.ttf"):
-        try:
-            return ImageFont.truetype(fn, size)
-        except Exception:
-            continue
-    return ImageFont.load_default()
+from modules.watermark import find_font  # noqa: E402
 
 
 def make_lut(chain: str):
@@ -209,6 +187,9 @@ class VideoSource:
         self._rgb_t = None
         self._rgb = None
 
+    def _convert(self, f):
+        return f.reformat(width=self.W, height=self.H, format="rgb24").to_ndarray()
+
     def _t(self, f):
         return float(f.pts * self.tb) if f.pts is not None else 0.0
 
@@ -236,7 +217,7 @@ class VideoSource:
             return self._rgb
         ft = self._t(f)
         if self._rgb_t != ft:
-            self._rgb = f.reformat(width=self.W, height=self.H, format="rgb24").to_ndarray()
+            self._rgb = self._convert(f)
             self._rgb_t = ft
         return self._rgb
 
@@ -249,16 +230,20 @@ class VideoSource:
 
 # ---------------------------------------------------------- engine
 class GLEngine:
-    def __init__(self, video_path, preview_h=480, fonts_dir="assets/fonts"):
+    def __init__(self, video_path, preview_h=480, fonts_dir="assets/fonts", size=None):
         self.video_path = video_path
         self.fonts_dir = fonts_dir
-        probe = av.open(video_path)
-        vs = probe.streams.video[0]
-        w, h = vs.codec_context.width, vs.codec_context.height
-        self.duration = float(probe.duration / 1e6) if probe.duration else 0.0
-        probe.close()
-        self.H = min(preview_h, h) // 2 * 2
-        self.W = int(round(w * self.H / h / 2) * 2)
+        if size:                      # mode komposisi: banyak sumber, ukuran keluaran ditentukan
+            self.W, self.H = size
+            self.duration = 0.0
+        else:
+            probe = av.open(video_path)
+            vs = probe.streams.video[0]
+            w, h = vs.codec_context.width, vs.codec_context.height
+            self.duration = float(probe.duration / 1e6) if probe.duration else 0.0
+            probe.close()
+            self.H = min(preview_h, h) // 2 * 2
+            self.W = int(round(w * self.H / h / 2) * 2)
         self.ctx = moderngl.create_standalone_context()
         self.prog = self.ctx.program(vertex_shader=VERT, fragment_shader=FRAG)
         vbo = self.ctx.buffer(np.array([-1, -1, 1, -1, -1, 1, 1, 1], dtype="f4"))
@@ -269,16 +254,22 @@ class GLEngine:
         self.texT = self.ctx.texture((self.W, self.H), 4)
         self.texT.filter = (moderngl.LINEAR, moderngl.LINEAR)
         self.texT.write(bytes(self.W * self.H * 4))
+        self.texW = self.ctx.texture((self.W, self.H), 4)
+        self.texW.filter = (moderngl.LINEAR, moderngl.LINEAR)
+        self.texW.write(bytes(self.W * self.H * 4))
+        self.wm_bbox = None
         ident = np.zeros((LUT_N, LUT_N, LUT_N, 3), dtype=np.uint8)
         self.lutF = self._tex3d(ident)
         self.lutA = self._tex3d(ident)
-        self.texA.use(0); self.texB.use(1); self.texT.use(2); self.lutF.use(3); self.lutA.use(4)
-        for n, i in (("A", 0), ("B", 1), ("TXT", 2), ("LUTF", 3), ("LUTA", 4)):
+        self.texA.use(0); self.texB.use(1); self.texT.use(2); self.lutF.use(3); self.lutA.use(4); self.texW.use(5)
+        for n, i in (("A", 0), ("B", 1), ("TXT", 2), ("LUTF", 3), ("LUTA", 4), ("WM", 5)):
             self.prog[n] = i
+        self.prog["wmOn"] = 0.0
         self.prog["aspect"] = self.W / self.H
         self.prog["texel"] = (1.0 / self.W, 1.0 / self.H)
-        self.srcA = VideoSource(video_path, self.W, self.H)
-        self.srcB = VideoSource(video_path, self.W, self.H)
+        self.srcA = VideoSource(video_path, self.W, self.H) if not size else None
+        self.srcB = VideoSource(video_path, self.W, self.H) if not size else None
+        self.kb_ratio = 0.04
         self.segs = []
         self.total = 0.0
         self.use_lutF = 0
@@ -288,6 +279,13 @@ class GLEngine:
         self.text_style = {}
         self._text_cache = {}
         self._look_key = None
+
+    def _frame(self, seg_i, which, t):
+        """Frame sumber untuk segmen seg_i pada waktu sumber t. Mode komposisi menimpa ini."""
+        return (self.srcA if which == "A" else self.srcB).frame_at(t)
+
+    def zoom_at(self, t):
+        return 1.0
 
     def _tex2d(self):
         t = self.ctx.texture((self.W, self.H), 3)
@@ -339,6 +337,18 @@ class GLEngine:
 
     def set_look(self, filter_preset="none", intensity=1.0, adjust=None):
         self.apply_look(self.compute_look(filter_preset, adjust), intensity)
+
+    def set_watermark(self, wm):
+        """wm: dict dari modules.watermark (None / enabled=False = mati). Mengembalikan bbox piksel atau None."""
+        from modules.watermark import make_watermark_rgba
+        arr, bbox = make_watermark_rgba(wm, self.W, self.H, self.fonts_dir)
+        self.wm_bbox = bbox
+        if arr is None:
+            self.prog["wmOn"] = 0.0
+        else:
+            self.texW.write(arr.tobytes())
+            self.prog["wmOn"] = 1.0
+        return bbox
 
     def set_text_style(self, style):
         self.text_style = dict(style or {})
@@ -418,8 +428,8 @@ class GLEngine:
         P = self.prog
         if in_tr:
             sp = self.segs[idx - 1]
-            fa = self.srcA.frame_at(sp["start"] + (t - sp["t0"]))
-            fb = self.srcB.frame_at(s["start"] + local)
+            fa = self._frame(idx - 1, "A", sp["start"] + (t - sp["t0"]))
+            fb = self._frame(idx, "B", s["start"] + local)
             P["tr"] = TRANS_IDS.get(s["tr"], 1)
             P["prog"] = local / s["td"]
             P["tA"], P["dA"] = t - sp["t0"], sp["d"]
@@ -427,7 +437,7 @@ class GLEngine:
             P["fxA"], P["fxB"] = EFFECT_IDS.get(sp["fx"], 0), EFFECT_IDS.get(s["fx"], 0)
             self.texA.write(fa.tobytes()); self.texB.write(fb.tobytes())
         else:
-            fa = self.srcA.frame_at(s["start"] + local)
+            fa = self._frame(idx, "A", s["start"] + local)
             P["tr"] = 0
             P["prog"] = 0.0
             P["tA"], P["dA"] = local, s["d"]
@@ -436,6 +446,8 @@ class GLEngine:
             self.texA.write(fa.tobytes())
         P["useLutF"], P["useLutA"] = self.use_lutF, self.use_lutA
         P["inten"] = self.inten
+        P["zp"] = self.zoom_at(t)
+        P["kbr"] = self.kb_ratio
         P["vign"], P["grain"], P["sharp"] = self.sp["vignette"], self.sp["grain"], self.sp["sharp"]
         # teks: tampil di [show0, show1] dengan fade 0.18 s
         alpha = 0.0
@@ -452,8 +464,9 @@ class GLEngine:
         return np.frombuffer(self.fbo.read(components=3), dtype=np.uint8).reshape(self.H, self.W, 3)[::-1]
 
     def close(self):
-        self.srcA.close()
-        self.srcB.close()
+        for s_ in (self.srcA, self.srcB):
+            if s_ is not None:
+                s_.close()
         try:
             self.ctx.release()
         except Exception:

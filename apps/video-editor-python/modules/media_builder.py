@@ -8,7 +8,7 @@ from modules.photo_to_video import create_ken_burns_clip, _cover_resize_crop
 from modules.effects import apply_intro_zoom
 from config import (
     VIDEO_WIDTH, VIDEO_HEIGHT, MIN_PHOTO_DURATION,
-    ZOOM_PUNCH_ENABLED, TRANSITION_ENABLED, TRANSITION_DURATION,
+    ZOOM_PUNCH_ENABLED, TRANSITION_ENABLED, TRANSITION_DURATION, KEN_BURNS_ZOOM_RATIO,
 )
 
 PHOTO_EXT = (".jpg", ".jpeg", ".png")
@@ -48,7 +48,7 @@ def _concat_with_transitions(clips: list, transition_enabled: bool):
     return concatenate_videoclips(faded_clips, method="compose", padding=-TRANSITION_DURATION)
 
 
-def build_media_video(media_paths: list, target_duration: float, output_path: str, tmp_dir: str = "output/_tmp",
+def _build_media_video_moviepy(media_paths: list, target_duration: float, output_path: str, tmp_dir: str = "output/_tmp",
                        zoom_punch_enabled: bool = None, transition_enabled: bool = None):
     os.makedirs(tmp_dir, exist_ok=True)
 
@@ -122,3 +122,60 @@ def build_media_video(media_paths: list, target_duration: float, output_path: st
 
     print(f"[INFO] Media gabungan tersimpan di: {output_path}")
     return output_path, music_audio_path
+
+
+def _probe_duration(path: str) -> float:
+    from modules.cut_recipe import probe_video
+    return float(probe_video(path)["duration"])
+
+
+def build_media_video(media_paths: list, target_duration: float, output_path: str, tmp_dir: str = "output/_tmp",
+                       zoom_punch_enabled: bool = None, transition_enabled: bool = None):
+    """Jalur GPU (moderngl + NVENC). Kalau tidak bisa dipakai, otomatis pakai jalur moviepy lama."""
+    if zoom_punch_enabled is None:
+        zoom_punch_enabled = ZOOM_PUNCH_ENABLED
+    if transition_enabled is None:
+        transition_enabled = TRANSITION_ENABLED
+    try:
+        import moderngl  # noqa: F401
+        import av  # noqa: F401
+        from modules.gl_compose import compose_media
+        os.makedirs(tmp_dir, exist_ok=True)
+
+        video_items, photo_paths, music_audio_path = [], [], None
+        for p in media_paths:
+            if _is_photo(p):
+                photo_paths.append(p)
+                continue
+            _validate_is_real_video(p)
+            if music_audio_path is None and has_audio_stream(p):
+                base_out = os.path.splitext(os.path.basename(output_path))[0]
+                music_audio_path = os.path.join(tmp_dir, f"{base_out}_extracted_music.wav")
+                extract_audio_from_video(p, music_audio_path)
+            base = os.path.splitext(os.path.basename(p))[0].replace(" ", "_")
+            cut_path = os.path.join(tmp_dir, f"{base}_cut.mp4")
+            auto_cut_video(p, cut_path)
+            video_items.append((p, cut_path))
+
+        lookup = {o: c for o, c in video_items}
+        video_total = sum(_probe_duration(c) for _, c in video_items)
+        remaining = max(target_duration - video_total, 0)
+        per_photo = max(remaining / len(photo_paths), MIN_PHOTO_DURATION) if photo_paths else 0
+        if photo_paths:
+            print(f"[INFO] Durasi video: {video_total:.1f}s, sisa buat {len(photo_paths)} foto: {per_photo:.1f}s/foto")
+
+        items = []
+        for p in media_paths:
+            if _is_photo(p):
+                items.append({"kind": "photo", "path": p, "duration": per_photo})
+            else:
+                items.append({"kind": "video", "path": lookup[p], "duration": _probe_duration(lookup[p])})
+
+        compose_media(items, output_path, VIDEO_WIDTH, VIDEO_HEIGHT, fps=30, transition_enabled=transition_enabled,
+                      transition_sec=TRANSITION_DURATION, zoom_punch=zoom_punch_enabled, kb_ratio=KEN_BURNS_ZOOM_RATIO)
+        print(f"[INFO] Media gabungan (GPU) tersimpan di: {output_path}")
+        return output_path, music_audio_path
+    except Exception as e:
+        print(f"[WARNING] Jalur GPU gagal ({e}). Pakai jalur moviepy (CPU).")
+        return _build_media_video_moviepy(media_paths, target_duration, output_path, tmp_dir,
+                                          zoom_punch_enabled, transition_enabled)

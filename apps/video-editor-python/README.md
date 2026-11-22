@@ -36,6 +36,8 @@ Susun ulang satu video mentah jadi video pendek dari potongan-potongan ("segmen"
    - **Gaya teks**: teks langsung terlihat di frame. Font, ukuran, posisi, tebal, kotak, fade bisa diatur di bawahnya.
    - **Transisi / Efek**: potongan pendek di sekitar segmen diputar berulang supaya langsung kelihatan.
      Centang "terapkan ke semua segmen" untuk menerapkan sekaligus.
+   - **Watermark**: tab Watermark → centang "Pakai watermark", pilih **Teks** (font, warna, garis tepi) atau **Gambar** (logo PNG/JPG),
+     atur ukuran dan transparansi. Posisinya digeser langsung dengan drag di preview (atau tombol pojok/tengah). Ikut ter-render saat Ekspor.
    - **Filter** + slider intensitas, dan **Adjust** (suhu, eksposur, kontras, dst). Ada jeda sekitar 0,4 detik sebelum warna terpasang.
 4. **Putar / Jeda**: tombol Putar atau geser timeline. Suara dicampur dulu sebentar ("Menyiapkan suara...").
    Kotak **Putar dengan VO**: VO AI ikut dibuat (memakai kuota Gemini, hasil di-cache). Kalau mati, VO AI tidak ikut diputar.
