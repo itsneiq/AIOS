@@ -31,7 +31,7 @@ void main(){ uv = p*0.5+0.5; gl_Position = vec4(p,0.0,1.0); }
 """
 
 FRAG = """#version 330
-uniform sampler2D A; uniform sampler2D B; uniform sampler2D TXT;
+uniform sampler2D A; uniform sampler2D B; uniform sampler2D TXT; uniform sampler2D WM; uniform float wmOn;
 uniform sampler3D LUTF; uniform sampler3D LUTA;
 uniform int useLutF; uniform int useLutA;
 uniform float tA; uniform float dA; uniform float tB; uniform float dB;
@@ -147,40 +147,15 @@ void main(){
   if (grain > 0.01){ c += (hash(u*vec2(733.0,911.0)+fract(tA*7.0))-0.5)*grain*0.35; }
   vec4 t = texture(TXT, u);
   c = c*(1.0 - t.a*txtAlpha) + t.rgb*txtAlpha;
+  vec4 w = texture(WM, u);
+  c = c*(1.0 - w.a*wmOn) + w.rgb*(w.a*wmOn);
   outc = vec4(clamp(c,0.0,1.0), 1.0);
 }
 """
 
 
 # ---------------------------------------------------------- util: font & LUT
-_FONT_FILES = {
-    "arial": ["arial.ttf"], "arial black": ["ariblk.ttf"], "impact": ["impact.ttf"], "georgia": ["georgia.ttf"],
-    "comic sans ms": ["comic.ttf"], "bangers": ["Bangers-Regular.ttf"], "luckiest guy": ["LuckiestGuy-Regular.ttf"],
-    "fredoka": ["Fredoka-Regular.ttf", "Fredoka-VariableFont_wdth,wght.ttf"], "chewy": ["Chewy-Regular.ttf"],
-    "permanent marker": ["PermanentMarker-Regular.ttf"],
-}
-
-
-def find_font(name: str, size: int, fonts_dir: str = "assets/fonts"):
-    cands = _FONT_FILES.get((name or "").lower(), [])
-    dirs = [fonts_dir]
-    if sys.platform.startswith("win"):
-        dirs.append(os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts"))
-        dirs.append(os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "Windows", "Fonts"))
-    for fn in cands + [name + ".ttf", name.replace(" ", "") + ".ttf"]:
-        for d in dirs:
-            p = os.path.join(d, fn)
-            if os.path.exists(p):
-                try:
-                    return ImageFont.truetype(p, size)
-                except Exception:
-                    pass
-    for fn in ("DejaVuSans-Bold.ttf", "arial.ttf"):
-        try:
-            return ImageFont.truetype(fn, size)
-        except Exception:
-            continue
-    return ImageFont.load_default()
+from modules.watermark import find_font  # noqa: E402
 
 
 def make_lut(chain: str):
@@ -269,12 +244,17 @@ class GLEngine:
         self.texT = self.ctx.texture((self.W, self.H), 4)
         self.texT.filter = (moderngl.LINEAR, moderngl.LINEAR)
         self.texT.write(bytes(self.W * self.H * 4))
+        self.texW = self.ctx.texture((self.W, self.H), 4)
+        self.texW.filter = (moderngl.LINEAR, moderngl.LINEAR)
+        self.texW.write(bytes(self.W * self.H * 4))
+        self.wm_bbox = None
         ident = np.zeros((LUT_N, LUT_N, LUT_N, 3), dtype=np.uint8)
         self.lutF = self._tex3d(ident)
         self.lutA = self._tex3d(ident)
-        self.texA.use(0); self.texB.use(1); self.texT.use(2); self.lutF.use(3); self.lutA.use(4)
-        for n, i in (("A", 0), ("B", 1), ("TXT", 2), ("LUTF", 3), ("LUTA", 4)):
+        self.texA.use(0); self.texB.use(1); self.texT.use(2); self.lutF.use(3); self.lutA.use(4); self.texW.use(5)
+        for n, i in (("A", 0), ("B", 1), ("TXT", 2), ("LUTF", 3), ("LUTA", 4), ("WM", 5)):
             self.prog[n] = i
+        self.prog["wmOn"] = 0.0
         self.prog["aspect"] = self.W / self.H
         self.prog["texel"] = (1.0 / self.W, 1.0 / self.H)
         self.srcA = VideoSource(video_path, self.W, self.H)
@@ -339,6 +319,18 @@ class GLEngine:
 
     def set_look(self, filter_preset="none", intensity=1.0, adjust=None):
         self.apply_look(self.compute_look(filter_preset, adjust), intensity)
+
+    def set_watermark(self, wm):
+        """wm: dict dari modules.watermark (None / enabled=False = mati). Mengembalikan bbox piksel atau None."""
+        from modules.watermark import make_watermark_rgba
+        arr, bbox = make_watermark_rgba(wm, self.W, self.H, self.fonts_dir)
+        self.wm_bbox = bbox
+        if arr is None:
+            self.prog["wmOn"] = 0.0
+        else:
+            self.texW.write(arr.tobytes())
+            self.prog["wmOn"] = 1.0
+        return bbox
 
     def set_text_style(self, style):
         self.text_style = dict(style or {})

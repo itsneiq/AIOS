@@ -455,7 +455,7 @@ def _run_ffmpeg(cmd: list, codec_idx: int, cwd: str, eco: bool = True) -> subpro
 
 
 def _gpu_export(video_path, segs, total, W, H, transition_sec, text_style, filter_preset, filter_intensity,
-                adjust, inputs, audio_fc, has_audio, target, tmp_dir, base, fonts_dir, eco):
+                adjust, watermark, inputs, audio_fc, has_audio, target, tmp_dir, base, fonts_dir, eco):
     """Video dirender frame-demi-frame oleh GLEngine (GPU) dan di-pipe ke NVENC; audio dari graf ffmpeg terpisah."""
     from modules.gl_engine import GLEngine
     kw = _popen_kwargs(eco)
@@ -474,6 +474,7 @@ def _gpu_export(video_path, segs, total, W, H, transition_sec, text_style, filte
         eng.set_segments(segs, transition_sec)
         eng.set_text_style(text_style)
         eng.set_look(filter_preset, filter_intensity, adjust)
+        eng.set_watermark(watermark)
         n = int(round(eng.total * OUT_FPS))
         base_cmd = ["ffmpeg", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(OUT_FPS), "-i", "-"]
         if audio_file:
@@ -527,6 +528,7 @@ def render_cut_recipe(
     max_vo_speedup: float = MAX_VO_SPEEDUP,
     gpu: bool = True,                      # ekspor lewat mesin GPU yang sama dengan preview
     audio_only_out: str = None,            # kalau diisi: hanya bikin campuran audio (WAV) untuk pemutar preview
+    watermark: dict = None,                # lihat modules/watermark.py
     timeline_out: list = None,             # diisi start/end segmen final (setelah VO memperpanjang segmen)
 ) -> str:
     t_start = time.time()
@@ -609,6 +611,15 @@ def render_cut_recipe(
 
     # ---- 5. graf video ----
     inputs = ["-i", video_path]
+    wm_png = None
+    if watermark and watermark.get("enabled") and not audio_only_out:
+        from modules.watermark import make_watermark_rgba
+        from PIL import Image as _Img
+        arr, _bb = make_watermark_rgba(watermark, W, H, fonts_dir)
+        if arr is not None:
+            wm_png = os.path.join(tmp_dir, f"{base}_cr_wm.png")
+            _Img.fromarray(arr, "RGBA").save(wm_png)
+            inputs += ["-i", wm_png]
     fc = []
     n = len(segs)
     for i, s in enumerate(segs):
@@ -633,12 +644,16 @@ def render_cut_recipe(
 
     fonts_escaped = os.path.abspath(fonts_dir).replace("\\", "/").replace(":", "\\:")
     fc.append(build_color_graph(cur, "vgrade", filter_preset, adjust, filter_intensity))
-    fc.append(f"[vgrade]subtitles={ass_name}:fontsdir='{fonts_escaped}'[vout]")
+    if wm_png:
+        fc.append(f"[vgrade]subtitles={ass_name}:fontsdir='{fonts_escaped}'[vsub]")
+        fc.append("[vsub][1:v]overlay=0:0:format=auto,format=yuv420p[vout]")
+    else:
+        fc.append(f"[vgrade]subtitles={ass_name}:fontsdir='{fonts_escaped}'[vout]")
 
     # ---- 6. graf audio ----
     a_start = len(fc)
     labels = []
-    nxt = 1
+    nxt = 2 if wm_png else 1
 
     if audio_mode == "original" and info["has_audio"] and not use_vo:
         for i, s in enumerate(segs):
@@ -714,7 +729,7 @@ def render_cut_recipe(
     if gpu and not preview:
         try:
             _gpu_export(video_path, segs, total, W, H, transition_sec, text_style, filter_preset,
-                        filter_intensity, adjust, inputs, fc[a_start:], has_audio_out, render_target,
+                        filter_intensity, adjust, watermark, inputs, fc[a_start:], has_audio_out, render_target,
                         tmp_dir, base, fonts_dir, eco)
             done_gpu = True
         except Exception as e:
