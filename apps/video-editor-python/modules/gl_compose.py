@@ -25,6 +25,8 @@ def _cover_array(im, W, H):
 
 class CoverVideoSource(VideoSource):
     def _convert(self, f):
+        if self.yuv:
+            return self._to_yuv(f)
         scale = max(self.W / f.width, self.H / f.height)
         cw, ch = max(self.W, int(np.ceil(f.width * scale))), max(self.H, int(np.ceil(f.height * scale)))
         a = f.reformat(width=cw, height=ch, format="rgb24").to_ndarray()
@@ -50,8 +52,9 @@ class GLCompose(GLEngine):
         self.kb_ratio = kb_ratio
         self.punch = punch
         self.items = items
-        self.sources = [PhotoSource(it["path"], W, H) if it["kind"] == "photo" else CoverVideoSource(it["path"], W, H)
-                        for it in items]
+        self.cover = True
+        self.sources = [PhotoSource(it["path"], W, H) if it["kind"] == "photo"
+                        else CoverVideoSource(it["path"], W, H, yuv=self.yuv_ok) for it in items]
 
     def _frame(self, seg_i, which, t):
         return self.sources[seg_i].frame_at(t)

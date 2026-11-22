@@ -90,6 +90,30 @@ def render_final_video(
     if color_grade_preset is None:
         color_grade_preset = COLOR_GRADE_PRESET
 
+    # ---- jalur GPU (moderngl + NVENC); kalau gagal, lanjut ke jalur ffmpeg di bawah ----
+    try:
+        import moderngl  # noqa: F401
+        import av  # noqa: F401
+        from modules.gl_final import render_final_gpu
+        wm = None
+        if watermark_enabled:
+            if watermark_type == "image" and watermark_path and os.path.exists(watermark_path):
+                wm = {"enabled": True, "kind": "image", "image_path": watermark_path, "width_px": 150,
+                      "opacity": 0.8, "anchor": watermark_position, "margin_px": 10}
+            elif watermark_type == "text" and watermark_text:
+                wm = {"enabled": True, "kind": "text", "text": watermark_text, "font_name": "Arial",
+                      "color_hex": "FFFFFF", "outline": False, "em_px": 24, "opacity": 0.8,
+                      "anchor": watermark_position, "margin_px": 20}
+        sub_style = SUBTITLE_STYLES.get(subtitle_style, SUBTITLE_STYLES["simple"]) \
+            if isinstance(subtitle_style, str) else subtitle_style
+        return render_final_gpu(
+            video_path, audio_path, output_path, srt_path=srt_path, subtitle_on=subtitle_on,
+            subtitle_style=sub_style, hook_srt_path=hook_srt_path, hook_on=hook_on, hook_style=hook_style,
+            watermark=wm, color_chain=COLOR_GRADE_PRESETS.get(color_grade_preset) if color_grade_preset else None,
+            fonts_dir=FONTS_DIR)
+    except Exception as e:
+        print(f"[WARNING] Render final GPU gagal ({e}). Pakai jalur ffmpeg (CPU).")
+
     video_dur = _get_duration(video_path)
     audio_dur = _get_duration(audio_path)
 

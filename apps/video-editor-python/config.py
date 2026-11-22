@@ -159,3 +159,6 @@ WATERMARK_PATH = "assets/watermark/logo.png"
 WATERMARK_POSITION = "Kanan Bawah"
 
 COLOR_GRADE_PRESET = "none"
+
+# Decode video lewat GPU (NVDEC). Eksperimen: nyalakan hanya setelah dites di PC sendiri.
+USE_NVDEC = False
