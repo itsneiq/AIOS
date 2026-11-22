@@ -1,5 +1,6 @@
 # modules/gemini_tts_engine.py
 import base64
+import time
 import wave
 import requests
 from config import GEMINI_API_KEYS, GEMINI_TTS_MODEL
@@ -34,10 +35,13 @@ def generate_gemini_tts_audio(text: str, output_path: str, voice_name: str = "Ze
     }
 
     last_error = None
-    for i, api_key in enumerate(GEMINI_API_KEYS):
-        headers = {"x-goog-api-key": api_key, "Content-Type": "application/json"}
+    max_rounds = 4          # berapa kali ngulang semua key kalau kena limit / respons kosong
+    wait_seconds = 25       # jeda antar ronde (limit gratisan Gemini TTS itu per menit)
 
-        try:
+    for round_no in range(1, max_rounds + 1):
+        for i, api_key in enumerate(GEMINI_API_KEYS):
+            headers = {"x-goog-api-key": api_key, "Content-Type": "application/json"}
+
             response = requests.post(url, headers=headers, json=payload)
 
             if response.status_code == 429:
@@ -46,20 +50,33 @@ def generate_gemini_tts_audio(text: str, output_path: str, voice_name: str = "Ze
                 continue
 
             if response.status_code != 200:
+                if response.status_code >= 500:
+                    last_error = f"status {response.status_code}: {response.text[:200]}"
+                    continue
                 raise Exception(f"Gemini TTS gagal (status {response.status_code}): {response.text}")
 
             data = response.json()
-            audio_b64 = data["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
-            pcm_data = base64.b64decode(audio_b64)
+            try:
+                audio_b64 = data["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
+            except (KeyError, IndexError, TypeError):
+                # Gemini TTS kadang ngasih respons kosong (tanpa audio). Anggap sementara, coba lagi.
+                reason = ""
+                try:
+                    reason = data["candidates"][0].get("finishReason", "")
+                except Exception:
+                    pass
+                print(f"[WARNING] Gemini key #{i + 1} balikin respons tanpa audio ({reason or 'kosong'}), coba lagi...")
+                last_error = f"respons tanpa audio ({reason or 'kosong'})"
+                continue
 
-            _save_wav(pcm_data, output_path)
+            _save_wav(base64.b64decode(audio_b64), output_path)
             print(f"[INFO] Audio VO (Gemini - {voice_name}) tersimpan di: {output_path}")
             return output_path
 
-        except Exception as e:
-            if "429" in str(e) or "quota" in str(e).lower():
-                last_error = e
-                continue
-            raise e
+        if round_no < max_rounds:
+            print(f"[INFO] Nunggu {wait_seconds} detik (limit Gemini per menit), lalu ulang "
+                  f"(percobaan {round_no + 1}/{max_rounds})...")
+            time.sleep(wait_seconds)
 
-    raise Exception(f"Semua API key Gemini kena limit/gagal buat TTS. Error terakhir: {last_error}")
+    raise Exception(f"Gemini TTS gagal setelah {max_rounds} percobaan. Error terakhir: {last_error}. "
+                    f"Coba pakai suara Azure (Ardi/Gadis) yang tidak dibatasi menit, atau tunggu beberapa menit.")
