@@ -294,6 +294,31 @@ def build_color_graph(src: str, dst: str, filter_preset: str = "none", adjust: d
     return f"[{src}]{chain}[{dst}]"
 
 
+def split_color_spatial(chain: str):
+    """Pecah rantai filter: (bagian warna murni, {sharp, vignette, grain}) — dipakai mesin GPU preview."""
+    color, spatial = [], {"sharp": 0.0, "vignette": 0.0, "grain": 0.0}
+    for part in [x for x in (chain or "").split(",") if x]:
+        if part.startswith("unsharp="):
+            try:
+                spatial["sharp"] = max(spatial["sharp"], float(part.split(":")[2]))
+            except Exception:
+                spatial["sharp"] = 0.8
+        elif part.startswith("noise="):
+            try:
+                spatial["grain"] = max(spatial["grain"], float(part.split("alls=")[1].split(":")[0]) / 25.0)
+            except Exception:
+                spatial["grain"] = 0.3
+        elif part.startswith("vignette="):
+            try:
+                ang = float(part.split("angle=")[1])
+                spatial["vignette"] = max(spatial["vignette"], (1.5708 - ang) / (1.5708 - 0.5236))
+            except Exception:
+                spatial["vignette"] = 0.4
+        else:
+            color.append(part)
+    return ",".join(color), spatial
+
+
 def build_color_filters(filter_preset: str = "none", adjust: dict = None) -> str:
     """Versi rantai lurus (tanpa intensity), dipakai untuk preview satu frame."""
     return ",".join(x for x in (_filter_chain(filter_preset), _adjust_chain(adjust)) if x)

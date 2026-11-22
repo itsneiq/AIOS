@@ -10,9 +10,11 @@ import os
 import sys
 import threading
 import subprocess
+import time
+import tkinter as tk
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
-from PIL import Image
+from PIL import Image, ImageTk
 
 from modules.cut_recipe import (
     parse_recipe, recipe_total_duration, render_cut_recipe, probe_video, render_preview_frame,
@@ -62,6 +64,18 @@ class CutStudioFrame(ctk.CTkFrame):
         self._frame_job = None
         self._frame_token = 0
         self._frame_img = None
+        self.engine = None
+        self.proj_dirty = True
+        self.playing = False
+        self.loop_range = None
+        self._tick_job = None
+        self._show_job = None
+        self._look_job = None
+        self._look_gen = 0
+        self._look_result = None
+        self._ph = None
+        self._play_t0 = 0.0
+        self._play_wall = 0.0
         self._thumbs = {}
         self._thumb_started = False
         self._result = None
@@ -283,11 +297,13 @@ class CutStudioFrame(ctk.CTkFrame):
         c = self.center
         c.grid_rowconfigure(0, weight=1)
         c.grid_columnconfigure(0, weight=1)
-        self.lbl_frame = ctk.CTkLabel(c, text="Pilih video dulu", text_color="gray")
+        self.lbl_frame = tk.Label(c, text="Pilih video dulu", fg="#888888", bg="#111111", bd=0)
         self.lbl_frame.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
 
         ctl = ctk.CTkFrame(c, fg_color="transparent")
         ctl.grid(row=1, column=0, sticky="ew", padx=8)
+        self.btn_play = ctk.CTkButton(ctl, text="Putar", width=64, command=self._toggle_play)
+        self.btn_play.pack(side="left", padx=(0, 8))
         self.s_play = ctk.CTkSlider(ctl, from_=0, to=1, command=self._on_scrub)
         self.s_play.set(0)
         self.s_play.pack(side="left", fill="x", expand=True, padx=(0, 8))
@@ -348,12 +364,13 @@ class CutStudioFrame(ctk.CTkFrame):
         self.vid_info = info
         self.src_dur = info["duration"]
         self.lbl_video.configure(text=os.path.basename(path)[:22], text_color="white")
-        self.s_play.configure(to=max(self.src_dur, 0.1))
         self.playhead = 0.0
         self._thumbs.clear()
         self._thumb_started = False
+        self._stop_play()
+        self._close_engine()
         self._redraw_timeline()
-        self._schedule_frame(0)
+        self._mark_dirty(0)
 
     # ================================================== segmen: data
     def _load_rows(self, segs):
@@ -363,6 +380,7 @@ class CutStudioFrame(ctk.CTkFrame):
         self.sel = 0
         self._render_cards()
         self._redraw_timeline()
+        self._mark_dirty()
 
     def _append_row(self, seg):
         seg = seg or {}
@@ -381,15 +399,20 @@ class CutStudioFrame(ctk.CTkFrame):
             "transition": ctk.StringVar(value=TR_LABEL.get(seg.get("transition", "cut"), "Potong langsung")),
             "effect": ctk.StringVar(value=FX_LABEL.get(seg.get("effect", "none"), "Tanpa efek")),
         }
-        for k in ("start", "end"):
-            row[k].trace_add("write", lambda *a: self._redraw_timeline())
+        for k in ("start", "end", "text", "transition", "effect"):
+            row[k].trace_add("write", lambda *a: self._on_row_edit())
         self.rows.append(row)
+
+    def _on_row_edit(self):
+        self._redraw_timeline()
+        self._mark_dirty()
 
     def _add_row(self, seg):
         self._append_row(seg)
         self.sel = len(self.rows) - 1
         self._render_cards()
         self._redraw_timeline()
+        self._mark_dirty()
 
     def _render_cards(self):
         for w in self.cards.winfo_children():
@@ -433,8 +456,10 @@ class CutStudioFrame(ctk.CTkFrame):
         if len(self.rows) <= 1:
             return
         self.rows.remove(row)
+        self.sel = min(self.sel, len(self.rows) - 1)
         self._render_cards()
         self._redraw_timeline()
+        self._mark_dirty()
 
     def _move(self, row, d):
         i = self.rows.index(row)
@@ -444,6 +469,7 @@ class CutStudioFrame(ctk.CTkFrame):
             self.sel = j
             self._render_cards()
             self._redraw_timeline()
+            self._mark_dirty()
 
     def _pick_row_vo(self, row):
         p = filedialog.askopenfilename(filetypes=[("Audio", "*.wav *.mp3 *.m4a *.aac")])
@@ -452,12 +478,10 @@ class CutStudioFrame(ctk.CTkFrame):
             self._render_cards()
 
     def _peek(self, row):
-        try:
-            self.playhead = float(row["start"].get().replace(",", "."))
-        except ValueError:
-            return
-        self.s_play.set(self.playhead)
-        self._schedule_frame(0)
+        i = self.rows.index(row)
+        self._sync_project()
+        if self.engine and i < len(self.engine.segs):
+            self._seek(self.engine.segs[i]["show0"] + 0.05)
 
     def _paste_recipe(self):
         win = ctk.CTkToplevel(self)
@@ -500,11 +524,15 @@ class CutStudioFrame(ctk.CTkFrame):
                 r["transition"].set(TR_LABEL[key])
         self._render_cards()
         self._redraw_timeline()
+        self._mark_dirty()
+        self._loop_selected("transition")
 
     def _apply_effect(self, key):
         for r in self._targets(self.v_all_fx):
             r["effect"].set(FX_LABEL[key])
         self._render_cards()
+        self._mark_dirty()
+        self._loop_selected("effect")
 
     def _apply_filter(self, key):
         self.filter_key = key
@@ -515,7 +543,9 @@ class CutStudioFrame(ctk.CTkFrame):
 
     def _on_intensity(self, v):
         self.filter_intensity = float(v)
-        self._schedule_frame()
+        if self.engine:
+            self.engine.inten = self.filter_intensity
+            self._mark_dirty(30, resync=False)
 
     def _reset_adjust(self):
         for k, (s, val) in self.adj.items():
@@ -538,9 +568,11 @@ class CutStudioFrame(ctk.CTkFrame):
                 self.c_color.set(nm)
                 break
         self._status(f"Gaya teks: {TEXT_PRESETS[key][0]}")
+        self._mark_dirty()
+        self._loop_selected("text")
 
     def _text_changed(self):
-        pass
+        self._mark_dirty()
 
     def _on_color(self, name):
         hx = self.app.color_map.get(name)
@@ -562,57 +594,197 @@ class CutStudioFrame(ctk.CTkFrame):
     def _adjust_values(self):
         return {k: float(s.get()) for k, (s, _) in self.adj.items()}
 
-    def _on_scrub(self, v):
-        self.playhead = float(v)
-        self._schedule_frame()
+    # ================================================== pemutar GPU (preview realtime)
+    def _ensure_engine(self):
+        if self.engine is not None or not self.video_path:
+            return self.engine
+        try:
+            from modules.gl_engine import GLEngine
+            self.engine = GLEngine(self.video_path, preview_h=520, fonts_dir="assets/fonts")
+            self._look_gen += 1
+            self._apply_look_async()
+        except Exception as e:
+            self.engine = None
+            self.lbl_frame.configure(image="", text=f"Preview GPU tidak tersedia:\n{e}", fg="#f87171")
+            self._status("Preview GPU gagal dibuka. Tombol Preview/Ekspor tetap bisa dipakai.", "#f87171")
+        return self.engine
 
-    def _schedule_frame(self, delay=350):
+    def _close_engine(self):
+        if self.engine is not None:
+            try:
+                self.engine.close()
+            except Exception:
+                pass
+            self.engine = None
+        self.proj_dirty = True
+
+    def _sync_project(self):
+        if not self.engine:
+            return
+        if self.proj_dirty:
+            try:
+                segs = self._collect_segments()
+            except ValueError:
+                return
+            self.engine.set_segments(segs, float(self.s_trans.get()))
+            self.engine.set_text_style(self._current_text_style())
+            self.s_play.configure(to=max(self.engine.total, 0.1))
+            self.proj_dirty = False
+
+    def _mark_dirty(self, delay=80, resync=True):
+        if resync:
+            self.proj_dirty = True
+        if self._show_job:
+            self.after_cancel(self._show_job)
+        self._show_job = self.after(delay, self._show_now)
+
+    def _show_now(self):
+        self._show_job = None
+        if not self._ensure_engine():
+            return
+        self._sync_project()
+        self._paint(self.playhead)
+
+    def _paint(self, t):
+        e = self.engine
+        if not e or not e.segs:
+            return
+        self.playhead = min(max(t, 0.0), e.total)
+        arr = e.render(self.playhead)
+        self._ph = ImageTk.PhotoImage(Image.fromarray(arr))
+        self.lbl_frame.configure(image=self._ph, text="")
+        self.lbl_time.configure(text=f"{self.playhead:.1f} / {e.total:.1f} s")
+
+    def _seek(self, t):
+        self.playhead = t
+        self._play_wall = time.perf_counter()
+        self._play_t0 = t
+        if self.engine and self.engine.total:
+            self.s_play.set(min(t, self.engine.total))
+        self._show_now()
+
+    def _on_scrub(self, v):
+        self.loop_range = None
+        self.playhead = float(v)
+        self._play_t0 = self.playhead
+        self._play_wall = time.perf_counter()
+        if not self.playing:
+            self._mark_dirty(10, resync=False)
+
+    def _toggle_play(self):
+        if self.playing:
+            self._stop_play()
+        else:
+            if not self._ensure_engine():
+                return
+            self._sync_project()
+            self.loop_range = None
+            self._start_play()
+
+    def _start_play(self):
+        e = self.engine
+        if not e or not e.segs:
+            return
+        if self.playhead >= e.total - 0.05:
+            self.playhead = 0.0
+        self.playing = True
+        self.btn_play.configure(text="Jeda")
+        self._play_t0 = self.playhead
+        self._play_wall = time.perf_counter()
+        self._tick()
+
+    def _stop_play(self):
+        self.playing = False
+        if self._tick_job:
+            self.after_cancel(self._tick_job)
+            self._tick_job = None
+        try:
+            self.btn_play.configure(text="Putar")
+        except Exception:
+            pass
+
+    def _tick(self):
+        if not self.playing or not self.engine:
+            return
+        t0 = time.perf_counter()
+        t = self._play_t0 + (t0 - self._play_wall)
+        e = self.engine
+        if self.loop_range:
+            a, b = self.loop_range
+            if t >= b:
+                t = a
+                self._play_t0, self._play_wall = a, t0
+        elif t >= e.total:
+            self._stop_play()
+            self._paint(e.total)
+            return
+        self._paint(t)
+        self.s_play.set(self.playhead)
+        used = (time.perf_counter() - t0) * 1000
+        self._tick_job = self.after(max(1, int(1000 / 30 - used)), self._tick)
+
+    def _loop_selected(self, kind):
+        """Setelah memilih efek/transisi/teks: putar potongan pendek di sekitar segmen terpilih, berulang."""
+        if not self._ensure_engine():
+            return
+        self._sync_project()
+        e = self.engine
+        i = min(self.sel, len(e.segs) - 1)
+        if i < 0:
+            return
+        sg = e.segs[i]
+        if kind == "text":
+            self._stop_play()
+            self._seek(min(sg["show0"] + 0.6, sg["show1"] - 0.05))
+            return
+        if kind == "transition" and i > 0 and sg["td"] > 0:
+            a, b = max(sg["t0"] - 0.5, 0.0), min(sg["show0"] + 0.7, e.total)
+        else:
+            a, b = sg["t0"], min(sg["t0"] + 1.8, sg["show1"])
+        self.loop_range = (a, b)
+        self.playhead = a
+        self._stop_play()
+        self._start_play()
+
+    # ---- filter/adjust: LUT dihitung di thread (ffmpeg), dipasang di thread utama
+    def _schedule_frame(self, delay=250):
+        """Dipanggil saat filter/adjustment berubah."""
         if not self.video_path:
             return
-        if self._frame_job:
-            self.after_cancel(self._frame_job)
-        self._frame_job = self.after(delay, self._render_frame)
+        if self._look_job:
+            self.after_cancel(self._look_job)
+        self._look_job = self.after(delay, self._apply_look_async)
 
-    def _render_frame(self):
-        self._frame_job = None
-        self._frame_token += 1
-        token = self._frame_token
-        t, flt, inten, adj = self.playhead, self.filter_key, self.filter_intensity, self._adjust_values()
-        self.lbl_time.configure(text=f"{t:.1f} / {self.src_dur:.1f} s")
-        png = os.path.join(self.tmp_dir, f"_frame_{token % 3}.png")
-        os.makedirs(self.tmp_dir, exist_ok=True)
+    def _apply_look_async(self):
+        self._look_job = None
+        if not self.engine:
+            return
+        self._look_gen += 1
+        gen = self._look_gen
+        flt, adj = self.filter_key, self._adjust_values()
+        self._look_result = None
 
         def work():
             try:
-                render_preview_frame(self.video_path, t, png, 360, flt, inten, adj)
-                self._result_frame = (token, png, None)
-            except Exception as e:
-                self._result_frame = (token, None, str(e))
-        self._result_frame = None
+                from modules.gl_engine import GLEngine
+                self._look_result = (gen, GLEngine.compute_look(flt, adj), None)
+            except Exception as ex:
+                self._look_result = (gen, None, str(ex))
         threading.Thread(target=work, daemon=True).start()
-        self.after(120, lambda: self._poll_frame(token))
+        self.after(100, lambda: self._poll_look(gen))
 
-    def _poll_frame(self, token):
-        r = getattr(self, "_result_frame", None)
-        if token != self._frame_token:
+    def _poll_look(self, gen):
+        if gen != self._look_gen:
             return
-        if not r or r[0] != token:
-            self.after(120, lambda: self._poll_frame(token))
+        r = self._look_result
+        if not r or r[0] != gen:
+            self.after(100, lambda: self._poll_look(gen))
             return
-        _, png, err = r
-        if err:
-            self.lbl_frame.configure(text=f"(preview gagal)", image=None)
-            return
-        try:
-            img = Image.open(png).convert("RGB")
-            img.load()
-            h = max(self.center.winfo_height() - 190, 200)
-            h = min(h, 460)
-            w = max(int(img.width * h / img.height), 1)
-            self._frame_img = ctk.CTkImage(light_image=img, dark_image=img, size=(w, h))
-            self.lbl_frame.configure(image=self._frame_img, text="")
-        except Exception as e:
-            self.lbl_frame.configure(text=f"(preview gagal: {e})", image=None)
+        _, look, err = r
+        if look is not None and self.engine:
+            self.engine.apply_look(look, self.filter_intensity)
+            if not self.playing:
+                self._mark_dirty(0, resync=False)
 
     # ================================================== thumbnail filter (sekali, prioritas rendah)
     def _start_thumbs(self):
