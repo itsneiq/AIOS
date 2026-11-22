@@ -1,0 +1,10 @@
+moviepy==1.0.3
+auto-editor
+openai-whisper
+pandas
+google-generativeai
+azure-cognitiveservices-speech
+requests
+pillow
+openpyxl
+customtkinter
