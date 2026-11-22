@@ -28,8 +28,10 @@ COLOR_GRADE_LIST = list(COLOR_GRADE_PRESETS.keys())
 FORMULA_LABELS = {v["label"]: k for k, v in FORMULAS.items()}
 
 
-TAB_HEIGHT_BATCH = 220
-TAB_HEIGHT_MANUAL = 480
+TAB_HEIGHT_BATCH = 165
+TAB_HEIGHT_MANUAL = 470
+WINDOW_HEIGHT_BATCH = 800
+WINDOW_HEIGHT_MANUAL = 1010
 
 
 class TextRedirector:
@@ -49,7 +51,7 @@ class VideoEditorApp(ctk.CTk):
         super().__init__()
 
         self.title("AI Video Editor")
-        self.geometry("1050x950")
+        self.geometry(f"1050x{WINDOW_HEIGHT_BATCH}")
         self.minsize(900, 700)
 
         self.excel_path = ctk.StringVar(value="products.xlsx")
@@ -111,8 +113,10 @@ class VideoEditorApp(ctk.CTk):
         """Tab Batch pendek (hemat tempat), tab Manual tinggi (butuh ruang box formula)."""
         if self.tabview.get() == "Batch (dari Excel)":
             self.tabview.configure(height=TAB_HEIGHT_BATCH)
+            self.geometry(f"{self.winfo_width()}x{WINDOW_HEIGHT_BATCH}")
         else:
             self.tabview.configure(height=TAB_HEIGHT_MANUAL)
+            self.geometry(f"{self.winfo_width()}x{WINDOW_HEIGHT_MANUAL}")
 
     # ---------- TAB BATCH ----------
     def _build_batch_tab(self):
@@ -141,11 +145,8 @@ class VideoEditorApp(ctk.CTk):
                        command=self._browse_manual_media).pack(side="left", padx=10, pady=10)
         self.label_media = ctk.CTkLabel(f_media, text="Belum ada media dipilih", text_color="gray")
         self.label_media.pack(side="left", padx=10, pady=10)
-
-        f_out = ctk.CTkFrame(scroll)
-        f_out.pack(fill="x", pady=(0, 8))
-        ctk.CTkLabel(f_out, text="Nama file output:").pack(side="left", padx=10, pady=10)
-        self.entry_manual_output = ctk.CTkEntry(f_out, placeholder_text="misal produk_baru.mp4")
+        ctk.CTkLabel(f_media, text="Output:").pack(side="left", padx=(20, 5), pady=10)
+        self.entry_manual_output = ctk.CTkEntry(f_media, placeholder_text="misal produk_baru.mp4", width=220)
         self.entry_manual_output.pack(side="left", padx=5, pady=10, fill="x", expand=True)
 
         f_formula = ctk.CTkFrame(scroll)
@@ -157,13 +158,10 @@ class VideoEditorApp(ctk.CTk):
         )
         self.combo_formula.set(list(FORMULA_LABELS.keys())[0])
         self.combo_formula.pack(side="left", padx=5, pady=10, fill="x", expand=True)
-
-        f_toggle = ctk.CTkFrame(scroll)
-        f_toggle.pack(fill="x", pady=(0, 8))
         self.teks_final_var = ctk.BooleanVar(value=False)
-        ctk.CTkCheckBox(f_toggle, text="Teks Final (isi kotak = teks jadi, bukan instruksi)",
+        ctk.CTkCheckBox(f_formula, text="Teks Final (kotak = teks jadi)",
                          variable=self.teks_final_var, command=self._refresh_manual_mode).pack(
-            side="left", padx=10, pady=10)
+            side="left", padx=(10, 10), pady=10)
 
         self.frame_produk_info = ctk.CTkFrame(scroll)
         self.frame_produk_info.pack(fill="x", pady=(0, 8))
