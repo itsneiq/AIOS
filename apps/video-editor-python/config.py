@@ -1,5 +1,29 @@
 # config.py
-from credentials import GEMINI_API_KEYS, AZURE_SPEECH_KEY, AZURE_SPEECH_REGION
+# Kunci API dibaca dari credentials.py. Semua opsional di sini: yang kosong/tidak ada
+# TIDAK bikin aplikasi crash saat dibuka (mis. tidak punya key Azure). Cek dilakukan di GUI
+# saat proses dimulai, dengan pesan yang jelas.
+try:
+    import credentials as _cred
+except ModuleNotFoundError:
+    _cred = None
+    print("[WARNING] credentials.py tidak ditemukan. Salin credentials.example.py jadi credentials.py lalu isi key.")
+
+
+def is_placeholder_key(value) -> bool:
+    v = str(value or "").strip().lower()
+    return (not v) or v.startswith("isi-") or "disini" in v or "isi key" in v
+
+
+def _clean_keys(keys):
+    if isinstance(keys, str):
+        keys = [keys]
+    return [k for k in (keys or []) if not is_placeholder_key(k)]
+
+
+GEMINI_API_KEYS = _clean_keys(getattr(_cred, "GEMINI_API_KEYS", []))
+_azure_key = getattr(_cred, "AZURE_SPEECH_KEY", "")
+AZURE_SPEECH_KEY = "" if is_placeholder_key(_azure_key) else _azure_key
+AZURE_SPEECH_REGION = getattr(_cred, "AZURE_SPEECH_REGION", "southeastasia") or "southeastasia"
 
 GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"
 

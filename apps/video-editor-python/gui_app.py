@@ -12,7 +12,10 @@ from modules.effects import COLOR_GRADE_PRESETS
 from modules.script_formula import FORMULAS, get_formula_parts
 from batch_process import process_one_product
 from manual_process import process_manual
-from config import VOICE_OPTIONS, SUBTITLE_STYLES, FONT_OPTIONS, COLOR_OPTIONS
+from batch_process import generate_audio
+from modules.cut_recipe import make_cached_tts
+from config import (VOICE_OPTIONS, SUBTITLE_STYLES, FONT_OPTIONS, COLOR_OPTIONS, OUTPUT_DIR,
+                    GEMINI_API_KEYS, AZURE_SPEECH_KEY)
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -30,8 +33,14 @@ FORMULA_LABELS = {v["label"]: k for k, v in FORMULAS.items()}
 
 TAB_HEIGHT_BATCH = 165
 TAB_HEIGHT_MANUAL = 470
-WINDOW_HEIGHT_BATCH = 800
-WINDOW_HEIGHT_MANUAL = 1010
+WINDOW_HEIGHT_BATCH = 880
+WINDOW_HEIGHT_MANUAL = 1060
+WINDOW_STUDIO = "1560x940"
+TAB_BATCH = "Batch (dari Excel)"
+TAB_MANUAL = "Manual (1 Produk)"
+PAGE_STUDIO = "studio"
+PAGE_BATCH = "batch"
+PAGE_MANUAL = "manual"
 
 
 class TextRedirector:
@@ -51,8 +60,9 @@ class VideoEditorApp(ctk.CTk):
         super().__init__()
 
         self.title("AI Video Editor")
-        self.geometry(f"1050x{WINDOW_HEIGHT_BATCH}")
-        self.minsize(900, 700)
+        self.geometry(WINDOW_STUDIO)
+        self.minsize(1100, 700)
+        self.output_dir = OUTPUT_DIR
 
         self.excel_path = ctk.StringVar(value="products.xlsx")
         self.watermark_path_var = ctk.StringVar(value="assets/watermark/logo.png")
@@ -74,49 +84,125 @@ class VideoEditorApp(ctk.CTk):
     # UI BUILDER
     # ==========================================================
     def _build_ui(self):
-        self.tabview = ctk.CTkTabview(self, height=TAB_HEIGHT_BATCH, command=self._on_tab_change)
-        self.tabview.pack(padx=15, pady=(15, 5), fill="x")
-        self.tab_batch = self.tabview.add("Batch (dari Excel)")
-        self.tab_manual = self.tabview.add("Manual (1 Produk)")
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
+        # ---- sidebar
+        side = ctk.CTkFrame(self, width=170, corner_radius=0)
+        side.grid(row=0, column=0, sticky="nsew")
+        side.grid_propagate(False)
+        ctk.CTkLabel(side, text="AI Video Editor", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=(18, 14), padx=12)
+        self.nav_buttons = {}
+        for key, text in [(PAGE_STUDIO, "CutRecipe Studio"), (PAGE_BATCH, "Batch (Excel)"), (PAGE_MANUAL, "Manual")]:
+            b = ctk.CTkButton(side, text=text, height=38, anchor="w", fg_color="transparent",
+                              hover_color="gray25", command=lambda k=key: self._show_page(k))
+            b.pack(fill="x", padx=10, pady=3)
+            self.nav_buttons[key] = b
+
+        # ---- area isi: halaman + log
+        self.content = ctk.CTkFrame(self, fg_color="transparent")
+        self.content.grid(row=0, column=1, sticky="nsew", padx=(6, 10), pady=8)
+        self.content.grid_columnconfigure(0, weight=1)
+        self.content.grid_rowconfigure(0, weight=1)
+
+        self.page_studio = None   # dibuat saat pertama dibuka (hemat memori)
+        self.page_classic = ctk.CTkFrame(self.content, fg_color="transparent")
+
+        self.tabview = ctk.CTkTabview(self.page_classic, height=TAB_HEIGHT_BATCH)
+        self.tabview.pack(padx=5, pady=(5, 5), fill="x")
+        self.tab_batch = self.tabview.add(TAB_BATCH)
+        self.tab_manual = self.tabview.add(TAB_MANUAL)
         self._build_batch_tab()
         self._build_manual_tab()
-        self.tabview.set("Batch (dari Excel)")
+        self.tabview.set(TAB_BATCH)
         self.tabview.configure(height=TAB_HEIGHT_BATCH)
+        try:
+            self.tabview._segmented_button.grid_remove()   # pindah halaman lewat sidebar
+        except Exception:
+            pass
 
-        self.settings_scroll = ctk.CTkScrollableFrame(self, height=280)
-        self.settings_scroll.pack(padx=15, pady=5, fill="both", expand=True)
+        self.settings_scroll = ctk.CTkScrollableFrame(self.page_classic, height=280)
+        self.settings_scroll.pack(padx=5, pady=5, fill="both", expand=True)
         self._build_voice_section()
         self._build_subtitle_section()
         self._build_hook_section()
         self._build_effects_section()
-
-        # Panggil refresh SETELAH semua section kebentuk, biar referensi "before="
-        # (label_hook_section, label_effects_section) udah pasti ada
         self._refresh_subtitle_controls()
         self._refresh_hook_controls()
 
         self.btn_start = ctk.CTkButton(
-            self, text="Mulai Proses", height=42,
+            self.page_classic, text="Mulai Proses", height=42,
             font=ctk.CTkFont(size=15, weight="bold"),
             command=self._start_processing,
         )
         self.btn_start.pack(pady=(5, 3))
-
-        self.progress_label = ctk.CTkLabel(self, text="Siap memulai.")
+        self.progress_label = ctk.CTkLabel(self.page_classic, text="Siap memulai.")
         self.progress_label.pack(pady=(0, 3))
 
-        self.log_box = ctk.CTkTextbox(self, height=170, font=ctk.CTkFont(family="Consolas", size=12))
-        self.log_box.pack(padx=15, pady=(3, 15), fill="both", expand=True)
+        # log bersama (bisa dilipat)
+        logbar = ctk.CTkFrame(self.content, fg_color="transparent")
+        logbar.grid(row=1, column=0, sticky="ew", pady=(6, 0))
+        self.btn_log = ctk.CTkButton(logbar, text="Log  ^", width=70, height=24, fg_color="gray25",
+                                     command=self._toggle_log)
+        self.btn_log.pack(side="left")
+        self.log_box = ctk.CTkTextbox(self.content, height=110, font=ctk.CTkFont(family="Consolas", size=12))
+        self.log_box.grid(row=2, column=0, sticky="ew", pady=(4, 0))
+        self.log_visible = True
 
-    def _on_tab_change(self):
-        """Tab Batch pendek (hemat tempat), tab Manual tinggi (butuh ruang box formula)."""
-        if self.tabview.get() == "Batch (dari Excel)":
-            self.tabview.configure(height=TAB_HEIGHT_BATCH)
-            self.geometry(f"{self.winfo_width()}x{WINDOW_HEIGHT_BATCH}")
+        self._show_page(PAGE_STUDIO)
+
+    def _toggle_log(self):
+        if self.log_visible:
+            self.log_box.grid_remove()
+            self.btn_log.configure(text="Log  v")
         else:
-            self.tabview.configure(height=TAB_HEIGHT_MANUAL)
-            self.geometry(f"{self.winfo_width()}x{WINDOW_HEIGHT_MANUAL}")
+            self.log_box.grid()
+            self.btn_log.configure(text="Log  ^")
+        self.log_visible = not self.log_visible
+
+    def _show_page(self, page):
+        for k, b in self.nav_buttons.items():
+            b.configure(fg_color="#1f6aa5" if k == page else "transparent")
+        if self.page_studio is not None:
+            self.page_studio.grid_remove()
+        self.page_classic.grid_remove()
+
+        if page == PAGE_STUDIO:
+            if self.page_studio is None:
+                from modules.cut_studio import CutStudioFrame
+                self.page_studio = CutStudioFrame(self.content, self)
+            self.page_studio.grid(row=0, column=0, sticky="nsew")
+            self.geometry(WINDOW_STUDIO)
+            return
+        self.page_classic.grid(row=0, column=0, sticky="nsew")
+        self.current_mode = TAB_BATCH if page == PAGE_BATCH else TAB_MANUAL
+        self.tabview.set(self.current_mode)
+        tab_h, win_h = ((TAB_HEIGHT_BATCH, WINDOW_HEIGHT_BATCH) if page == PAGE_BATCH
+                        else (TAB_HEIGHT_MANUAL, WINDOW_HEIGHT_MANUAL))
+        self.tabview.configure(height=tab_h)
+        self.geometry(f"{max(self.winfo_width(), 1180)}x{win_h}")
+
+    # dipakai Studio
+    def make_redirector(self):
+        return TextRedirector(self.log_queue)
+
+    def make_tts(self, voice_label):
+        """Fungsi TTS ber-cache untuk Studio; None (+ pop-up) kalau key belum siap."""
+        voice_option = self.voice_map.get(voice_label)
+        engine = voice_option["engine"] if voice_option else "gemini"
+        if engine == "gemini" and not GEMINI_API_KEYS:
+            messagebox.showerror("API key belum siap",
+                                 "API key Gemini belum diisi.\n\nBuka credentials.py, isi GEMINI_API_KEYS dengan key dari "
+                                 "aistudio.google.com/apikey, simpan, lalu buka ulang aplikasi.")
+            return None
+        if engine == "azure" and not AZURE_SPEECH_KEY:
+            messagebox.showerror("API key belum siap",
+                                 "Suara Azure butuh AZURE_SPEECH_KEY di credentials.py, dan itu belum diisi.\n\n"
+                                 "Pilih suara Gemini di kotak Suara VO, atau isi key Azure.")
+            return None
+        key = f"{voice_option.get('engine')}:{voice_option.get('voice_name')}"
+        return make_cached_tts(lambda text, path: generate_audio(text, path, voice_option),
+                               key, os.path.join(OUTPUT_DIR, "_tts_cache"))
 
     # ---------- TAB BATCH ----------
     def _build_batch_tab(self):
@@ -234,7 +320,8 @@ class VideoEditorApp(ctk.CTk):
         ctk.CTkLabel(f, text="Suara VO:").pack(side="left", padx=10, pady=10)
         voice_labels = list(self.voice_map.keys())
         self.combo_voice = ctk.CTkComboBox(f, values=voice_labels, width=420)
-        self.combo_voice.set(voice_labels[0])
+        gemini_labels = [lbl for lbl in voice_labels if "Gemini" in lbl]
+        self.combo_voice.set(gemini_labels[0] if gemini_labels else voice_labels[0])
         self.combo_voice.pack(side="left", padx=10, pady=10, fill="x", expand=True)
 
         f2 = ctk.CTkFrame(self.settings_scroll)
@@ -562,7 +649,7 @@ class VideoEditorApp(ctk.CTk):
             messagebox.showinfo("Info", "Masih ada proses berjalan, tunggu sampai selesai.")
             return
 
-        mode = self.tabview.get()
+        mode = getattr(self, "current_mode", self.tabview.get())
 
         try:
             settings = self._collect_common_settings()
@@ -580,7 +667,12 @@ class VideoEditorApp(ctk.CTk):
 
         voice_option = self.voice_map.get(self.combo_voice.get())
 
-        if mode == "Batch (dari Excel)":
+        problem = self._check_credentials(mode, voice_option)
+        if problem:
+            messagebox.showerror("API key belum siap", problem)
+            return
+
+        if mode == TAB_BATCH:
             excel_path = self.excel_path.get()
             if not os.path.exists(excel_path):
                 messagebox.showerror("Error", f"File Excel nggak ditemukan: {excel_path}")
@@ -673,6 +765,24 @@ class VideoEditorApp(ctk.CTk):
         finally:
             sys.stdout = old_stdout
             self._finish_processing()
+
+    def _check_credentials(self, mode, voice_option):
+        """Cek key yang dibutuhkan proses ini. Return pesan error, atau None kalau aman."""
+        engine = voice_option["engine"] if voice_option else "gemini"
+        if mode == TAB_MANUAL:
+            uses_voice = True
+            needs_script_ai = not self.teks_final_var.get()
+        else:
+            uses_voice = True
+            needs_script_ai = True
+
+        if (needs_script_ai or (uses_voice and engine == "gemini")) and not GEMINI_API_KEYS:
+            return ("API key Gemini belum diisi.\n\nBuka credentials.py, isi GEMINI_API_KEYS dengan key dari "
+                    "aistudio.google.com/apikey, simpan, lalu buka ulang aplikasi.")
+        if uses_voice and engine == "azure" and not AZURE_SPEECH_KEY:
+            return ("Suara Azure butuh AZURE_SPEECH_KEY di credentials.py, dan itu belum diisi.\n\n"
+                    "Pilih suara Gemini (Zephyr, Puck, Kore, Charon, Leda) di Suara VO, atau isi key Azure.")
+        return None
 
     def _finish_processing(self):
         self.is_processing = False
