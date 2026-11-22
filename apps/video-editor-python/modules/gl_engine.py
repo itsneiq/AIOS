@@ -157,6 +157,39 @@ void main(){
 """
 
 
+# Pra-pass: YUV (3 plane / NV12) -> RGB di GPU, sekaligus scale (dan crop 'cover' bila perlu)
+YUV_FRAG = """#version 330
+uniform sampler2D Y; uniform sampler2D U; uniform sampler2D V;
+uniform int nv12; uniform int bt709; uniform int fullr; uniform vec4 crop;
+in vec2 uv; out vec4 o;
+void main(){
+  vec2 q = vec2(crop.x + uv.x*crop.z, crop.y + uv.y*crop.w);
+  float y = texture(Y, q).r;
+  vec2 c = (nv12 == 1) ? texture(U, q).rg : vec2(texture(U, q).r, texture(V, q).r);
+  float yy, cb, cr;
+  if (fullr == 1){ yy = y; cb = c.x - 0.5; cr = c.y - 0.5; }
+  else { yy = (y - 16.0/255.0) * (255.0/219.0); cb = (c.x - 128.0/255.0) * (255.0/224.0); cr = (c.y - 128.0/255.0) * (255.0/224.0); }
+  vec3 rgb;
+  if (bt709 == 1) rgb = vec3(yy + 1.5748*cr, yy - 0.1873*cb - 0.4681*cr, yy + 1.8556*cb);
+  else rgb = vec3(yy + 1.402*cr, yy - 0.3441*cb - 0.7141*cr, yy + 1.772*cb);
+  o = vec4(clamp(rgb, 0.0, 1.0), 1.0);
+}
+"""
+
+
+COPY_FRAG = """#version 330
+uniform sampler2D Y; in vec2 uv; out vec4 o;
+void main(){ o = vec4(texture(Y, uv).rgb, 1.0); }
+"""
+
+
+class YuvFrame:
+    __slots__ = ("w", "h", "nv12", "bt709", "full", "planes")
+
+    def __init__(self, w, h, nv12, bt709, full, planes):
+        self.w, self.h, self.nv12, self.bt709, self.full, self.planes = w, h, nv12, bt709, full, planes
+
+
 # ---------------------------------------------------------- util: font & LUT
 from modules.watermark import find_font  # noqa: E402
 
@@ -174,10 +207,20 @@ def make_lut(chain: str):
 
 
 # ---------------------------------------------------------- decoder
+def _use_nvdec_default():
+    try:
+        import config
+        return bool(getattr(config, "USE_NVDEC", False))
+    except Exception:
+        return False
+
+
 class VideoSource:
-    def __init__(self, path, W, H):
+    def __init__(self, path, W, H, yuv=False, hw=None):
         self.path, self.W, self.H = path, W, H
-        self.c = av.open(path)
+        self.yuv = yuv
+        self.hw = _use_nvdec_default() if hw is None else hw
+        self.c = self._open()
         self.s = self.c.streams.video[0]
         self.s.thread_type = "AUTO"
         self.tb = float(self.s.time_base)
@@ -187,7 +230,40 @@ class VideoSource:
         self._rgb_t = None
         self._rgb = None
 
+    def _open(self):
+        if self.hw:
+            try:
+                from av.codec.hwaccel import HWAccel
+                return av.open(self.path, hwaccel=HWAccel(device_type="cuda"))
+            except Exception as e:
+                print(f"[INFO] NVDEC tidak bisa dipakai ({e}); decode lewat CPU.")
+                self.hw = False
+        return av.open(self.path)
+
+    def _to_yuv(self, f):
+        name = f.format.name
+        try:
+            full = int(f.color_range) == 2 or name.startswith("yuvj")
+        except Exception:
+            full = name.startswith("yuvj")
+        try:      # tanpa tag = BT.601 (sama seperti default swscale/ffmpeg), jadi warnanya identik dengan jalur lama
+            bt709 = int(f.colorspace) in (1, 9)
+        except Exception:
+            bt709 = False
+        if name not in ("yuv420p", "yuvj420p", "nv12"):
+            f = f.reformat(format="yuv420p")
+            name = "yuv420p"
+        nv = name == "nv12"
+        planes = []
+        for i, p in enumerate(f.planes):
+            bpp = 2 if (nv and i == 1) else 1
+            a = np.frombuffer(p, np.uint8)[: p.line_size * p.height].reshape(p.height, p.line_size)[:, : p.width * bpp]
+            planes.append(np.ascontiguousarray(a))
+        return YuvFrame(f.width, f.height, nv, bt709, full, planes)
+
     def _convert(self, f):
+        if self.yuv:
+            return self._to_yuv(f)
         return f.reformat(width=self.W, height=self.H, format="rgb24").to_ndarray()
 
     def _t(self, f):
@@ -267,8 +343,26 @@ class GLEngine:
         self.prog["wmOn"] = 0.0
         self.prog["aspect"] = self.W / self.H
         self.prog["texel"] = (1.0 / self.W, 1.0 / self.H)
-        self.srcA = VideoSource(video_path, self.W, self.H) if not size else None
-        self.srcB = VideoSource(video_path, self.W, self.H) if not size else None
+        self.cover = False
+        self.yuv_ok = False
+        try:
+            self.prog_yuv = self.ctx.program(vertex_shader=VERT, fragment_shader=YUV_FRAG)
+            self.vao_yuv = self.ctx.vertex_array(self.prog_yuv, [(vbo, "2f", "p")])
+            self.prog_cp = self.ctx.program(vertex_shader=VERT, fragment_shader=COPY_FRAG)
+            self.vao_cp = self.ctx.vertex_array(self.prog_cp, [(vbo, "2f", "p")])
+            self.prog_cp["Y"] = 0
+            self.tex4 = {k: self.ctx.texture((self.W, self.H), 4) for k in "AB"}
+            for t_ in self.tex4.values():
+                t_.filter = (moderngl.LINEAR, moderngl.LINEAR)
+            self.fbo4 = {k: self.ctx.framebuffer(color_attachments=[self.tex4[k]]) for k in "AB"}
+            self._yuvtex = {}
+            for n_, i_ in (("Y", 0), ("U", 1), ("V", 2)):
+                self.prog_yuv[n_] = i_
+            self.yuv_ok = True
+        except Exception as e:
+            print(f"[INFO] Pra-pass YUV GPU tidak tersedia ({e}); konversi warna lewat CPU.")
+        self.srcA = VideoSource(video_path, self.W, self.H, yuv=self.yuv_ok) if not size else None
+        self.srcB = VideoSource(video_path, self.W, self.H, yuv=self.yuv_ok) if not size else None
         self.kb_ratio = 0.04
         self.overlay_fn = None      # fungsi(t) -> RGBA HxWx4 atau None (menggantikan teks segmen)
         self._ov_last = None
@@ -281,6 +375,59 @@ class GLEngine:
         self.text_style = {}
         self._text_cache = {}
         self._look_key = None
+
+    def _yuv_draw(self, which, fr):
+        key = (which, fr.w, fr.h, fr.nv12)
+        texs = self._yuvtex.get(key)
+        if texs is None:
+            ch = (fr.w // 2, fr.h // 2)
+            y = self.ctx.texture((fr.w, fr.h), 1)
+            if fr.nv12:
+                uv_ = self.ctx.texture(ch, 2)
+                texs = (y, uv_, None)
+            else:
+                texs = (y, self.ctx.texture(ch, 1), self.ctx.texture(ch, 1))
+            for t_ in texs:
+                if t_ is not None:
+                    t_.filter = (moderngl.LINEAR, moderngl.LINEAR)
+            self._yuvtex[key] = texs
+        for t_, arr in zip(texs, fr.planes):
+            if t_ is not None:
+                t_.write(arr.tobytes(), alignment=1)
+        texs[0].use(0)
+        texs[1].use(1)
+        if texs[2] is not None:
+            texs[2].use(2)
+        if self.cover:
+            sc = max(self.W / fr.w, self.H / fr.h)
+            cw, ch_ = self.W / (fr.w * sc), self.H / (fr.h * sc)
+            crop = ((1 - cw) / 2, (1 - ch_) / 2, cw, ch_)
+        else:
+            crop = (0.0, 0.0, 1.0, 1.0)
+        P = self.prog_yuv
+        P["nv12"] = int(fr.nv12)
+        P["bt709"] = int(fr.bt709)
+        P["fullr"] = int(fr.full)
+        P["crop"] = crop
+        self.fbo4[which].use()
+        self.vao_yuv.render(moderngl.TRIANGLE_STRIP)
+
+    def _put(self, which, fr):
+        unit = 0 if which == "A" else 1
+        if isinstance(fr, YuvFrame):
+            self._yuv_draw(which, fr)
+            self.tex4[which].use(unit)
+        elif self.yuv_ok:      # RGB (foto) disalin ke tekstur RGBA yang sama supaya shader utama tidak ganti format
+            t3 = self.texA if which == "A" else self.texB
+            t3.write(fr.tobytes())
+            t3.use(0)
+            self.fbo4[which].use()
+            self.vao_cp.render(moderngl.TRIANGLE_STRIP)
+            self.tex4[which].use(unit)
+        else:
+            t3 = self.texA if which == "A" else self.texB
+            t3.write(fr.tobytes())
+            t3.use(unit)
 
     def _frame(self, seg_i, which, t):
         """Frame sumber untuk segmen seg_i pada waktu sumber t. Mode komposisi menimpa ini."""
@@ -437,7 +584,7 @@ class GLEngine:
             P["tA"], P["dA"] = t - sp["t0"], sp["d"]
             P["tB"], P["dB"] = local, s["d"]
             P["fxA"], P["fxB"] = EFFECT_IDS.get(sp["fx"], 0), EFFECT_IDS.get(s["fx"], 0)
-            self.texA.write(fa.tobytes()); self.texB.write(fb.tobytes())
+            self._put("A", fa); self._put("B", fb)
         else:
             fa = self._frame(idx, "A", s["start"] + local)
             P["tr"] = 0
@@ -445,7 +592,7 @@ class GLEngine:
             P["tA"], P["dA"] = local, s["d"]
             P["tB"], P["dB"] = 0.0, 1.0
             P["fxA"], P["fxB"] = EFFECT_IDS.get(s["fx"], 0), 0
-            self.texA.write(fa.tobytes())
+            self._put("A", fa)
         P["useLutF"], P["useLutA"] = self.use_lutF, self.use_lutA
         P["inten"] = self.inten
         P["zp"] = self.zoom_at(t)
@@ -469,6 +616,7 @@ class GLEngine:
             P["txtAlpha"] = alpha
             if alpha > 0:
                 self.texT.write(self._text_rgba(ti).tobytes())
+        self.texT.use(2); self.lutF.use(3); self.lutA.use(4); self.texW.use(5)
         self.fbo.use()
         self.vao.render(moderngl.TRIANGLE_STRIP)
         return np.frombuffer(self.fbo.read(components=3), dtype=np.uint8).reshape(self.H, self.W, 3)[::-1]

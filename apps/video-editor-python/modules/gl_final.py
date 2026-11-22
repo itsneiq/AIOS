@@ -147,7 +147,7 @@ def _over(base, top):
 class GLFinal(GLEngine):
     def __init__(self, video_path, W, H, layers):
         super().__init__(video_path, size=(W, H))
-        self.src = VideoSource(video_path, W, H)
+        self.src = VideoSource(video_path, W, H, yuv=self.yuv_ok)
         self.layers = layers          # [SubtitleLayer, ...] ; urutan = lapisan bawah -> atas
         self._ov_key = None
         self._ov_arr = None
