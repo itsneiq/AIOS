@@ -136,6 +136,9 @@ class VideoEditorApp(ctk.CTk):
             command=self._start_processing,
         )
         self.btn_start.pack(pady=(5, 3))
+        self.v_eco_classic = ctk.BooleanVar(value=True)
+        ctk.CTkCheckBox(self.page_classic, text="Mode hemat CPU (prioritas rendah, PC tetap lancar dipakai)",
+                        variable=self.v_eco_classic).pack(pady=(0, 2))
         self.progress_label = ctk.CTkLabel(self.page_classic, text="Siap memulai.")
         self.progress_label.pack(pady=(0, 3))
 
@@ -720,6 +723,9 @@ class VideoEditorApp(ctk.CTk):
         self.is_processing = True
         self.btn_start.configure(state="disabled", text="Sedang Memproses...")
         self.log_box.delete("1.0", "end")
+        if self.v_eco_classic.get():
+            from modules.eco import set_low_priority
+            set_low_priority(True)
 
         threading.Thread(target=target, args=args, daemon=True).start()
 
@@ -785,6 +791,11 @@ class VideoEditorApp(ctk.CTk):
         return None
 
     def _finish_processing(self):
+        try:
+            from modules.eco import set_low_priority
+            set_low_priority(False)
+        except Exception:
+            pass
         self.is_processing = False
         self.after(0, lambda: self.btn_start.configure(state="normal", text="Mulai Proses"))
 
