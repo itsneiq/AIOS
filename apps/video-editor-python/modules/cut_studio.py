@@ -101,7 +101,9 @@ class CutStudioFrame(ctk.CTkFrame):
         self.c_voice.set(self.app.combo_voice.get() if hasattr(self.app, "combo_voice") else labels[0])
         self.c_voice.pack(side="left", padx=4)
         self.v_vo = ctk.BooleanVar(value=True)
-        ctk.CTkCheckBox(bar, text="AI VO", variable=self.v_vo, width=60).pack(side="left", padx=8)
+        ctk.CTkCheckBox(bar, text="AI VO", variable=self.v_vo, width=60).pack(side="left", padx=(8, 2))
+        self.v_prev_vo = ctk.BooleanVar(value=False)
+        ctk.CTkCheckBox(bar, text="VO saat Preview", variable=self.v_prev_vo, width=100).pack(side="left", padx=6)
 
         self.btn_export = ctk.CTkButton(bar, text="Ekspor", width=90, font=ctk.CTkFont(weight="bold"),
                                         command=lambda: self._render(False))
@@ -295,7 +297,7 @@ class CutStudioFrame(ctk.CTkFrame):
         self.canvas = ctk.CTkCanvas(c, height=64, bg="#2b2b2b", highlightthickness=0)
         self.canvas.grid(row=2, column=0, sticky="ew", padx=8, pady=(8, 2))
         self.canvas.bind("<Button-1>", self._on_canvas_click)
-        self.canvas.bind("<Configure>", lambda e: self._redraw_timeline())
+        self.canvas.bind("<Configure>", self._on_canvas_resize)
         self.lbl_usage = ctk.CTkLabel(c, text="", text_color="gray", anchor="w")
         self.lbl_usage.grid(row=3, column=0, sticky="ew", padx=10)
 
@@ -679,6 +681,12 @@ class CutStudioFrame(ctk.CTkFrame):
         self.lbl_usage.configure(text=f"Dipakai {used:.1f}s dari {self.src_dur:.1f}s video asli  |  Dibuang {max(self.src_dur - used, 0):.1f}s")
         self._update_total()
 
+    def _on_canvas_resize(self, e):
+        # jangan gambar ulang tiap langkah drag jendela (bikin lag); tunggu sampai berhenti
+        if getattr(self, "_resize_job", None):
+            self.after_cancel(self._resize_job)
+        self._resize_job = self.after(250, self._redraw_timeline)
+
     def _on_canvas_click(self, e):
         spans = self._spans()
         durs = [max(sp[1] - sp[0], 0.0) if sp else 0.0 for sp in spans]
@@ -748,6 +756,8 @@ class CutStudioFrame(ctk.CTkFrame):
                 name += ".mp4"
 
         vo_on = self.v_vo.get() and any(s["vo"] and not s["vo_file"] for s in segs)
+        if preview and not self.v_prev_vo.get():
+            vo_on = False      # hemat kuota API: VO AI baru dibuat saat Ekspor
         tts = None
         if vo_on:
             tts = self.app.make_tts(self.c_voice.get())
@@ -766,7 +776,8 @@ class CutStudioFrame(ctk.CTkFrame):
         self.busy = True
         for b in (self.btn_prev, self.btn_export):
             b.configure(state="disabled")
-        self._status("Membuat preview..." if preview else "Mengekspor video...", "white")
+        self._status(("Membuat preview" + ("" if vo_on else " (tanpa VO AI, hemat kuota)") + "...") if preview
+                     else "Mengekspor video...", "white")
         self._result = None
 
         def work():
