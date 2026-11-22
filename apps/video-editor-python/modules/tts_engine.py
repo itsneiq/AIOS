@@ -34,6 +34,9 @@ def generate_vo_audio(text: str, output_path: str, voice_name: str = "id-ID-Ardi
     Convert naskah VO (teks) jadi file audio pake Azure Neural TTS + SSML.
     voice_name: nama suara Azure yang mau dipakai, misal 'id-ID-ArdiNeural'.
     """
+    if not AZURE_SPEECH_KEY:
+        raise RuntimeError("Key Azure belum diisi di credentials.py. Pilih suara Gemini "
+                           "(Zephyr, Puck, Kore, Charon, Leda) atau isi AZURE_SPEECH_KEY.")
     speech_config = speechsdk.SpeechConfig(
         subscription=AZURE_SPEECH_KEY,
         region=AZURE_SPEECH_REGION,

@@ -17,7 +17,8 @@ from modules.cut_recipe import (
     parse_recipe, recipe_total_duration, render_cut_recipe, DEFAULT_RECIPE, recipe_to_lines,
 )
 import json
-from config import VOICE_OPTIONS, SUBTITLE_STYLES, FONT_OPTIONS, COLOR_OPTIONS, OUTPUT_DIR
+from config import (VOICE_OPTIONS, SUBTITLE_STYLES, FONT_OPTIONS, COLOR_OPTIONS, OUTPUT_DIR,
+                    GEMINI_API_KEYS, AZURE_SPEECH_KEY)
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -342,7 +343,8 @@ class VideoEditorApp(ctk.CTk):
         ctk.CTkLabel(f, text="Suara VO:").pack(side="left", padx=10, pady=10)
         voice_labels = list(self.voice_map.keys())
         self.combo_voice = ctk.CTkComboBox(f, values=voice_labels, width=420)
-        self.combo_voice.set(voice_labels[0])
+        gemini_labels = [lbl for lbl in voice_labels if "Gemini" in lbl]
+        self.combo_voice.set(gemini_labels[0] if gemini_labels else voice_labels[0])
         self.combo_voice.pack(side="left", padx=10, pady=10, fill="x", expand=True)
 
         f2 = ctk.CTkFrame(self.settings_scroll)
@@ -688,6 +690,11 @@ class VideoEditorApp(ctk.CTk):
 
         voice_option = self.voice_map.get(self.combo_voice.get())
 
+        problem = self._check_credentials(mode, voice_option)
+        if problem:
+            messagebox.showerror("API key belum siap", problem)
+            return
+
         if mode == TAB_BATCH:
             excel_path = self.excel_path.get()
             if not os.path.exists(excel_path):
@@ -787,6 +794,27 @@ class VideoEditorApp(ctk.CTk):
         finally:
             sys.stdout = old_stdout
             self._finish_processing()
+
+    def _check_credentials(self, mode, voice_option):
+        """Cek key yang dibutuhkan proses ini. Return pesan error, atau None kalau aman."""
+        engine = voice_option["engine"] if voice_option else "gemini"
+        if mode == TAB_CUT:
+            uses_voice = self.cut_vo_var.get()
+            needs_script_ai = False
+        elif mode == TAB_MANUAL:
+            uses_voice = True
+            needs_script_ai = not self.teks_final_var.get()
+        else:
+            uses_voice = True
+            needs_script_ai = True
+
+        if (needs_script_ai or (uses_voice and engine == "gemini")) and not GEMINI_API_KEYS:
+            return ("API key Gemini belum diisi.\n\nBuka credentials.py, isi GEMINI_API_KEYS dengan key dari "
+                    "aistudio.google.com/apikey, simpan, lalu buka ulang aplikasi.")
+        if uses_voice and engine == "azure" and not AZURE_SPEECH_KEY:
+            return ("Suara Azure butuh AZURE_SPEECH_KEY di credentials.py, dan itu belum diisi.\n\n"
+                    "Pilih suara Gemini (Zephyr, Puck, Kore, Charon, Leda) di Suara VO, atau isi key Azure.")
+        return None
 
     def _collect_cut_args(self, voice_option):
         if not self.cut_video_path or not os.path.exists(self.cut_video_path):
