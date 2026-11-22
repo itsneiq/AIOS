@@ -526,6 +526,8 @@ def render_cut_recipe(
     tmp_dir: str = "_tmp",
     max_vo_speedup: float = MAX_VO_SPEEDUP,
     gpu: bool = True,                      # ekspor lewat mesin GPU yang sama dengan preview
+    audio_only_out: str = None,            # kalau diisi: hanya bikin campuran audio (WAV) untuk pemutar preview
+    timeline_out: list = None,             # diisi start/end segmen final (setelah VO memperpanjang segmen)
 ) -> str:
     t_start = time.time()
     video_path = os.path.abspath(video_path)
@@ -690,6 +692,19 @@ def render_cut_recipe(
             fc.append(f"{mix}apad,atrim=0:{total:.3f},loudnorm=I=-16:TP=-1.5:LRA=11[aout]")
         else:
             fc.append(f"{mix}apad,atrim=0:{total:.3f},loudnorm=I=-16:TP=-1.5:LRA=11[aout]")
+
+    if timeline_out is not None:
+        timeline_out[:] = [{"start": s["start"], "end": s["end"]} for s in segs]
+    if audio_only_out:
+        if not has_audio_out:
+            return None
+        cmd = ["ffmpeg", "-y", *inputs, "-filter_complex", ";".join(fc[a_start:]), "-map", "[aout]",
+               "-c:a", "pcm_s16le", "-ar", "44100", "-ac", "2", "-t", f"{total:.3f}", os.path.abspath(audio_only_out)]
+        r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                           cwd=tmp_dir, **_popen_kwargs(eco))
+        if r.returncode != 0:
+            raise RuntimeError("Audio preview gagal: " + r.stderr[-600:])
+        return audio_only_out
 
     # ---- 7. encode ----
     want_caption = bool(caption) and not preview

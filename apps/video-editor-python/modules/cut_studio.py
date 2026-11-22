@@ -66,6 +66,11 @@ class CutStudioFrame(ctk.CTkFrame):
         self._frame_img = None
         self.engine = None
         self.proj_dirty = True
+        self._aud = None
+        self._aud_sig = None
+        self._aud_busy = False
+        self._aud_res = None
+        self._end_override = None
         self.playing = False
         self.loop_range = None
         self._tick_job = None
@@ -117,13 +122,11 @@ class CutStudioFrame(ctk.CTkFrame):
         self.v_vo = ctk.BooleanVar(value=True)
         ctk.CTkCheckBox(bar, text="AI VO", variable=self.v_vo, width=60).pack(side="left", padx=(8, 2))
         self.v_prev_vo = ctk.BooleanVar(value=False)
-        ctk.CTkCheckBox(bar, text="VO saat Preview", variable=self.v_prev_vo, width=100).pack(side="left", padx=6)
+        ctk.CTkCheckBox(bar, text="Putar dengan VO", variable=self.v_prev_vo, width=100).pack(side="left", padx=6)
 
         self.btn_export = ctk.CTkButton(bar, text="Ekspor", width=90, font=ctk.CTkFont(weight="bold"),
                                         command=lambda: self._render(False))
         self.btn_export.pack(side="right", padx=(4, 8), pady=8)
-        self.btn_prev = ctk.CTkButton(bar, text="Preview", width=90, fg_color="gray30", command=lambda: self._render(True))
-        self.btn_prev.pack(side="right", padx=4)
         self.v_eco = ctk.BooleanVar(value=True)
         ctk.CTkCheckBox(bar, text="Mode hemat", variable=self.v_eco, width=90).pack(side="right", padx=8)
         self.e_out = ctk.CTkEntry(bar, placeholder_text="nama_hasil.mp4", width=170)
@@ -606,7 +609,7 @@ class CutStudioFrame(ctk.CTkFrame):
         except Exception as e:
             self.engine = None
             self.lbl_frame.configure(image="", text=f"Preview GPU tidak tersedia:\n{e}", fg="#f87171")
-            self._status("Preview GPU gagal dibuka. Tombol Preview/Ekspor tetap bisa dipakai.", "#f87171")
+            self._status("Preview GPU gagal dibuka. Tombol Ekspor tetap bisa dipakai.", "#f87171")
         return self.engine
 
     def _close_engine(self):
@@ -626,6 +629,10 @@ class CutStudioFrame(ctk.CTkFrame):
                 segs = self._collect_segments()
             except ValueError:
                 return
+            ov = self._end_override
+            if ov and len(ov) == len(segs):
+                for sg, o in zip(segs, ov):
+                    sg["end"] = max(sg["end"], o["end"])
             self.engine.set_segments(segs, float(self.s_trans.get()))
             self.engine.set_text_style(self._current_text_style())
             self.s_play.configure(to=max(self.engine.total, 0.1))
@@ -668,8 +675,101 @@ class CutStudioFrame(ctk.CTkFrame):
         self.playhead = float(v)
         self._play_t0 = self.playhead
         self._play_wall = time.perf_counter()
+        if self.playing:
+            self._audio_at(self.playhead)
         if not self.playing:
             self._mark_dirty(10, resync=False)
+
+    # ---- suara pemutar
+    def _audio_sig(self):
+        segs = self._collect_segments()
+        return repr((
+            [(s["start"], s["end"], s["vo"], s.get("vo_file"), s.get("transition")) for s in segs],
+            self.audio_var.get(), self.music_path, round(self.s_music.get(), 2), self.sep_vo_path,
+            bool(self.v_vo.get() and self.v_prev_vo.get()), self.c_voice.get(), round(float(self.s_trans.get()), 3)))
+
+    def _prepare_audio_then_play(self):
+        if not self._ensure_engine():
+            return
+        self._sync_project()
+        try:
+            sig = self._audio_sig()
+            segs = self._collect_segments()
+        except ValueError:
+            self._start_play()
+            return
+        if sig == self._aud_sig or self._aud_busy or self.audio_var.get() == "mute":
+            self._start_play()
+            return
+        vo_on = bool(self.v_vo.get() and self.v_prev_vo.get() and any(s["vo"] and not s["vo_file"] for s in segs))
+        tts = None
+        if vo_on:
+            tts = self.app.make_tts(self.c_voice.get())
+            if tts is None:
+                return
+        self._aud_busy = True
+        self._aud_res = None
+        self._status("Menyiapkan suara..." + (" (membuat VO)" if vo_on else ""), "white")
+        kw = dict(video_path=self.video_path, segments=segs, output_path=os.path.join(self.tmp_dir, "_studio_play.mp4"),
+                  tts_func=tts, vo_enabled=vo_on, audio_mode=self.audio_var.get(), music_path=self.music_path,
+                  music_volume=self.s_music.get() / 100.0, separate_vo_path=self.sep_vo_path,
+                  transition_sec=float(self.s_trans.get()), eco=self.v_eco.get(), tmp_dir=self.tmp_dir)
+        wav = os.path.join(self.tmp_dir, "_studio_play.wav")
+        tl = []
+
+        def work():
+            old = sys.stdout
+            sys.stdout = self.app.make_redirector()
+            try:
+                p = render_cut_recipe(audio_only_out=wav, timeline_out=tl, **kw)
+                self._aud_res = (sig, p, tl, None)
+            except Exception as e:
+                print(f"[ERROR] {e}")
+                self._aud_res = (sig, None, tl, str(e))
+            finally:
+                sys.stdout = old
+        threading.Thread(target=work, daemon=True).start()
+        self.after(200, self._poll_audio)
+
+    def _poll_audio(self):
+        r = self._aud_res
+        if r is None:
+            self.after(200, self._poll_audio)
+            return
+        self._aud_res = None
+        self._aud_busy = False
+        sig, path, tl, err = r
+        self._aud, self._aud_sig = None, sig
+        if err:
+            self._status("Suara gagal dibuat, diputar tanpa suara. Lihat log.", "#f87171")
+        else:
+            self._status("Siap.", "gray")
+            self._end_override = tl
+            self.proj_dirty = True
+            if path:
+                try:
+                    import wave
+                    import numpy as np
+                    with wave.open(path, "rb") as w:
+                        sr, ch = w.getframerate(), w.getnchannels()
+                        a = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).reshape(-1, ch)
+                    self._aud = (a, sr)
+                except Exception as e:
+                    self._status(f"Suara tidak bisa dibaca: {e}", "#f87171")
+        self._sync_project()
+        self._start_play()
+
+    def _audio_at(self, t):
+        if not self._aud or self.loop_range:
+            return
+        try:
+            import sounddevice as sd
+            a, sr = self._aud
+            sd.stop()
+            sd.play(a[int(max(t, 0) * sr):], sr)
+        except Exception as e:
+            self._aud = None
+            self._status(f"Suara tidak bisa diputar ({e}). Jalankan: pip install sounddevice", "#f87171")
 
     def _toggle_play(self):
         if self.playing:
@@ -677,9 +777,8 @@ class CutStudioFrame(ctk.CTkFrame):
         else:
             if not self._ensure_engine():
                 return
-            self._sync_project()
             self.loop_range = None
-            self._start_play()
+            self._prepare_audio_then_play()
 
     def _start_play(self):
         e = self.engine
@@ -691,10 +790,16 @@ class CutStudioFrame(ctk.CTkFrame):
         self.btn_play.configure(text="Jeda")
         self._play_t0 = self.playhead
         self._play_wall = time.perf_counter()
+        self._audio_at(self.playhead)
         self._tick()
 
     def _stop_play(self):
         self.playing = False
+        try:
+            import sounddevice as sd
+            sd.stop()
+        except Exception:
+            pass
         if self._tick_job:
             self.after_cancel(self._tick_job)
             self._tick_job = None
@@ -928,8 +1033,6 @@ class CutStudioFrame(ctk.CTkFrame):
                 name += ".mp4"
 
         vo_on = self.v_vo.get() and any(s["vo"] and not s["vo_file"] for s in segs)
-        if preview and not self.v_prev_vo.get():
-            vo_on = False      # hemat kuota API: VO AI baru dibuat saat Ekspor
         tts = None
         if vo_on:
             tts = self.app.make_tts(self.c_voice.get())
@@ -946,7 +1049,7 @@ class CutStudioFrame(ctk.CTkFrame):
             transition_sec=float(self.s_trans.get()), preview=preview, eco=self.v_eco.get(), tmp_dir=self.tmp_dir,
         )
         self.busy = True
-        for b in (self.btn_prev, self.btn_export):
+        for b in (self.btn_export,):
             b.configure(state="disabled")
         self._status(("Membuat preview" + ("" if vo_on else " (tanpa VO AI, hemat kuota)") + "...") if preview
                      else "Mengekspor video...", "white")
@@ -973,7 +1076,7 @@ class CutStudioFrame(ctk.CTkFrame):
             return
         (path, err, preview), self._result = self._result, None
         self.busy = False
-        for b in (self.btn_prev, self.btn_export):
+        for b in (self.btn_export,):
             b.configure(state="normal")
         if err:
             self._status("Gagal. Lihat log di bawah.", "#f87171")
