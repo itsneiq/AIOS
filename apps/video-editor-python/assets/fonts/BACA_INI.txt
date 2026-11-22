@@ -1,0 +1,19 @@
+TARO FILE FONT (.ttf) DI FOLDER INI
+
+Biar preset subtitle gaya cartoon bisa jalan, taro file .ttf berikut di folder ini
+(assets/fonts/), ambil dari folder Downloads hasil extract Google Fonts lu:
+
+- Bangers-Regular.ttf
+- LuckiestGuy-Regular.ttf
+- Fredoka-Regular.ttf (atau versi variable font-nya)
+- Chewy-Regular.ttf
+- PermanentMarker-Regular.ttf
+
+Cara cari file .ttf-nya:
+1. Buka folder Downloads
+2. Cari file zip dari Google Fonts (nama font atau "font_families")
+3. Extract
+4. Di dalamnya ada folder per font, masuk ke situ, copy file .ttf-nya
+5. Paste ke folder assets/fonts/ ini (folder yang sama tempat file petunjuk ini berada)
+
+Nggak perlu install ke Windows lagi - ffmpeg baca langsung dari folder ini.

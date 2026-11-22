@@ -1,0 +1,11 @@
+credentials.py
+secrets.py
+venv/
+__pycache__/
+*.pyc
+_tmp/
+input/*
+output/*
+!input/.gitkeep
+!output/.gitkeep
+*.zip
