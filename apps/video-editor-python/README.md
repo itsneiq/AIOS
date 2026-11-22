@@ -17,3 +17,7 @@ Versi: update43 (tab Batch/Manual dengan tinggi dinamis).
 Susun ulang satu video mentah dari "resep potongan" JSON: `[{"start": 48, "end": 51, "text": "...", "vo": "..."}]`.
 Urutan baris = urutan di video hasil. Opsi: teks overlay (atas-tengah), VO per segmen (TTS yang sama dengan mode lain,
 auto dipercepat maks 1.2x atau segmen diperpanjang kalau VO kepanjangan), audio asli, musik latar. Emoji dibuang otomatis.
+
+
+## CutRecipe Studio
+Di tab CutRecipe, klik **Buka CutRecipe Studio**: kartu segmen (mulai/selesai, teks overlay, teks VO, transisi, efek, upload VO), timeline video asli, tab Teks & Caption (gaya teks + caption Whisper), Filter, Adjustment, mode audio (Asli/Mute/Musik), voiceover terpisah, Preview & Ekspor.

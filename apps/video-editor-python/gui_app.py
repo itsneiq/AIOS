@@ -157,6 +157,8 @@ class VideoEditorApp(ctk.CTk):
         f1.pack(fill="x", padx=5, pady=(5, 4))
         ctk.CTkButton(f1, text="Pilih Video Mentah...", width=160,
                       command=self._browse_cut_video).pack(side="left", padx=10, pady=8)
+        ctk.CTkButton(f1, text="Buka CutRecipe Studio", width=170, fg_color="#16a34a", hover_color="#15803d",
+                      command=self._open_studio).pack(side="left", padx=5, pady=8)
         self.label_cut_video = ctk.CTkLabel(f1, text="Belum ada video dipilih", text_color="gray")
         self.label_cut_video.pack(side="left", padx=5, pady=8)
         ctk.CTkLabel(f1, text="Output:").pack(side="left", padx=(20, 5), pady=8)
@@ -212,6 +214,38 @@ class VideoEditorApp(ctk.CTk):
         self.combo_cut_color = ctk.CTkComboBox(f4, values=names, width=110)
         self.combo_cut_color.set(names[0])
         self.combo_cut_color.pack(side="left", padx=3, pady=8)
+
+    def make_redirector(self):
+        return TextRedirector(self.log_queue)
+
+    def _studio_tts_factory(self):
+        voice_option = self.voice_map.get(self.combo_voice.get())
+        prev = self.cut_vo_var.get()
+        self.cut_vo_var.set(True)
+        try:
+            problem = self._check_credentials(TAB_CUT, voice_option)
+        finally:
+            self.cut_vo_var.set(prev)
+        if problem:
+            messagebox.showerror("Belum siap", problem)
+            return None
+        return lambda text, path: generate_audio(text, path, voice_option)
+
+    def _open_studio(self):
+        if not self.cut_video_path or not os.path.exists(self.cut_video_path):
+            messagebox.showerror("Error", "Pilih dulu video mentahnya.")
+            return
+        try:
+            segs = parse_recipe(self.text_recipe.get("1.0", "end"))
+        except ValueError:
+            segs = None
+        from modules.cut_studio import CutStudio
+        try:
+            CutStudio(self, self.cut_video_path, OUTPUT_DIR, os.path.join(OUTPUT_DIR, "_tmp"),
+                      self._studio_tts_factory, self.font_list, self.color_map,
+                      initial_segments=segs, output_name=self.entry_cut_output.get().strip())
+        except Exception as e:
+            messagebox.showerror("Studio gagal dibuka", str(e))
 
     def _browse_cut_video(self):
         path = filedialog.askopenfilename(filetypes=[("Video", "*.mp4 *.mov *.avi *.mkv *.webm")])
@@ -844,13 +878,12 @@ class VideoEditorApp(ctk.CTk):
             output_path=os.path.join(OUTPUT_DIR, nama),
             voice_option=voice_option,
             vo_enabled=vo_on,
-            keep_original_audio=self.cut_keep_audio_var.get(),
+            audio_mode=("music" if self.cut_music_path else ("original" if self.cut_keep_audio_var.get() else "mute")),
             music_path=self.cut_music_path,
             music_volume=vol,
-            font_name=self.combo_cut_font.get(),
-            text_size_pct=size_pct,
-            text_top_pct=top_pct,
-            text_color_hex=self.color_map.get(self.combo_cut_color.get(), "FFFFFF"),
+            text_style={"font_name": self.combo_cut_font.get(), "size_pct": size_pct, "offset_pct": top_pct,
+                        "position": "top",
+                        "text_hex": self.color_map.get(self.combo_cut_color.get(), "FFFFFF")},
         )
 
     def _run_cutrecipe(self, cut_args):
