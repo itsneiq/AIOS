@@ -30,67 +30,9 @@ _EMOJI_RE = re.compile(
     flags=re.UNICODE,
 )
 
-# key -> label tampilan. "cut" = potong langsung (tanpa transisi). Selain itu = nama transisi ffmpeg xfade.
-TRANSITIONS = {
-    "cut": "Potong langsung",
-    "fade": "Fade",
-    "dissolve": "Dissolve",
-    "wipeleft": "Wipe kiri",
-    "wiperight": "Wipe kanan",
-    "slideleft": "Geser kiri",
-    "slideright": "Geser kanan",
-    "slideup": "Geser atas",
-    "circleopen": "Lingkaran buka",
-    "zoomin": "Zoom masuk",
-    "pixelize": "Pixelize",
-    "radial": "Radial",
-}
-
-EFFECTS = {
-    "none": "Tanpa efek",
-    "zoom_in": "Zoom In",
-    "zoom_out": "Zoom Out",
-    "pulse": "Pulse (denyut)",
-    "shake": "Shake (getar)",
-    "glitch": "Glitch RGB",
-    "flash": "Flash putih",
-    "fade_in": "Fade dari hitam",
-    "vignette": "Vinyet",
-}
-
-FILTER_PRESETS = {
-    "none": ("Tanpa filter", None),
-    "cerah_pop": ("Cerah Pop", "eq=contrast=1.15:brightness=0.03:saturation=1.3"),
-    "warm_cozy": ("Hangat Cozy", "eq=contrast=1.05:brightness=0.02:saturation=1.1,colorbalance=rs=0.08:gs=0.02:bs=-0.08"),
-    "clean_minimal": ("Bersih Minimal", "eq=contrast=1.08:brightness=0.0:saturation=0.9"),
-    "moody_cinematic": ("Moody Sinematik", "eq=contrast=1.2:brightness=-0.03:saturation=0.85,colorbalance=rs=-0.05:bs=0.1"),
-    "hitam_putih": ("Hitam Putih", "hue=s=0,eq=contrast=1.1"),
-    "dingin_biru": ("Dingin Biru", "colorbalance=rs=-0.06:bs=0.1,eq=saturation=1.05"),
-    "vintage": ("Vintage", "eq=contrast=0.95:saturation=0.8,colorbalance=rs=0.08:gs=0.03:bs=-0.1"),
-    "tajam_segar": ("Tajam Segar", "eq=contrast=1.1:saturation=1.15,unsharp=5:5:0.8:5:5:0"),
-}
-
-DEFAULT_ADJUST = {
-    "brightness": 0.0,   # -0.4 .. 0.4
-    "contrast": 1.0,     # 0.6 .. 1.6
-    "saturation": 1.0,   # 0 .. 2
-    "temperature": 0.0,  # -1 (dingin) .. 1 (hangat)
-    "sharpness": 0.0,    # 0 .. 2
-    "vignette": 0.0,     # 0 .. 1
-    "grain": 0.0,        # 0 .. 1
-}
-
-DEFAULT_TEXT_STYLE = {
-    "font_name": "Arial Black",
-    "size_pct": 3.6,        # % dari tinggi video
-    "text_hex": "FFFFFF",
-    "outline_hex": "000000",
-    "position": "top",      # top | middle | bottom
-    "offset_pct": 25.0,     # jarak dari tepi atas (top) atau bawah (bottom), % tinggi video
-    "bold": True,
-    "box": False,           # kotak latar di belakang teks
-    "animate": True,        # fade in/out singkat
-}
+from modules.cut_catalog import (  # noqa: E402,F401
+    TRANSITIONS, EFFECTS, FILTERS, FILTER_ALIASES, ADJUSTMENTS, DEFAULT_ADJUST, TEXT_PRESETS, DEFAULT_TEXT_STYLE,
+)
 
 DEFAULT_RECIPE = [
     {"start": 48, "end": 51, "text": "Kulkas kotor gini bisa balik putih lagi?", "vo": "Kulkas sekotor ini... beneran bisa putih lagi?"},
@@ -270,17 +212,37 @@ def extract_frame(video_path: str, t: float, out_png: str, width: int = 360) -> 
     return out_png
 
 
+def render_preview_frame(video_path: str, t: float, out_png: str, width: int = 360,
+                         filter_preset: str = "none", filter_intensity: float = 1.0,
+                         adjust: dict = None, effect: str = "none") -> str:
+    """Satu frame di detik t dengan filter + adjustment terpasang (ringan, buat preview instan)."""
+    graph = f"[0:v]scale={width}:-2,setsar=1,format=yuv420p[s]"
+    src = "s"
+    graph += ";" + build_color_graph(src, "out", filter_preset, adjust, filter_intensity)
+    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-ss", f"{max(t, 0):.3f}", "-i", video_path,
+           "-filter_complex", graph, "-map", "[out]", "-frames:v", "1", out_png]
+    r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", **_popen_kwargs(True))
+    if r.returncode != 0 or not os.path.exists(out_png):
+        raise RuntimeError(f"Preview frame gagal: {r.stderr.strip()[-200:]}")
+    return out_png
+
+
 # ==========================================================
 # Filter builders
 # ==========================================================
-def build_color_filters(filter_preset: str = "none", adjust: dict = None) -> str:
-    """Gabungkan preset filter + adjustment jadi satu rantai filter ffmpeg ("" kalau netral)."""
-    parts = []
-    preset = FILTER_PRESETS.get(filter_preset or "none", FILTER_PRESETS["none"])[1]
-    if preset:
-        parts.append(preset)
-
+def _adjust_chain(adjust: dict = None) -> str:
+    """Rantai filter dari slider Adjustment ("" kalau semua netral)."""
     a = {**DEFAULT_ADJUST, **(adjust or {})}
+    parts = []
+    if abs(a["exposure"]) > 0.01:
+        parts.append(f"exposure=exposure={a['exposure'] * 1.5:.3f}")
+    if abs(a["temperature"]) > 0.01:
+        t = a["temperature"]
+        parts.append(f"colorbalance=rs={t * 0.15:.3f}:gs={t * 0.03:.3f}:bs={-t * 0.15:.3f}:"
+                     f"rm={t * 0.1:.3f}:bm={-t * 0.1:.3f}")
+    if abs(a["tint"]) > 0.01:
+        parts.append(f"colorbalance=gs={-a['tint'] * 0.15:.3f}:gm={-a['tint'] * 0.1:.3f}:"
+                     f"rs={a['tint'] * 0.05:.3f}:bs={a['tint'] * 0.05:.3f}")
     eq = []
     if abs(a["brightness"]) > 0.005:
         eq.append(f"brightness={a['brightness']:.3f}")
@@ -290,43 +252,96 @@ def build_color_filters(filter_preset: str = "none", adjust: dict = None) -> str
         eq.append(f"saturation={a['saturation']:.3f}")
     if eq:
         parts.append("eq=" + ":".join(eq))
-    if abs(a["temperature"]) > 0.01:
-        t = a["temperature"]
-        parts.append(f"colorbalance=rs={t * 0.15:.3f}:gs={t * 0.03:.3f}:bs={-t * 0.15:.3f}")
+    # highlights/shadows/whites/blacks/fade lewat satu kurva
+    if any(abs(a[k]) > 0.005 for k in ("highlights", "shadows", "whites", "blacks")) or a["fade"] > 0.01:
+        lo = max(0.0, a["blacks"] + a["fade"] * 0.15)
+        hi = min(1.0, 1.0 + a["whites"] - a["fade"] * 0.05)
+        pts = [(0.0, lo), (0.25, 0.25 + a["shadows"]), (0.75, 0.75 + a["highlights"]), (1.0, hi)]
+        pts = [(x, min(max(y, 0.0), 1.0)) for x, y in pts]
+        parts.append("curves=all='" + " ".join(f"{x:g}/{y:.3f}" for x, y in pts) + "'")
     if a["sharpness"] > 0.02:
         parts.append(f"unsharp=5:5:{a['sharpness']:.3f}:5:5:0")
     if a["vignette"] > 0.02:
-        angle = 1.5708 - a["vignette"] * (1.5708 - 0.5236)   # PI/2 (lemah) .. PI/6 (kuat)
+        angle = 1.5708 - a["vignette"] * (1.5708 - 0.5236)
         parts.append(f"vignette=angle={angle:.4f}")
     if a["grain"] > 0.02:
         parts.append(f"noise=alls={a['grain'] * 25:.1f}:allf=t")
     return ",".join(parts)
 
 
+def _filter_chain(filter_preset: str) -> str:
+    key = FILTER_ALIASES.get(filter_preset or "none", filter_preset or "none")
+    return (FILTERS.get(key) or FILTERS["none"])[2] or ""
+
+
+def build_color_graph(src: str, dst: str, filter_preset: str = "none", adjust: dict = None,
+                      intensity: float = 1.0) -> str:
+    """
+    Potongan filter_complex: [src] -> filter + adjustment -> [dst]. Kalau intensity < 1,
+    filter dicampur dengan gambar asli (split + blend) supaya kekuatannya bisa diatur.
+    """
+    f = _filter_chain(filter_preset)
+    adj = _adjust_chain(adjust)
+    if not f and not adj:
+        return f"[{src}]null[{dst}]"
+    inten = min(max(float(intensity), 0.0), 1.0)
+    if f and inten < 0.98:
+        mid = f"{dst}_m"
+        g = (f"[{src}]split[{dst}_a][{dst}_b];[{dst}_b]{f},format=yuv420p[{dst}_c];"
+             f"[{dst}_a]format=yuv420p[{dst}_d];[{dst}_d][{dst}_c]blend=all_opacity={inten:.2f}[{mid}]")
+        return g + (f";[{mid}]{adj}[{dst}]" if adj else f";[{mid}]null[{dst}]")
+    chain = ",".join(x for x in (f, adj) if x)
+    return f"[{src}]{chain}[{dst}]"
+
+
+def build_color_filters(filter_preset: str = "none", adjust: dict = None) -> str:
+    """Versi rantai lurus (tanpa intensity), dipakai untuk preview satu frame."""
+    return ",".join(x for x in (_filter_chain(filter_preset), _adjust_chain(adjust)) if x)
+
+
 def _effect_filter(effect: str, dur: float, W: int, H: int) -> str:
     """Filter ffmpeg untuk satu efek pada satu segmen (input sudah W x H, waktu mulai dari 0)."""
     d = max(dur, 0.1)
-    if effect == "zoom_in":
-        z = f"(1+0.15*t/{d:.3f})"
-    elif effect == "zoom_out":
-        z = f"(1.15-0.15*t/{d:.3f})"
-    elif effect == "pulse":
-        z = "(1+0.05*abs(sin(t*6)))"
-    else:
-        z = None
-    if z:
-        return (f"scale=w='trunc(iw*{z}/2)*2':h='trunc(ih*{z}/2)*2':eval=frame,crop={W}:{H}")
+    zoom = {
+        "zoom_in": f"(1+0.15*t/{d:.3f})",
+        "zoom_out": f"(1.15-0.15*t/{d:.3f})",
+        "pulse": "(1+0.05*abs(sin(t*6)))",
+        "zoom_punch": "(1+0.22*max(0,1-t/0.25))",
+    }.get(effect)
+    if zoom:
+        return f"scale=w='trunc(iw*{zoom}/2)*2':h='trunc(ih*{zoom}/2)*2':eval=frame,crop={W}:{H}"
     if effect == "shake":
         return (f"crop=w=iw*0.94:h=ih*0.94:x='(iw-ow)/2+sin(t*40)*iw*0.02':"
                 f"y='(ih-oh)/2+cos(t*47)*ih*0.02',scale={W}:{H}")
+    if effect == "shake_hard":
+        return (f"crop=w=iw*0.88:h=ih*0.88:x='(iw-ow)/2+sin(t*60)*iw*0.05':"
+                f"y='(ih-oh)/2+cos(t*71)*ih*0.05',scale={W}:{H}")
+    if effect == "tilt":
+        return f"rotate=a='0.05*sin(t*5)':c=black:ow={W}:oh={H},scale=iw*1.12:ih*1.12,crop={W}:{H}"
     if effect == "glitch":
         return "rgbashift=rh=8:bh=-8:enable='lt(mod(t,0.6),0.12)'"
+    if effect == "rgb_split":
+        return "rgbashift=rh=5:bh=-5"
+    if effect == "vhs":
+        return "rgbashift=rh=3:bh=-3,noise=alls=14:allf=t,eq=saturation=1.3:contrast=1.05"
+    if effect == "film_grain":
+        return "noise=alls=18:allf=t"
     if effect == "flash":
         return "fade=t=in:st=0:d=0.25:color=white"
+    if effect == "flash_negatif":
+        return "negate=enable='lt(t,0.12)'"
     if effect == "fade_in":
         return "fade=t=in:st=0:d=0.3"
+    if effect == "fade_out":
+        return f"fade=t=out:st={max(d - 0.3, 0):.3f}:d=0.3"
     if effect == "vignette":
         return "vignette=angle=0.6"
+    if effect == "blur_in":
+        return "boxblur=luma_radius=12:luma_power=2:enable='lt(t,0.3)'"
+    if effect == "bw_flash":
+        return "hue=s=0:enable='lt(t,0.35)'"
+    if effect == "mirror":
+        return "hflip"
     return ""
 
 
@@ -356,7 +371,8 @@ def build_overlay_ass(entries: list, width: int, height: int, style: dict) -> st
     margin_v = round(height * st["offset_pct"] / 100)
     alignment = {"top": 8, "middle": 5, "bottom": 2}.get(st["position"], 8)
     if st["box"]:
-        border_style, outline, back = 3, max(6, round(font_size / 4)), "&H99000000"
+        border_style, outline, back = 3, max(6, round(font_size / 4)), "&H00000000"
+        st = {**st, "outline_hex": st["box_hex"]}   # BorderStyle 3: warna kotak = OutlineColour
     else:
         border_style, outline, back = 1, max(2, round(font_size / 10)), "&H80000000"
     header = (
@@ -376,6 +392,8 @@ def build_overlay_ass(entries: list, width: int, height: int, style: dict) -> st
     for start, end, text in entries:
         if not text:
             continue
+        if st["uppercase"]:
+            text = text.upper()
         safe = text.replace("\\", "").replace("{", "(").replace("}", ")").replace("\n", "\\N")
         lines.append(f"Dialogue: 0,{_ass_time(start)},{_ass_time(end)},Overlay,,0,0,0,,{fad}{safe}")
     return header + "\n".join(lines) + "\n"
@@ -423,6 +441,7 @@ def render_cut_recipe(
     separate_vo_path: str = None,          # satu file VO utuh, diputar dari detik 0
     text_style: dict = None,
     filter_preset: str = "none",
+    filter_intensity: float = 1.0,
     adjust: dict = None,
     caption: dict = None,                  # {"style": preset-name|dict} -> auto caption Whisper
     transition_sec: float = DEFAULT_TRANSITION_SEC,
@@ -520,7 +539,7 @@ def render_cut_recipe(
                  f"fps={OUT_FPS},scale={W}:{H},setsar=1,format=yuv420p")
         fx = _effect_filter(s.get("effect", "none"), d, W, H)
         if fx:
-            chain += "," + fx + ",format=yuv420p"
+            chain += "," + fx + f",scale={W}:{H},setsar=1,format=yuv420p"
         fc.append(chain + f"[v{i}]")
 
     cur = "v0"
@@ -534,10 +553,9 @@ def render_cut_recipe(
             fc.append(f"[{cur}][v{i}]concat=n=2:v=1:a=0[{out}]")
         cur = out
 
-    color = build_color_filters(filter_preset, adjust)
     fonts_escaped = os.path.abspath(fonts_dir).replace("\\", "/").replace(":", "\\:")
-    post = (color + "," if color else "") + f"subtitles={ass_name}:fontsdir='{fonts_escaped}'"
-    fc.append(f"[{cur}]{post}[vout]")
+    fc.append(build_color_graph(cur, "vgrade", filter_preset, adjust, filter_intensity))
+    fc.append(f"[vgrade]subtitles={ass_name}:fontsdir='{fonts_escaped}'[vout]")
 
     # ---- 6. graf audio ----
     labels = []

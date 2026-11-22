@@ -13,10 +13,7 @@ from modules.script_formula import FORMULAS, get_formula_parts
 from batch_process import process_one_product
 from manual_process import process_manual
 from batch_process import generate_audio
-from modules.cut_recipe import (
-    make_cached_tts, parse_recipe, recipe_total_duration, render_cut_recipe, DEFAULT_RECIPE, recipe_to_lines,
-)
-import json
+from modules.cut_recipe import make_cached_tts
 from config import (VOICE_OPTIONS, SUBTITLE_STYLES, FONT_OPTIONS, COLOR_OPTIONS, OUTPUT_DIR,
                     GEMINI_API_KEYS, AZURE_SPEECH_KEY)
 
@@ -36,13 +33,14 @@ FORMULA_LABELS = {v["label"]: k for k, v in FORMULAS.items()}
 
 TAB_HEIGHT_BATCH = 165
 TAB_HEIGHT_MANUAL = 470
-WINDOW_HEIGHT_BATCH = 800
-WINDOW_HEIGHT_MANUAL = 1010
-TAB_HEIGHT_CUTRECIPE = 400
-WINDOW_HEIGHT_CUTRECIPE = 960
+WINDOW_HEIGHT_BATCH = 880
+WINDOW_HEIGHT_MANUAL = 1060
+WINDOW_STUDIO = "1560x940"
 TAB_BATCH = "Batch (dari Excel)"
 TAB_MANUAL = "Manual (1 Produk)"
-TAB_CUT = "CutRecipe (Potong Ulang)"
+PAGE_STUDIO = "studio"
+PAGE_BATCH = "batch"
+PAGE_MANUAL = "manual"
 
 
 class TextRedirector:
@@ -62,14 +60,13 @@ class VideoEditorApp(ctk.CTk):
         super().__init__()
 
         self.title("AI Video Editor")
-        self.geometry(f"1050x{WINDOW_HEIGHT_BATCH}")
-        self.minsize(900, 700)
+        self.geometry(WINDOW_STUDIO)
+        self.minsize(1100, 700)
+        self.output_dir = OUTPUT_DIR
 
         self.excel_path = ctk.StringVar(value="products.xlsx")
         self.watermark_path_var = ctk.StringVar(value="assets/watermark/logo.png")
         self.manual_media_paths = []
-        self.cut_video_path = None
-        self.cut_music_path = None
         self.part_entries = {}
         self.log_queue = queue.Queue()
         self.is_processing = False
@@ -87,53 +84,125 @@ class VideoEditorApp(ctk.CTk):
     # UI BUILDER
     # ==========================================================
     def _build_ui(self):
-        self.tabview = ctk.CTkTabview(self, height=TAB_HEIGHT_BATCH, command=self._on_tab_change)
-        self.tabview.pack(padx=15, pady=(15, 5), fill="x")
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
+        # ---- sidebar
+        side = ctk.CTkFrame(self, width=170, corner_radius=0)
+        side.grid(row=0, column=0, sticky="nsew")
+        side.grid_propagate(False)
+        ctk.CTkLabel(side, text="AI Video Editor", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=(18, 14), padx=12)
+        self.nav_buttons = {}
+        for key, text in [(PAGE_STUDIO, "CutRecipe Studio"), (PAGE_BATCH, "Batch (Excel)"), (PAGE_MANUAL, "Manual")]:
+            b = ctk.CTkButton(side, text=text, height=38, anchor="w", fg_color="transparent",
+                              hover_color="gray25", command=lambda k=key: self._show_page(k))
+            b.pack(fill="x", padx=10, pady=3)
+            self.nav_buttons[key] = b
+
+        # ---- area isi: halaman + log
+        self.content = ctk.CTkFrame(self, fg_color="transparent")
+        self.content.grid(row=0, column=1, sticky="nsew", padx=(6, 10), pady=8)
+        self.content.grid_columnconfigure(0, weight=1)
+        self.content.grid_rowconfigure(0, weight=1)
+
+        self.page_studio = None   # dibuat saat pertama dibuka (hemat memori)
+        self.page_classic = ctk.CTkFrame(self.content, fg_color="transparent")
+
+        self.tabview = ctk.CTkTabview(self.page_classic, height=TAB_HEIGHT_BATCH)
+        self.tabview.pack(padx=5, pady=(5, 5), fill="x")
         self.tab_batch = self.tabview.add(TAB_BATCH)
         self.tab_manual = self.tabview.add(TAB_MANUAL)
-        self.tab_cut = self.tabview.add(TAB_CUT)
-
         self._build_batch_tab()
         self._build_manual_tab()
-        self._build_cutrecipe_tab()
         self.tabview.set(TAB_BATCH)
         self.tabview.configure(height=TAB_HEIGHT_BATCH)
+        try:
+            self.tabview._segmented_button.grid_remove()   # pindah halaman lewat sidebar
+        except Exception:
+            pass
 
-        self.settings_scroll = ctk.CTkScrollableFrame(self, height=280)
-        self.settings_scroll.pack(padx=15, pady=5, fill="both", expand=True)
+        self.settings_scroll = ctk.CTkScrollableFrame(self.page_classic, height=280)
+        self.settings_scroll.pack(padx=5, pady=5, fill="both", expand=True)
         self._build_voice_section()
         self._build_subtitle_section()
         self._build_hook_section()
         self._build_effects_section()
-
-        # Panggil refresh SETELAH semua section kebentuk, biar referensi "before="
-        # (label_hook_section, label_effects_section) udah pasti ada
         self._refresh_subtitle_controls()
         self._refresh_hook_controls()
 
         self.btn_start = ctk.CTkButton(
-            self, text="Mulai Proses", height=42,
+            self.page_classic, text="Mulai Proses", height=42,
             font=ctk.CTkFont(size=15, weight="bold"),
             command=self._start_processing,
         )
         self.btn_start.pack(pady=(5, 3))
-
-        self.progress_label = ctk.CTkLabel(self, text="Siap memulai.")
+        self.progress_label = ctk.CTkLabel(self.page_classic, text="Siap memulai.")
         self.progress_label.pack(pady=(0, 3))
 
-        self.log_box = ctk.CTkTextbox(self, height=170, font=ctk.CTkFont(family="Consolas", size=12))
-        self.log_box.pack(padx=15, pady=(3, 15), fill="both", expand=True)
+        # log bersama (bisa dilipat)
+        logbar = ctk.CTkFrame(self.content, fg_color="transparent")
+        logbar.grid(row=1, column=0, sticky="ew", pady=(6, 0))
+        self.btn_log = ctk.CTkButton(logbar, text="Log  ^", width=70, height=24, fg_color="gray25",
+                                     command=self._toggle_log)
+        self.btn_log.pack(side="left")
+        self.log_box = ctk.CTkTextbox(self.content, height=110, font=ctk.CTkFont(family="Consolas", size=12))
+        self.log_box.grid(row=2, column=0, sticky="ew", pady=(4, 0))
+        self.log_visible = True
 
-    def _on_tab_change(self):
-        """Tinggi tab + window menyesuaikan isi tab yang aktif."""
-        current = self.tabview.get()
-        tab_h, win_h = {
-            TAB_BATCH: (TAB_HEIGHT_BATCH, WINDOW_HEIGHT_BATCH),
-            TAB_MANUAL: (TAB_HEIGHT_MANUAL, WINDOW_HEIGHT_MANUAL),
-            TAB_CUT: (TAB_HEIGHT_CUTRECIPE, WINDOW_HEIGHT_CUTRECIPE),
-        }[current]
+        self._show_page(PAGE_STUDIO)
+
+    def _toggle_log(self):
+        if self.log_visible:
+            self.log_box.grid_remove()
+            self.btn_log.configure(text="Log  v")
+        else:
+            self.log_box.grid()
+            self.btn_log.configure(text="Log  ^")
+        self.log_visible = not self.log_visible
+
+    def _show_page(self, page):
+        for k, b in self.nav_buttons.items():
+            b.configure(fg_color="#1f6aa5" if k == page else "transparent")
+        if self.page_studio is not None:
+            self.page_studio.grid_remove()
+        self.page_classic.grid_remove()
+
+        if page == PAGE_STUDIO:
+            if self.page_studio is None:
+                from modules.cut_studio import CutStudioFrame
+                self.page_studio = CutStudioFrame(self.content, self)
+            self.page_studio.grid(row=0, column=0, sticky="nsew")
+            self.geometry(WINDOW_STUDIO)
+            return
+        self.page_classic.grid(row=0, column=0, sticky="nsew")
+        self.current_mode = TAB_BATCH if page == PAGE_BATCH else TAB_MANUAL
+        self.tabview.set(self.current_mode)
+        tab_h, win_h = ((TAB_HEIGHT_BATCH, WINDOW_HEIGHT_BATCH) if page == PAGE_BATCH
+                        else (TAB_HEIGHT_MANUAL, WINDOW_HEIGHT_MANUAL))
         self.tabview.configure(height=tab_h)
-        self.geometry(f"{self.winfo_width()}x{win_h}")
+        self.geometry(f"{max(self.winfo_width(), 1180)}x{win_h}")
+
+    # dipakai Studio
+    def make_redirector(self):
+        return TextRedirector(self.log_queue)
+
+    def make_tts(self, voice_label):
+        """Fungsi TTS ber-cache untuk Studio; None (+ pop-up) kalau key belum siap."""
+        voice_option = self.voice_map.get(voice_label)
+        engine = voice_option["engine"] if voice_option else "gemini"
+        if engine == "gemini" and not GEMINI_API_KEYS:
+            messagebox.showerror("API key belum siap",
+                                 "API key Gemini belum diisi.\n\nBuka credentials.py, isi GEMINI_API_KEYS dengan key dari "
+                                 "aistudio.google.com/apikey, simpan, lalu buka ulang aplikasi.")
+            return None
+        if engine == "azure" and not AZURE_SPEECH_KEY:
+            messagebox.showerror("API key belum siap",
+                                 "Suara Azure butuh AZURE_SPEECH_KEY di credentials.py, dan itu belum diisi.\n\n"
+                                 "Pilih suara Gemini di kotak Suara VO, atau isi key Azure.")
+            return None
+        key = f"{voice_option.get('engine')}:{voice_option.get('voice_name')}"
+        return make_cached_tts(lambda text, path: generate_audio(text, path, voice_option),
+                               key, os.path.join(OUTPUT_DIR, "_tts_cache"))
 
     # ---------- TAB BATCH ----------
     def _build_batch_tab(self):
@@ -149,137 +218,6 @@ class VideoEditorApp(ctk.CTk):
                  "Naskah, formula copywriting, dan durasi ditentukan otomatis oleh AI.",
             justify="left", text_color="gray",
         ).pack(anchor="w", padx=20, pady=(0, 10))
-
-    # ---------- TAB CUTRECIPE ----------
-    def _build_cutrecipe_tab(self):
-        t = self.tab_cut
-        f1 = ctk.CTkFrame(t)
-        f1.pack(fill="x", padx=5, pady=(5, 4))
-        ctk.CTkButton(f1, text="Pilih Video Mentah...", width=160,
-                      command=self._browse_cut_video).pack(side="left", padx=10, pady=8)
-        ctk.CTkButton(f1, text="Buka CutRecipe Studio", width=170, fg_color="#16a34a", hover_color="#15803d",
-                      command=self._open_studio).pack(side="left", padx=5, pady=8)
-        self.label_cut_video = ctk.CTkLabel(f1, text="Belum ada video dipilih", text_color="gray")
-        self.label_cut_video.pack(side="left", padx=5, pady=8)
-        ctk.CTkLabel(f1, text="Output:").pack(side="left", padx=(20, 5), pady=8)
-        self.entry_cut_output = ctk.CTkEntry(f1, placeholder_text="misal kulkas_20detik.mp4", width=220)
-        self.entry_cut_output.pack(side="left", padx=5, pady=8, fill="x", expand=True)
-
-        f2 = ctk.CTkFrame(t)
-        f2.pack(fill="both", expand=True, padx=5, pady=4)
-        head = ctk.CTkFrame(f2, fg_color="transparent")
-        head.pack(fill="x", padx=8, pady=(6, 0))
-        ctk.CTkLabel(head, text="Resep: satu potongan per baris  ->  mulai-selesai | teks layar | teks VO   (urutan = urutan di video hasil)",
-                     anchor="w").pack(side="left")
-        ctk.CTkButton(head, text="Cek Resep", width=90, command=self._check_recipe).pack(side="right", padx=(5, 0))
-        ctk.CTkButton(head, text="Muat Contoh", width=100, fg_color="gray30",
-                      command=self._load_example_recipe).pack(side="right", padx=5)
-        self.text_recipe = ctk.CTkTextbox(f2, height=140, font=ctk.CTkFont(family="Consolas", size=12))
-        self.text_recipe.pack(fill="both", expand=True, padx=8, pady=6)
-        self._load_example_recipe()
-
-        f3 = ctk.CTkFrame(t)
-        f3.pack(fill="x", padx=5, pady=4)
-        self.cut_vo_var = ctk.BooleanVar(value=False)
-        ctk.CTkCheckBox(f3, text="Tambah VO per segmen (pakai pilihan Suara VO di bawah; audio asli dimatikan)",
-                        variable=self.cut_vo_var).grid(row=0, column=0, columnspan=4, sticky="w", padx=10, pady=(8, 2))
-        self.cut_keep_audio_var = ctk.BooleanVar(value=True)
-        ctk.CTkCheckBox(f3, text="Pakai audio asli video (kalau VO mati)",
-                        variable=self.cut_keep_audio_var).grid(row=1, column=0, columnspan=2, sticky="w", padx=10, pady=2)
-        ctk.CTkButton(f3, text="Musik latar...", width=110, command=self._browse_cut_music).grid(
-            row=2, column=0, sticky="w", padx=10, pady=(2, 8))
-        self.label_cut_music = ctk.CTkLabel(f3, text="Tanpa musik", text_color="gray")
-        self.label_cut_music.grid(row=2, column=1, sticky="w", padx=5, pady=(2, 8))
-        ctk.CTkLabel(f3, text="Volume musik (%):").grid(row=2, column=2, sticky="e", padx=(20, 5), pady=(2, 8))
-        self.entry_cut_music_vol = ctk.CTkEntry(f3, width=60)
-        self.entry_cut_music_vol.insert(0, "20")
-        self.entry_cut_music_vol.grid(row=2, column=3, sticky="w", padx=5, pady=(2, 8))
-
-        f4 = ctk.CTkFrame(t)
-        f4.pack(fill="x", padx=5, pady=(4, 5))
-        ctk.CTkLabel(f4, text="Teks overlay:").pack(side="left", padx=(10, 5), pady=8)
-        self.combo_cut_font = ctk.CTkComboBox(f4, values=self.font_list, width=140)
-        self.combo_cut_font.set("Arial Black" if "Arial Black" in self.font_list else self.font_list[0])
-        self.combo_cut_font.pack(side="left", padx=4, pady=8)
-        ctk.CTkLabel(f4, text="Ukuran %:").pack(side="left", padx=(12, 3), pady=8)
-        self.entry_cut_size = ctk.CTkEntry(f4, width=50)
-        self.entry_cut_size.insert(0, "3.6")
-        self.entry_cut_size.pack(side="left", padx=3, pady=8)
-        ctk.CTkLabel(f4, text="Posisi dari atas %:").pack(side="left", padx=(12, 3), pady=8)
-        self.entry_cut_top = ctk.CTkEntry(f4, width=50)
-        self.entry_cut_top.insert(0, "25")
-        self.entry_cut_top.pack(side="left", padx=3, pady=8)
-        ctk.CTkLabel(f4, text="Warna:").pack(side="left", padx=(12, 3), pady=8)
-        names = list(self.color_map.keys())
-        self.combo_cut_color = ctk.CTkComboBox(f4, values=names, width=110)
-        self.combo_cut_color.set(names[0])
-        self.combo_cut_color.pack(side="left", padx=3, pady=8)
-
-    def make_redirector(self):
-        return TextRedirector(self.log_queue)
-
-    def _studio_tts_factory(self):
-        voice_option = self.voice_map.get(self.combo_voice.get())
-        prev = self.cut_vo_var.get()
-        self.cut_vo_var.set(True)
-        try:
-            problem = self._check_credentials(TAB_CUT, voice_option)
-        finally:
-            self.cut_vo_var.set(prev)
-        if problem:
-            messagebox.showerror("Belum siap", problem)
-            return None
-        return self._cached_tts(voice_option)
-
-    def _cached_tts(self, voice_option):
-        key = f"{voice_option.get('engine')}:{voice_option.get('voice_name')}"
-        return make_cached_tts(lambda text, path: generate_audio(text, path, voice_option),
-                               key, os.path.join(OUTPUT_DIR, "_tts_cache"))
-
-    def _open_studio(self):
-        if not self.cut_video_path or not os.path.exists(self.cut_video_path):
-            messagebox.showerror("Error", "Pilih dulu video mentahnya.")
-            return
-        try:
-            segs = parse_recipe(self.text_recipe.get("1.0", "end"))
-        except ValueError:
-            segs = None
-        from modules.cut_studio import CutStudio
-        try:
-            CutStudio(self, self.cut_video_path, OUTPUT_DIR, os.path.join(OUTPUT_DIR, "_tmp"),
-                      self._studio_tts_factory, self.font_list, self.color_map,
-                      initial_segments=segs, output_name=self.entry_cut_output.get().strip())
-        except Exception as e:
-            messagebox.showerror("Studio gagal dibuka", str(e))
-
-    def _browse_cut_video(self):
-        path = filedialog.askopenfilename(filetypes=[("Video", "*.mp4 *.mov *.avi *.mkv *.webm")])
-        if path:
-            self.cut_video_path = path
-            self.label_cut_video.configure(text=os.path.basename(path), text_color="white")
-
-    def _browse_cut_music(self):
-        path = filedialog.askopenfilename(filetypes=[("Audio", "*.mp3 *.wav *.m4a *.aac")])
-        if path:
-            self.cut_music_path = path
-            self.label_cut_music.configure(text=os.path.basename(path), text_color="white")
-
-    def _load_example_recipe(self):
-        self.text_recipe.delete("1.0", "end")
-        self.text_recipe.insert("1.0", recipe_to_lines(DEFAULT_RECIPE))
-
-    def _check_recipe(self):
-        try:
-            segs = parse_recipe(self.text_recipe.get("1.0", "end"))
-        except ValueError as e:
-            messagebox.showerror("Resep tidak valid", str(e))
-            return
-        n_vo = sum(1 for s in segs if s["vo"])
-        messagebox.showinfo(
-            "Resep valid",
-            f"{len(segs)} segmen, durasi hasil sekitar {recipe_total_duration(segs):.1f} detik.\n"
-            f"{n_vo} segmen punya teks VO.\n"
-            "(Kalau VO lebih panjang dari segmen, segmen otomatis diperpanjang.)")
 
     # ---------- TAB MANUAL ----------
     def _build_manual_tab(self):
@@ -711,7 +649,7 @@ class VideoEditorApp(ctk.CTk):
             messagebox.showinfo("Info", "Masih ada proses berjalan, tunggu sampai selesai.")
             return
 
-        mode = self.tabview.get()
+        mode = getattr(self, "current_mode", self.tabview.get())
 
         try:
             settings = self._collect_common_settings()
@@ -741,12 +679,6 @@ class VideoEditorApp(ctk.CTk):
                 return
             target = self._run_batch
             args = (excel_path, voice_option, settings)
-        elif mode == TAB_CUT:
-            cut_args = self._collect_cut_args(voice_option)
-            if cut_args is None:
-                return
-            target = self._run_cutrecipe
-            args = (cut_args,)
         else:
             if not self.manual_media_paths:
                 messagebox.showerror("Error", "Pilih dulu file video/foto-nya.")
@@ -837,10 +769,7 @@ class VideoEditorApp(ctk.CTk):
     def _check_credentials(self, mode, voice_option):
         """Cek key yang dibutuhkan proses ini. Return pesan error, atau None kalau aman."""
         engine = voice_option["engine"] if voice_option else "gemini"
-        if mode == TAB_CUT:
-            uses_voice = self.cut_vo_var.get()
-            needs_script_ai = False
-        elif mode == TAB_MANUAL:
+        if mode == TAB_MANUAL:
             uses_voice = True
             needs_script_ai = not self.teks_final_var.get()
         else:
@@ -854,60 +783,6 @@ class VideoEditorApp(ctk.CTk):
             return ("Suara Azure butuh AZURE_SPEECH_KEY di credentials.py, dan itu belum diisi.\n\n"
                     "Pilih suara Gemini (Zephyr, Puck, Kore, Charon, Leda) di Suara VO, atau isi key Azure.")
         return None
-
-    def _collect_cut_args(self, voice_option):
-        if not self.cut_video_path or not os.path.exists(self.cut_video_path):
-            messagebox.showerror("Error", "Pilih dulu video mentahnya.")
-            return None
-        nama = self.entry_cut_output.get().strip()
-        if not nama:
-            messagebox.showerror("Error", "Isi dulu nama file output-nya.")
-            return None
-        if not nama.lower().endswith(".mp4"):
-            nama += ".mp4"
-        try:
-            segments = parse_recipe(self.text_recipe.get("1.0", "end"))
-            vol = float(self.entry_cut_music_vol.get().replace(",", ".")) / 100.0
-            size_pct = float(self.entry_cut_size.get().replace(",", "."))
-            top_pct = float(self.entry_cut_top.get().replace(",", "."))
-        except ValueError as e:
-            messagebox.showerror("Error", f"Input tidak valid: {e}")
-            return None
-        vo_on = self.cut_vo_var.get()
-        if vo_on and not any(s["vo"] for s in segments):
-            messagebox.showerror("Error", "VO aktif tapi tidak ada baris yang punya teks \"vo\" di resep.")
-            return None
-        return dict(
-            video_path=self.cut_video_path,
-            segments=segments,
-            output_path=os.path.join(OUTPUT_DIR, nama),
-            voice_option=voice_option,
-            vo_enabled=vo_on,
-            audio_mode=("music" if self.cut_music_path else ("original" if self.cut_keep_audio_var.get() else "mute")),
-            music_path=self.cut_music_path,
-            music_volume=vol,
-            text_style={"font_name": self.combo_cut_font.get(), "size_pct": size_pct, "offset_pct": top_pct,
-                        "position": "top",
-                        "text_hex": self.color_map.get(self.combo_cut_color.get(), "FFFFFF")},
-        )
-
-    def _run_cutrecipe(self, cut_args):
-        old_stdout = sys.stdout
-        sys.stdout = TextRedirector(self.log_queue)
-        try:
-            self._set_progress("Memproses CutRecipe...")
-            voice_option = cut_args.pop("voice_option")
-            if cut_args["vo_enabled"]:
-                cut_args["tts_func"] = self._cached_tts(voice_option)
-            path = render_cut_recipe(tmp_dir=os.path.join(OUTPUT_DIR, "_tmp"), **cut_args)
-            print(f"\nSELESAI: {path}")
-            self._set_progress(f"Selesai! Output: {path}")
-        except Exception as e:
-            print(f"[ERROR] {e}")
-            self._set_progress("Terjadi error, cek log.")
-        finally:
-            sys.stdout = old_stdout
-            self._finish_processing()
 
     def _finish_processing(self):
         self.is_processing = False

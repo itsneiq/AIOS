@@ -20,4 +20,8 @@ auto dipercepat maks 1.2x atau segmen diperpanjang kalau VO kepanjangan), audio 
 
 
 ## CutRecipe Studio
-Di tab CutRecipe, klik **Buka CutRecipe Studio**: kartu segmen (mulai/selesai, teks overlay, teks VO, transisi, efek, upload VO), timeline video asli, tab Teks & Caption (gaya teks + caption Whisper), Filter, Adjustment, mode audio (Asli/Mute/Musik), voiceover terpisah, Preview & Ekspor.
+Jendela satu aplikasi dengan sidebar: **CutRecipe Studio**, **Batch (Excel)**, **Manual**.
+Studio: perpustakaan preset di kiri (Teks, Transisi, Efek, Filter dengan thumbnail, Adjustment), preview frame + timeline hasil di tengah, kartu segmen di kanan.
+Suara VO dipilih sekali di bar atas dan dipakai semua segmen (VO yang sama di-cache). Mode hemat: ffmpeg berprioritas rendah dan thread dibatasi.
+Katalog preset ada di `modules/cut_catalog.py` (tambah entri = tambah pilihan baru).
+Perlu ffmpeg build "full" (misal gyan.dev) dan ffprobe di PATH.
