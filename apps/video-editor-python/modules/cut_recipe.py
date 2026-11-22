@@ -454,6 +454,56 @@ def _run_ffmpeg(cmd: list, codec_idx: int, cwd: str, eco: bool = True) -> subpro
     return r
 
 
+def _gpu_export(video_path, segs, total, W, H, transition_sec, text_style, filter_preset, filter_intensity,
+                adjust, inputs, audio_fc, has_audio, target, tmp_dir, base, fonts_dir, eco):
+    """Video dirender frame-demi-frame oleh GLEngine (GPU) dan di-pipe ke NVENC; audio dari graf ffmpeg terpisah."""
+    from modules.gl_engine import GLEngine
+    kw = _popen_kwargs(eco)
+    audio_file = None
+    if has_audio:
+        audio_file = os.path.join(tmp_dir, f"{base}_cr_audio.m4a")
+        cmd = ["ffmpeg", "-y", *inputs, "-filter_complex", ";".join(audio_fc), "-map", "[aout]",
+               "-c:a", "aac", "-b:a", "192k", "-ar", "44100", "-t", f"{total:.3f}", audio_file]
+        r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=tmp_dir, **kw)
+        if r.returncode != 0:
+            raise RuntimeError("audio gagal: " + r.stderr[-600:])
+    eng = GLEngine(video_path, preview_h=H, fonts_dir=fonts_dir)
+    try:
+        if (eng.W, eng.H) != (W, H):
+            raise RuntimeError(f"ukuran mesin {eng.W}x{eng.H} != {W}x{H}")
+        eng.set_segments(segs, transition_sec)
+        eng.set_text_style(text_style)
+        eng.set_look(filter_preset, filter_intensity, adjust)
+        n = int(round(eng.total * OUT_FPS))
+        base_cmd = ["ffmpeg", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(OUT_FPS), "-i", "-"]
+        if audio_file:
+            base_cmd += ["-i", audio_file]
+        for enc in (["-c:v", "h264_nvenc", "-preset", "p4", "-cq", "19"],
+                    ["-c:v", "libx264", "-preset", "veryfast", "-crf", "19"]):
+            cmd = base_cmd + ["-map", "0:v"] + (["-map", "1:a", "-c:a", "copy"] if audio_file else []) + \
+                  enc + ["-pix_fmt", "yuv420p", "-movflags", "+faststart", "-t", f"{eng.total:.3f}", target]
+            pr = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE, cwd=tmp_dir, **kw)
+            t0, last, ok = time.time(), 0.0, True
+            try:
+                for i in range(n):
+                    pr.stdin.write(eng.render(i / OUT_FPS).tobytes())
+                    if time.time() - last > 2:
+                        last = time.time()
+                        print(f"[GPU] frame {i + 1}/{n} ({(i + 1) / max(time.time() - t0, 1e-6):.0f} fps)")
+                pr.stdin.close()
+            except (BrokenPipeError, OSError):
+                ok = False
+            err = pr.stderr.read().decode("utf-8", "replace")
+            pr.wait()
+            if ok and pr.returncode == 0:
+                print(f"[GPU] selesai {n} frame dalam {time.time() - t0:.1f}s")
+                return
+            print("[WARNING] Encoder gagal, coba cadangan:", err[-300:])
+        raise RuntimeError("encoder gagal")
+    finally:
+        eng.close()
+
+
 def render_cut_recipe(
     video_path: str,
     segments: list,
@@ -475,6 +525,7 @@ def render_cut_recipe(
     fonts_dir: str = FONTS_DIR_DEFAULT,
     tmp_dir: str = "_tmp",
     max_vo_speedup: float = MAX_VO_SPEEDUP,
+    gpu: bool = True,                      # ekspor lewat mesin GPU yang sama dengan preview
 ) -> str:
     t_start = time.time()
     video_path = os.path.abspath(video_path)
@@ -583,6 +634,7 @@ def render_cut_recipe(
     fc.append(f"[vgrade]subtitles={ass_name}:fontsdir='{fonts_escaped}'[vout]")
 
     # ---- 6. graf audio ----
+    a_start = len(fc)
     labels = []
     nxt = 1
 
@@ -643,22 +695,38 @@ def render_cut_recipe(
     want_caption = bool(caption) and not preview
     render_target = (os.path.join(tmp_dir, f"{base}_cr_precaption.mp4") if want_caption else output_path)
 
+    done_gpu = False
+    if gpu and not preview:
+        try:
+            _gpu_export(video_path, segs, total, W, H, transition_sec, text_style, filter_preset,
+                        filter_intensity, adjust, inputs, fc[a_start:], has_audio_out, render_target,
+                        tmp_dir, base, fonts_dir, eco)
+            done_gpu = True
+        except Exception as e:
+            print(f"[WARNING] Ekspor GPU gagal ({e}). Pakai jalur ffmpeg biasa.")
+
     threads = ["-threads", str(max(2, (os.cpu_count() or 4) // 2))] if eco else []
     cmd = ["ffmpeg", "-y", *threads, *inputs, "-filter_complex", ";".join(fc), "-map", "[vout]"]
     if has_audio_out:
         cmd += ["-map", "[aout]"]
-    codec_idx = len(cmd) + 1
-    if preview:
+    if done_gpu:
+        cmd = None
+    codec_idx = len(cmd) + 1 if cmd else 0
+    if cmd is None:
+        pass
+    elif preview:
         cmd += ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "30", "-pix_fmt", "yuv420p"]
     else:
         cmd += ["-c:v", "h264_nvenc", "-preset", "p4", "-cq", "19", "-pix_fmt", "yuv420p"]
-    if has_audio_out:
-        cmd += ["-c:a", "aac", "-b:a", "192k", "-ar", "44100"]
-    cmd += ["-t", f"{total:.3f}", "-movflags", "+faststart", render_target]
+    if cmd is not None:
+        if has_audio_out:
+            cmd += ["-c:a", "aac", "-b:a", "192k", "-ar", "44100"]
+        cmd += ["-t", f"{total:.3f}", "-movflags", "+faststart", render_target]
 
-    r = _run_ffmpeg(cmd, codec_idx, cwd=tmp_dir, eco=eco)
-    if r.returncode != 0:
-        raise RuntimeError(f"Render CutRecipe gagal.\nSTDERR: {r.stderr[-1500:]}")
+    if cmd is not None:
+        r = _run_ffmpeg(cmd, codec_idx, cwd=tmp_dir, eco=eco)
+        if r.returncode != 0:
+            raise RuntimeError(f"Render CutRecipe gagal.\nSTDERR: {r.stderr[-1500:]}")
     t_render = time.time()
 
     # ---- 8. auto caption (Whisper) di atas hasil jadi ----

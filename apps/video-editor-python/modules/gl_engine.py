@@ -359,7 +359,13 @@ class GLEngine:
             if st.get("uppercase"):
                 text = text.upper()
             size = max(12, round(self.H * st["size_pct"] / 100))
-            font = find_font(st["font_name"], size, self.fonts_dir)
+            f0 = find_font(st["font_name"], size, self.fonts_dir)
+            try:   # libass: Fontsize = tinggi baris (ascent+descent), PIL: ukuran em -> samakan
+                asc, desc = f0.getmetrics()
+                em = max(8, round(size * size / (asc + desc)))
+            except Exception:
+                em = size
+            font = find_font(st["font_name"], em, self.fonts_dir)
             img = Image.new("RGBA", (self.W, self.H), (0, 0, 0, 0))
             d = ImageDraw.Draw(img)
             maxw = int(self.W * 0.88)
@@ -372,11 +378,13 @@ class GLEngine:
                     lines.append(cur); cur = w
             if cur:
                 lines.append(cur)
-            lh = int(size * 1.2)
+            lh = int(size)
             total_h = lh * len(lines)
             pos = st["position"]
             off = int(self.H * st["offset_pct"] / 100)
             y0 = off if pos == "top" else (self.H - off - total_h if pos == "bottom" else (self.H - total_h) // 2)
+            _h = lambda v: str(v).lstrip("#")
+            st = {**st, "text_hex": _h(st["text_hex"]), "outline_hex": _h(st["outline_hex"]), "box_hex": _h(st.get("box_hex", "000000"))}
             tc = tuple(int(st["text_hex"][i:i + 2], 16) for i in (0, 2, 4))
             oc = tuple(int(st["outline_hex"][i:i + 2], 16) for i in (0, 2, 4))
             bc = tuple(int(st.get("box_hex", "000000")[i:i + 2], 16) for i in (0, 2, 4))
