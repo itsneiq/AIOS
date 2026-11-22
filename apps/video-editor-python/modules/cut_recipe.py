@@ -12,6 +12,7 @@ JSON juga didukung: [{"start": 48, "end": 51, "text": "...", "vo": "...", "trans
 """
 import os
 import re
+import sys
 import json
 import time
 import shutil
@@ -383,8 +384,16 @@ def build_overlay_ass(entries: list, width: int, height: int, style: dict) -> st
 # ==========================================================
 # Render
 # ==========================================================
-def _run_ffmpeg(cmd: list, codec_idx: int, cwd: str) -> subprocess.CompletedProcess:
-    r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=cwd)
+def _popen_kwargs(eco: bool) -> dict:
+    """Mode hemat: ffmpeg jalan di prioritas rendah (Windows) supaya PC tetap responsif."""
+    if eco and sys.platform.startswith("win"):
+        return {"creationflags": 0x00004000}   # BELOW_NORMAL_PRIORITY_CLASS
+    return {}
+
+
+def _run_ffmpeg(cmd: list, codec_idx: int, cwd: str, eco: bool = True) -> subprocess.CompletedProcess:
+    kw = _popen_kwargs(eco)
+    r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=cwd, **kw)
     if r.returncode != 0 and "nvenc" in " ".join(cmd).lower():
         print("[WARNING] Encoding NVENC (GPU) gagal, fallback ke CPU (libx264)...")
         cpu = cmd.copy()
@@ -398,7 +407,7 @@ def _run_ffmpeg(cmd: list, codec_idx: int, cwd: str) -> subprocess.CompletedProc
                 skip = 1
                 continue
             cleaned.append(c)
-        r = subprocess.run(cleaned, capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=cwd)
+        r = subprocess.run(cleaned, capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=cwd, **kw)
     return r
 
 
@@ -418,6 +427,7 @@ def render_cut_recipe(
     caption: dict = None,                  # {"style": preset-name|dict} -> auto caption Whisper
     transition_sec: float = DEFAULT_TRANSITION_SEC,
     preview: bool = False,                 # render kecil & cepat untuk dicek
+    eco: bool = True,                      # mode hemat: prioritas rendah + thread dibatasi
     fonts_dir: str = FONTS_DIR_DEFAULT,
     tmp_dir: str = "_tmp",
     max_vo_speedup: float = MAX_VO_SPEEDUP,
@@ -432,8 +442,8 @@ def render_cut_recipe(
 
     info = probe_video(video_path)
     W, H, src_dur = info["width"] - info["width"] % 2, info["height"] - info["height"] % 2, info["duration"]
-    if preview and H > 640:
-        W, H = int(round(W * 640 / H / 2) * 2), 640
+    if preview and H > 480:
+        W, H = int(round(W * 480 / H / 2) * 2), 480
 
     # ---- 1. validasi / clamp segmen ----
     segs = []
@@ -590,7 +600,8 @@ def render_cut_recipe(
     want_caption = bool(caption) and not preview
     render_target = (os.path.join(tmp_dir, f"{base}_cr_precaption.mp4") if want_caption else output_path)
 
-    cmd = ["ffmpeg", "-y", *inputs, "-filter_complex", ";".join(fc), "-map", "[vout]"]
+    threads = ["-threads", str(max(2, (os.cpu_count() or 4) // 2))] if eco else []
+    cmd = ["ffmpeg", "-y", *threads, *inputs, "-filter_complex", ";".join(fc), "-map", "[vout]"]
     if has_audio_out:
         cmd += ["-map", "[aout]"]
     codec_idx = len(cmd) + 1
@@ -602,7 +613,7 @@ def render_cut_recipe(
         cmd += ["-c:a", "aac", "-b:a", "192k", "-ar", "44100"]
     cmd += ["-t", f"{total:.3f}", "-movflags", "+faststart", render_target]
 
-    r = _run_ffmpeg(cmd, codec_idx, cwd=tmp_dir)
+    r = _run_ffmpeg(cmd, codec_idx, cwd=tmp_dir, eco=eco)
     if r.returncode != 0:
         raise RuntimeError(f"Render CutRecipe gagal.\nSTDERR: {r.stderr[-1500:]}")
     t_render = time.time()
@@ -613,12 +624,13 @@ def render_cut_recipe(
             print("[WARNING] Auto caption dilewati: video hasil tidak punya audio.")
             os.replace(render_target, output_path)
         else:
-            from modules.subtitle_gen import generate_subtitles, burn_subtitles_to_video
+            from modules.subtitle_gen import generate_subtitles, burn_subtitles_to_video, release_whisper
             wav = os.path.join(tmp_dir, f"{base}_cr_caption.wav")
             subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", render_target, "-vn",
                             "-ac", "1", "-ar", "16000", wav], check=True)
             srt = os.path.join(tmp_dir, f"{base}_cr_caption.srt")
             generate_subtitles(wav, srt)
+            release_whisper()
             burn_subtitles_to_video(render_target, output_path, main_srt_path=srt,
                                     main_style=caption.get("style", "simple"))
 

@@ -26,6 +26,20 @@ def _get_whisper_model():
     return _model_cache
 
 
+def release_whisper():
+    """Lepas model Whisper dari memori/VRAM setelah selesai dipakai (bikin PC lebih lega)."""
+    global _model_cache
+    _model_cache = None
+    try:
+        import gc
+        gc.collect()
+        import torch
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except Exception:
+        pass
+
+
 def _format_timestamp(seconds: float) -> str:
     hours = int(seconds // 3600)
     minutes = int((seconds % 3600) // 60)
