@@ -19,7 +19,8 @@ from modules.cut_recipe import (
 LUT_N = 64
 EFFECT_IDS = {k: i for i, k in enumerate([
     "none", "zoom_in", "zoom_out", "zoom_punch", "pulse", "shake", "shake_hard", "tilt", "glitch", "rgb_split",
-    "vhs", "film_grain", "flash", "flash_negatif", "fade_in", "fade_out", "vignette", "blur_in", "bw_flash", "mirror"])}
+    "vhs", "film_grain", "flash", "flash_negatif", "fade_in", "fade_out", "vignette", "blur_in", "bw_flash", "mirror",
+    "kenburns"])}
 TRANS_IDS = {k: i for i, k in enumerate([
     "cut", "fade", "fadeblack", "fadewhite", "dissolve", "distance", "wipeleft", "wiperight", "wipeup", "wipedown",
     "slideleft", "slideright", "slideup", "slidedown", "smoothleft", "smoothright", "circleopen", "circleclose",
@@ -37,7 +38,7 @@ uniform int useLutF; uniform int useLutA;
 uniform float tA; uniform float dA; uniform float tB; uniform float dB;
 uniform int fxA; uniform int fxB; uniform int tr; uniform float prog;
 uniform float inten; uniform float vign; uniform float grain; uniform float sharp;
-uniform float txtAlpha; uniform float aspect; uniform vec2 texel;
+uniform float txtAlpha; uniform float aspect; uniform vec2 texel; uniform float zp; uniform float kbr;
 in vec2 uv; out vec4 outc;
 
 float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233))) * 43758.5453); }
@@ -66,6 +67,7 @@ vec3 fx(sampler2D tex, vec2 u, int id, float t, float d){
     p = vec2(cos(a)*p.x - sin(a)*p.y, sin(a)*p.x + cos(a)*p.y); q = p/vec2(aspect,1.0) + c;
   }
   else if (id==19) q.x = 1.0 - u.x;
+  else if (id==20) q = (u-c)/(1.0+kbr*t/max(d,0.1)) + c;
   vec3 col;
   if (id==8 && mod(t,0.6) < 0.12){
     col = vec3(fetchRaw(tex,q+vec2(0.008,0)).r, fetchRaw(tex,q).g, fetchRaw(tex,q-vec2(0.008,0)).b);
@@ -136,6 +138,7 @@ vec3 transition(vec2 u, float p, int id){
 
 void main(){
   vec2 u = vec2(uv.x, 1.0-uv.y);
+  u = (u - vec2(0.5))/zp + vec2(0.5);
   vec3 c = (tr == 0) ? getA(u) : transition(u, prog, tr);
   c = clamp(c, 0.0, 1.0);
   if (useLutF == 1){
@@ -184,6 +187,9 @@ class VideoSource:
         self._rgb_t = None
         self._rgb = None
 
+    def _convert(self, f):
+        return f.reformat(width=self.W, height=self.H, format="rgb24").to_ndarray()
+
     def _t(self, f):
         return float(f.pts * self.tb) if f.pts is not None else 0.0
 
@@ -211,7 +217,7 @@ class VideoSource:
             return self._rgb
         ft = self._t(f)
         if self._rgb_t != ft:
-            self._rgb = f.reformat(width=self.W, height=self.H, format="rgb24").to_ndarray()
+            self._rgb = self._convert(f)
             self._rgb_t = ft
         return self._rgb
 
@@ -224,16 +230,20 @@ class VideoSource:
 
 # ---------------------------------------------------------- engine
 class GLEngine:
-    def __init__(self, video_path, preview_h=480, fonts_dir="assets/fonts"):
+    def __init__(self, video_path, preview_h=480, fonts_dir="assets/fonts", size=None):
         self.video_path = video_path
         self.fonts_dir = fonts_dir
-        probe = av.open(video_path)
-        vs = probe.streams.video[0]
-        w, h = vs.codec_context.width, vs.codec_context.height
-        self.duration = float(probe.duration / 1e6) if probe.duration else 0.0
-        probe.close()
-        self.H = min(preview_h, h) // 2 * 2
-        self.W = int(round(w * self.H / h / 2) * 2)
+        if size:                      # mode komposisi: banyak sumber, ukuran keluaran ditentukan
+            self.W, self.H = size
+            self.duration = 0.0
+        else:
+            probe = av.open(video_path)
+            vs = probe.streams.video[0]
+            w, h = vs.codec_context.width, vs.codec_context.height
+            self.duration = float(probe.duration / 1e6) if probe.duration else 0.0
+            probe.close()
+            self.H = min(preview_h, h) // 2 * 2
+            self.W = int(round(w * self.H / h / 2) * 2)
         self.ctx = moderngl.create_standalone_context()
         self.prog = self.ctx.program(vertex_shader=VERT, fragment_shader=FRAG)
         vbo = self.ctx.buffer(np.array([-1, -1, 1, -1, -1, 1, 1, 1], dtype="f4"))
@@ -257,8 +267,9 @@ class GLEngine:
         self.prog["wmOn"] = 0.0
         self.prog["aspect"] = self.W / self.H
         self.prog["texel"] = (1.0 / self.W, 1.0 / self.H)
-        self.srcA = VideoSource(video_path, self.W, self.H)
-        self.srcB = VideoSource(video_path, self.W, self.H)
+        self.srcA = VideoSource(video_path, self.W, self.H) if not size else None
+        self.srcB = VideoSource(video_path, self.W, self.H) if not size else None
+        self.kb_ratio = 0.04
         self.segs = []
         self.total = 0.0
         self.use_lutF = 0
@@ -268,6 +279,13 @@ class GLEngine:
         self.text_style = {}
         self._text_cache = {}
         self._look_key = None
+
+    def _frame(self, seg_i, which, t):
+        """Frame sumber untuk segmen seg_i pada waktu sumber t. Mode komposisi menimpa ini."""
+        return (self.srcA if which == "A" else self.srcB).frame_at(t)
+
+    def zoom_at(self, t):
+        return 1.0
 
     def _tex2d(self):
         t = self.ctx.texture((self.W, self.H), 3)
@@ -410,8 +428,8 @@ class GLEngine:
         P = self.prog
         if in_tr:
             sp = self.segs[idx - 1]
-            fa = self.srcA.frame_at(sp["start"] + (t - sp["t0"]))
-            fb = self.srcB.frame_at(s["start"] + local)
+            fa = self._frame(idx - 1, "A", sp["start"] + (t - sp["t0"]))
+            fb = self._frame(idx, "B", s["start"] + local)
             P["tr"] = TRANS_IDS.get(s["tr"], 1)
             P["prog"] = local / s["td"]
             P["tA"], P["dA"] = t - sp["t0"], sp["d"]
@@ -419,7 +437,7 @@ class GLEngine:
             P["fxA"], P["fxB"] = EFFECT_IDS.get(sp["fx"], 0), EFFECT_IDS.get(s["fx"], 0)
             self.texA.write(fa.tobytes()); self.texB.write(fb.tobytes())
         else:
-            fa = self.srcA.frame_at(s["start"] + local)
+            fa = self._frame(idx, "A", s["start"] + local)
             P["tr"] = 0
             P["prog"] = 0.0
             P["tA"], P["dA"] = local, s["d"]
@@ -428,6 +446,8 @@ class GLEngine:
             self.texA.write(fa.tobytes())
         P["useLutF"], P["useLutA"] = self.use_lutF, self.use_lutA
         P["inten"] = self.inten
+        P["zp"] = self.zoom_at(t)
+        P["kbr"] = self.kb_ratio
         P["vign"], P["grain"], P["sharp"] = self.sp["vignette"], self.sp["grain"], self.sp["sharp"]
         # teks: tampil di [show0, show1] dengan fade 0.18 s
         alpha = 0.0
@@ -444,8 +464,9 @@ class GLEngine:
         return np.frombuffer(self.fbo.read(components=3), dtype=np.uint8).reshape(self.H, self.W, 3)[::-1]
 
     def close(self):
-        self.srcA.close()
-        self.srcB.close()
+        for s_ in (self.srcA, self.srcB):
+            if s_ is not None:
+                s_.close()
         try:
             self.ctx.release()
         except Exception:
