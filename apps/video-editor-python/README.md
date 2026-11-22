@@ -12,3 +12,8 @@ dengan formula copywriting (Hook-Benefit-CTA / PAS / AIDA).
 5. Jalankan `Buka_Video_Editor.bat` (atau `python gui_app.py`).
 
 Versi: update43 (tab Batch/Manual dengan tinggi dinamis).
+
+## CutRecipe (tab ketiga)
+Susun ulang satu video mentah dari "resep potongan" JSON: `[{"start": 48, "end": 51, "text": "...", "vo": "..."}]`.
+Urutan baris = urutan di video hasil. Opsi: teks overlay (atas-tengah), VO per segmen (TTS yang sama dengan mode lain,
+auto dipercepat maks 1.2x atau segmen diperpanjang kalau VO kepanjangan), audio asli, musik latar. Emoji dibuang otomatis.
