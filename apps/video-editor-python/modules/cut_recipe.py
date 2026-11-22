@@ -3,7 +3,11 @@
 CutRecipe: susun ulang SATU video mentahan berdasarkan "resep potongan"
 (daftar segmen + teks overlay + VO per segmen), lalu render jadi satu video baru.
 
-Format resep (JSON):
+Format resep simpel (satu potongan per baris):
+48-51 | Teks overlay | Teks VO (opsional)
+0:08-0:10 | Teks overlay saja
+
+Format resep JSON (tetap didukung):
 [
   {"start": 48, "end": 51, "text": "Kulkas kotor gini bisa balik putih lagi?", "vo": "Kulkas sekotor ini..."},
   {"start": "0:08", "end": "0:10", "text": "Bau busuk, kerak, noda membandel"}
@@ -39,6 +43,17 @@ DEFAULT_RECIPE = [
 ]
 
 
+def recipe_to_lines(segments: list) -> str:
+    """Ubah daftar segmen jadi format satu-baris (untuk contoh di GUI)."""
+    out = []
+    for r in segments:
+        line = f"{r['start']:g}-{r['end']:g} | {r.get('text', '')}"
+        if r.get("vo"):
+            line += f" | {r['vo']}"
+        out.append(line)
+    return "\n".join(out)
+
+
 # ==========================================================
 # Parsing & validasi resep
 # ==========================================================
@@ -59,16 +74,43 @@ def strip_emoji(text: str) -> str:
     return re.sub(r"\s{2,}", " ", _EMOJI_RE.sub("", text or "")).strip()
 
 
+_LINE_RE = re.compile(
+    r"^\s*([\d:.,]+)\s*(?:-|\u2013|\u2014|->|s/d|sampai)\s*([\d:.,]+)\s*(?:\|(.*))?$",
+    flags=re.IGNORECASE,
+)
+
+
+def _parse_lines(raw: str) -> list:
+    """Format simpel: satu potongan per baris -> `48-51 | teks overlay | teks vo`.
+    Waktu boleh detik (48) atau mm:ss (0:48). Teks dan vo boleh kosong. Baris diawali # diabaikan."""
+    rows = []
+    for no, line in enumerate(raw.splitlines(), start=1):
+        if not line.strip() or line.strip().startswith("#"):
+            continue
+        m = _LINE_RE.match(line)
+        if not m:
+            raise ValueError(f"Baris {no} tidak dikenali: \"{line.strip()[:50]}\". "
+                             f"Format: 48-51 | teks overlay | teks VO")
+        rest = m.group(3) or ""
+        parts = [p.strip() for p in rest.split("|")]
+        rows.append({"start": m.group(1), "end": m.group(2),
+                     "text": parts[0] if parts else "", "vo": parts[1] if len(parts) > 1 else ""})
+    return rows
+
+
 def parse_recipe(raw) -> list:
     """Terima string JSON / list / dict {"segments": [...]}. Return list segmen bersih."""
     if isinstance(raw, str):
         raw = raw.strip()
         if not raw:
             raise ValueError("Resep kosong.")
-        try:
-            data = json.loads(raw)
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Resep bukan JSON yang valid: {e}")
+        if raw[0] in "[{":
+            try:
+                data = json.loads(raw)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Resep (JSON) tidak valid: {e}")
+        else:
+            data = _parse_lines(raw)
     else:
         data = raw
 

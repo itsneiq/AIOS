@@ -14,7 +14,7 @@ from batch_process import process_one_product
 from manual_process import process_manual
 from batch_process import generate_audio
 from modules.cut_recipe import (
-    parse_recipe, recipe_total_duration, render_cut_recipe, DEFAULT_RECIPE,
+    parse_recipe, recipe_total_duration, render_cut_recipe, DEFAULT_RECIPE, recipe_to_lines,
 )
 import json
 from config import VOICE_OPTIONS, SUBTITLE_STYLES, FONT_OPTIONS, COLOR_OPTIONS, OUTPUT_DIR
@@ -166,7 +166,7 @@ class VideoEditorApp(ctk.CTk):
         f2.pack(fill="both", expand=True, padx=5, pady=4)
         head = ctk.CTkFrame(f2, fg_color="transparent")
         head.pack(fill="x", padx=8, pady=(6, 0))
-        ctk.CTkLabel(head, text="Resep Potongan (JSON: start, end, text, vo). Urutan = urutan di video hasil.",
+        ctk.CTkLabel(head, text="Resep: satu potongan per baris  ->  mulai-selesai | teks layar | teks VO   (urutan = urutan di video hasil)",
                      anchor="w").pack(side="left")
         ctk.CTkButton(head, text="Cek Resep", width=90, command=self._check_recipe).pack(side="right", padx=(5, 0))
         ctk.CTkButton(head, text="Muat Contoh", width=100, fg_color="gray30",
@@ -226,7 +226,7 @@ class VideoEditorApp(ctk.CTk):
 
     def _load_example_recipe(self):
         self.text_recipe.delete("1.0", "end")
-        self.text_recipe.insert("1.0", json.dumps(DEFAULT_RECIPE, ensure_ascii=False, indent=1))
+        self.text_recipe.insert("1.0", recipe_to_lines(DEFAULT_RECIPE))
 
     def _check_recipe(self):
         try:
