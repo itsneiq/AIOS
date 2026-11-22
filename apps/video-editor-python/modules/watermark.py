@@ -27,8 +27,11 @@ _FONT_FILES = {
 }
 
 
-def find_font(name: str, size: int, fonts_dir: str = "assets/fonts"):
-    cands = _FONT_FILES.get((name or "").lower(), [])
+_BOLD_FILES = {"arial": ["arialbd.ttf"], "georgia": ["georgiab.ttf"], "comic sans ms": ["comicbd.ttf"]}
+
+
+def find_font(name: str, size: int, fonts_dir: str = "assets/fonts", bold: bool = False):
+    cands = (_BOLD_FILES.get((name or "").lower(), []) if bold else []) + _FONT_FILES.get((name or "").lower(), [])
     dirs = [fonts_dir]
     if sys.platform.startswith("win"):
         dirs.append(os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts"))
@@ -61,13 +64,14 @@ def make_watermark_rgba(wm, W, H, fonts_dir="assets/fonts"):
         if not p or not os.path.exists(p):
             return None, None
         im = Image.open(p).convert("RGBA")
-        w = max(8, int(W * size / 100))
+        w = int(cfg["width_px"]) if cfg.get("width_px") else max(8, int(W * size / 100))
+        w = max(8, w)
         im = im.resize((w, max(8, int(im.height * w / im.width))), Image.LANCZOS)
     else:
         text = (cfg.get("text") or "").strip()
         if not text:
             return None, None
-        em = max(10, int(W * size / 100 * 0.4))
+        em = int(cfg["em_px"]) if cfg.get("em_px") else max(10, int(W * size / 100 * 0.4))
         font = find_font(cfg["font_name"], em, fonts_dir)
         hx = str(cfg["color_hex"]).lstrip("#")
         col = tuple(int(hx[i:i + 2], 16) for i in (0, 2, 4))
@@ -83,8 +87,14 @@ def make_watermark_rgba(wm, W, H, fonts_dir="assets/fonts"):
         im = im.resize((max(1, int(im.width * k)), max(1, int(im.height * k))), Image.LANCZOS)
     a = np.array(im)
     a[..., 3] = (a[..., 3].astype(np.float32) * float(min(max(cfg["opacity"], 0.0), 1.0))).astype(np.uint8)
-    x0 = int(round(cfg["x"] * W - im.width / 2))
-    y0 = int(round(cfg["y"] * H - im.height / 2))
+    if cfg.get("anchor"):
+        m = int(cfg.get("margin_px", 10))
+        anc = cfg["anchor"]
+        x0 = m if "Kiri" in anc else (W - im.width - m if "Kanan" in anc else (W - im.width) // 2)
+        y0 = m if "Atas" in anc else (H - im.height - m if "Bawah" in anc else (H - im.height) // 2)
+    else:
+        x0 = int(round(cfg["x"] * W - im.width / 2))
+        y0 = int(round(cfg["y"] * H - im.height / 2))
     x0 = min(max(x0, 0), W - im.width)
     y0 = min(max(y0, 0), H - im.height)
     out = np.zeros((H, W, 4), dtype=np.uint8)

@@ -270,6 +270,8 @@ class GLEngine:
         self.srcA = VideoSource(video_path, self.W, self.H) if not size else None
         self.srcB = VideoSource(video_path, self.W, self.H) if not size else None
         self.kb_ratio = 0.04
+        self.overlay_fn = None      # fungsi(t) -> RGBA HxWx4 atau None (menggantikan teks segmen)
+        self._ov_last = None
         self.segs = []
         self.total = 0.0
         self.use_lutF = 0
@@ -452,13 +454,21 @@ class GLEngine:
         # teks: tampil di [show0, show1] dengan fade 0.18 s
         alpha = 0.0
         ti = idx
-        if s["text"] and s["show0"] <= t <= s["show1"]:
-            a_in = (t - s["show0"]) / 0.18
-            a_out = (s["show1"] - t) / 0.18
-            alpha = float(min(1.0, max(0.0, min(a_in, a_out))))
-        P["txtAlpha"] = alpha
-        if alpha > 0:
-            self.texT.write(self._text_rgba(ti).tobytes())
+        if self.overlay_fn is not None:
+            ov = self.overlay_fn(t)
+            alpha = 1.0 if ov is not None else 0.0
+            if ov is not None and ov is not self._ov_last:
+                self.texT.write(ov.tobytes())
+                self._ov_last = ov
+            P["txtAlpha"] = alpha
+        else:
+            if s["text"] and s["show0"] <= t <= s["show1"]:
+                a_in = (t - s["show0"]) / 0.18
+                a_out = (s["show1"] - t) / 0.18
+                alpha = float(min(1.0, max(0.0, min(a_in, a_out))))
+            P["txtAlpha"] = alpha
+            if alpha > 0:
+                self.texT.write(self._text_rgba(ti).tobytes())
         self.fbo.use()
         self.vao.render(moderngl.TRIANGLE_STRIP)
         return np.frombuffer(self.fbo.read(components=3), dtype=np.uint8).reshape(self.H, self.W, 3)[::-1]
