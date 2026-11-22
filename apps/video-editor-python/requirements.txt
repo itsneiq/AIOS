@@ -8,3 +8,7 @@ requests
 pillow
 openpyxl
 customtkinter
+numpy
+moderngl
+av
+sounddevice
