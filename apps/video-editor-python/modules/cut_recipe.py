@@ -13,6 +13,9 @@ JSON juga didukung: [{"start": 48, "end": 51, "text": "...", "vo": "...", "trans
 import os
 import re
 import json
+import time
+import shutil
+import hashlib
 import subprocess
 
 FONTS_DIR_DEFAULT = "assets/fonts"
@@ -98,6 +101,25 @@ DEFAULT_RECIPE = [
     {"start": 53, "end": 55, "text": "Kulkas bersih, wangi, siap dipakai", "vo": "Kulkas jadi bersih, nggak bau lagi."},
     {"start": 56, "end": 57, "text": "Cek di keranjang kuning", "vo": "Cek keranjang kuning, ya!"},
 ]
+
+
+def make_cached_tts(tts_raw, voice_key: str, cache_dir: str):
+    """Bungkus fungsi TTS: teks + suara yang sama tidak dibuat ulang (hemat waktu dan kuota API)."""
+    os.makedirs(cache_dir, exist_ok=True)
+
+    def tts(text: str, out_path: str):
+        key = hashlib.sha1(f"{voice_key}||{text}".encode("utf-8")).hexdigest()[:20]
+        cached = os.path.join(cache_dir, key + ".wav")
+        if os.path.exists(cached) and os.path.getsize(cached) > 1000:
+            shutil.copyfile(cached, out_path)
+            print(f"[CACHE] VO dipakai ulang: \"{text[:30]}\"")
+            return
+        tts_raw(text, out_path)
+        try:
+            shutil.copyfile(out_path, cached)
+        except OSError:
+            pass
+    return tts
 
 
 # ==========================================================
@@ -400,6 +422,7 @@ def render_cut_recipe(
     tmp_dir: str = "_tmp",
     max_vo_speedup: float = MAX_VO_SPEEDUP,
 ) -> str:
+    t_start = time.time()
     video_path = os.path.abspath(video_path)
     output_path = os.path.abspath(output_path)
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
@@ -457,6 +480,7 @@ def render_cut_recipe(
                 else:
                     print(f"[INFO] VO segmen {i + 1} dipercepat {speed:.2f}x agar muat.")
     use_vo = any(s["vo_audio"] for s in segs) or bool(separate_vo_path)
+    t_vo = time.time()
 
     # ---- 3. timeline hasil (transisi menumpuk sebagian segmen) ----
     acc = 0.0
@@ -581,6 +605,7 @@ def render_cut_recipe(
     r = _run_ffmpeg(cmd, codec_idx, cwd=tmp_dir)
     if r.returncode != 0:
         raise RuntimeError(f"Render CutRecipe gagal.\nSTDERR: {r.stderr[-1500:]}")
+    t_render = time.time()
 
     # ---- 8. auto caption (Whisper) di atas hasil jadi ----
     if want_caption:
@@ -605,5 +630,8 @@ def render_cut_recipe(
             except OSError:
                 pass
 
+    t_end = time.time()
+    print(f"[WAKTU] VO/TTS {t_vo - t_start:.1f}s | render ffmpeg {t_render - t_vo:.1f}s | "
+          f"caption+bersih-bersih {t_end - t_render:.1f}s | total {t_end - t_start:.1f}s")
     print(f"[INFO] CutRecipe selesai: {output_path} ({total:.1f}s)")
     return output_path

@@ -14,7 +14,7 @@ from batch_process import process_one_product
 from manual_process import process_manual
 from batch_process import generate_audio
 from modules.cut_recipe import (
-    parse_recipe, recipe_total_duration, render_cut_recipe, DEFAULT_RECIPE, recipe_to_lines,
+    make_cached_tts, parse_recipe, recipe_total_duration, render_cut_recipe, DEFAULT_RECIPE, recipe_to_lines,
 )
 import json
 from config import (VOICE_OPTIONS, SUBTITLE_STYLES, FONT_OPTIONS, COLOR_OPTIONS, OUTPUT_DIR,
@@ -229,7 +229,12 @@ class VideoEditorApp(ctk.CTk):
         if problem:
             messagebox.showerror("Belum siap", problem)
             return None
-        return lambda text, path: generate_audio(text, path, voice_option)
+        return self._cached_tts(voice_option)
+
+    def _cached_tts(self, voice_option):
+        key = f"{voice_option.get('engine')}:{voice_option.get('voice_name')}"
+        return make_cached_tts(lambda text, path: generate_audio(text, path, voice_option),
+                               key, os.path.join(OUTPUT_DIR, "_tts_cache"))
 
     def _open_studio(self):
         if not self.cut_video_path or not os.path.exists(self.cut_video_path):
@@ -893,7 +898,7 @@ class VideoEditorApp(ctk.CTk):
             self._set_progress("Memproses CutRecipe...")
             voice_option = cut_args.pop("voice_option")
             if cut_args["vo_enabled"]:
-                cut_args["tts_func"] = lambda text, path: generate_audio(text, path, voice_option)
+                cut_args["tts_func"] = self._cached_tts(voice_option)
             path = render_cut_recipe(tmp_dir=os.path.join(OUTPUT_DIR, "_tmp"), **cut_args)
             print(f"\nSELESAI: {path}")
             self._set_progress(f"Selesai! Output: {path}")
